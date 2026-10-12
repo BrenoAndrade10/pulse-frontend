@@ -1,0 +1,8 @@
+# Deploy do frontend (SvelteKit + @sveltejs/adapter-netlify).
+[build]
+  command = "npm run build"
+  publish = "build"
+
+[build.environment]
+  # Mesma versão usada no desenvolvimento.
+  NODE_VERSION = "24"
