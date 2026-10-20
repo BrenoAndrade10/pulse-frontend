@@ -6,8 +6,8 @@
 	import EmptyState from '#lib/components/ui/EmptyState.svelte';
 	import Icon from '#lib/components/ui/Icon.svelte';
 	import { APP_NAME } from '#lib/config.js';
-	import { FACEBOOK_STATUS } from '#lib/utils/facebook.js';
-	import { EMPTY_VALUE, formatRoas, initials } from '#lib/utils/format.js';
+	import { CONNECTION_STATUS } from '#lib/utils/integrations.js';
+	import { EMPTY_VALUE, initials } from '#lib/utils/format.js';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -17,14 +17,15 @@
 	const cell = 'border-b border-border px-5.5 py-3.5 whitespace-nowrap';
 	const th = `${cell} text-left text-[12px] font-semibold tracking-[0.05em] text-fg-subtle uppercase`;
 	const td = `${cell} text-left`;
-	const num = 'text-right tabular-nums';
 	const muted = 'text-[13px] text-fg-muted';
 
 	const filtered = $derived.by(() => {
 		const term = search.trim().toLocaleLowerCase('pt-BR');
 		if (!term) return data.experts;
 		return data.experts.filter((e) =>
-			[e.name, e.email, e.niche].some((v) => v.toLocaleLowerCase('pt-BR').includes(term))
+			[e.name, e.email, e.commercialName ?? ''].some((v) =>
+				v.toLocaleLowerCase('pt-BR').includes(term)
+			)
 		);
 	});
 </script>
@@ -33,10 +34,7 @@
 	<title>Experts · {APP_NAME}</title>
 </svelte:head>
 
-<PageHeader
-	title="Experts"
-	description="Gerencie os experts da sua operação e a conta do Facebook de cada um."
->
+<PageHeader title="Experts" description="Gerencie os experts da sua operação e suas integrações.">
 	{#snippet actions()}
 		<a class={buttonClass()} href="/experts/new"><Icon name="plus" size={16} />Novo expert</a>
 	{/snippet}
@@ -47,7 +45,7 @@
 		<EmptyState
 			icon="users"
 			title="Nenhum expert cadastrado"
-			description="Cadastre o primeiro expert para configurar metas e conectar a conta de anúncios do Facebook."
+			description="Cadastre o primeiro expert para conectar suas plataformas."
 		>
 			{#snippet action()}
 				<a class={buttonClass()} href="/experts/new">
@@ -69,7 +67,7 @@
 				<input
 					class="min-w-0 flex-1 border-0 bg-transparent px-0.5 py-px text-[14px] text-fg outline-none placeholder:text-[#757575] focus-visible:shadow-none"
 					type="search"
-					placeholder="Buscar por nome, e-mail ou nicho"
+					placeholder="Buscar por nome, e-mail ou nome comercial"
 					bind:value={search}
 				/>
 			</label>
@@ -85,16 +83,15 @@
 					<thead>
 						<tr>
 							<th class={th}>Expert</th>
-							<th class={th}>Nicho</th>
-							<th class={th}>Conta do Facebook</th>
-							<th class={th}>Conta de anúncios</th>
-							<th class={[th, num]}>ROAS alvo</th>
+							<th class={th}>Nome comercial</th>
+							<th class={th}>Status</th>
+							<th class={th}>Instagram</th>
 							<th class={th}><span class="sr-only">Ações</span></th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each filtered as expert (expert.id)}
-							{@const status = FACEBOOK_STATUS[expert.facebook.status]}
+							{@const status = CONNECTION_STATUS[expert.instagram.status]}
 							<tr class="group/row hover:bg-[rgb(255_255_255/0.015)]">
 								<td class={[td, 'group-last/row:border-b-0']}>
 									<a
@@ -112,20 +109,15 @@
 									</a>
 								</td>
 								<td class={[td, muted, 'group-last/row:border-b-0']}
-									>{expert.niche || EMPTY_VALUE}</td
+									>{expert.commercialName || EMPTY_VALUE}</td
 								>
+								<td class={[td, 'group-last/row:border-b-0']}>
+									<Badge variant={expert.status === 'active' ? 'success' : 'neutral'}>
+										{expert.status === 'active' ? 'Ativo' : 'Inativo'}
+									</Badge>
+								</td>
 								<td class={[td, 'group-last/row:border-b-0']}
 									><Badge variant={status.variant}>{status.label}</Badge></td
-								>
-								<td
-									class={[
-										td,
-										'font-[family-name:ui-monospace,SFMono-Regular,Menlo,monospace] text-[12.5px] text-fg-muted',
-										'group-last/row:border-b-0'
-									]}>{expert.adAccountId || EMPTY_VALUE}</td
-								>
-								<td class={[td, num, 'group-last/row:border-b-0']}
-									>{formatRoas(expert.goals.roas)}</td
 								>
 								<td class={[td, 'text-right group-last/row:border-b-0']}>
 									<a

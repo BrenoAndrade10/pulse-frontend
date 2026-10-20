@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount, untrack } from 'svelte';
 	import { page } from '$app/state';
 	import Logo from '#lib/components/auth/Logo.svelte';
 	import Icon, { type IconName } from '#lib/components/ui/Icon.svelte';
@@ -9,26 +10,56 @@
 
 	let { open, onclose }: Props = $props();
 
-	type NavItem = { href: string; label: string; icon: IconName };
+	type NavItem = { href: string; label: string; icon: IconName; nested?: boolean };
+	type GroupId = 'attract' | 'capture' | 'relationship' | 'analysis';
+	type NavGroup = { id: GroupId; label: string; items: NavItem[] };
 
-	const sections: { title: string; items: NavItem[] }[] = [
+	const STORAGE_KEY = 'pulse:sidebar-groups';
+	const topItems: NavItem[] = [
+		{ href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
+		{ href: '/experts', label: 'Experts', icon: 'users' },
+		{ href: '/launches', label: 'Lançamentos', icon: 'rocket' }
+	];
+	const groups: NavGroup[] = [
 		{
-			title: 'Visão geral',
-			items: [{ href: '/dashboard', label: 'Dashboard', icon: 'dashboard' }]
-		},
-		{
-			title: 'Gestão',
+			id: 'attract',
+			label: 'Atrair',
 			items: [
-				{ href: '/experts', label: 'Experts', icon: 'users' },
-				{ href: '/campaigns', label: 'Campanhas', icon: 'megaphone' },
-				{ href: '/reports', label: 'Relatórios', icon: 'bar-chart' }
+				{ href: '/reels', label: 'Publicações', icon: 'image' },
+				{ href: '/campaigns', label: 'Campanhas', icon: 'megaphone' }
 			]
 		},
 		{
-			title: 'Integrações',
-			items: [{ href: '/facebook-accounts', label: 'Contas do Facebook', icon: 'facebook' }]
+			id: 'capture',
+			label: 'Capturar',
+			items: [
+				{ href: '/tracking', label: 'Rastreamento', icon: 'target' },
+				{ href: '/leads', label: 'Leads', icon: 'user-plus' }
+			]
+		},
+		{
+			id: 'relationship',
+			label: 'Relacionamento',
+			items: [
+				{ href: '/whatsapp', label: 'WhatsApp', icon: 'whatsapp' },
+				{ href: '/email', label: 'E-mail', icon: 'mail' }
+			]
+		},
+		{
+			id: 'analysis',
+			label: 'Análise',
+			items: [{ href: '/reports', label: 'Relatórios', icon: 'bar-chart' }]
 		}
 	];
+	const integrations: NavItem = { href: '/integrations', label: 'Integrações', icon: 'plug' };
+
+	let expanded = $state<Record<GroupId, boolean>>({
+		attract: true,
+		capture: true,
+		relationship: true,
+		analysis: true
+	});
+	let storageReady = $state(false);
 
 	const fullName = $derived(
 		[auth.user?.firstName, auth.user?.lastName].filter(Boolean).join(' ') || 'Minha conta'
@@ -43,8 +74,55 @@
 		await logout();
 	}
 
-	const isActive = (href: string) =>
-		page.url.pathname === href || page.url.pathname.startsWith(`${href}/`);
+	const matchesPath = (href: string, pathname: string) =>
+		pathname === href || pathname.startsWith(`${href}/`);
+	const isActive = (href: string) => matchesPath(href, page.url.pathname);
+	const groupIsActive = (group: NavGroup) => group.items.some((item) => isActive(item.href));
+
+	onMount(() => {
+		try {
+			const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') as Partial<
+				Record<GroupId, unknown>
+			>;
+			const savedState: Record<GroupId, boolean> = {
+				attract: typeof saved.attract === 'boolean' ? saved.attract : expanded.attract,
+				capture: typeof saved.capture === 'boolean' ? saved.capture : expanded.capture,
+				relationship:
+					typeof saved.relationship === 'boolean' ? saved.relationship : expanded.relationship,
+				analysis: typeof saved.analysis === 'boolean' ? saved.analysis : expanded.analysis
+			};
+			const active = groups.find((group) =>
+				group.items.some((item) => matchesPath(item.href, page.url.pathname))
+			);
+			expanded = active ? { ...savedState, [active.id]: true } : savedState;
+		} catch {
+			// O menu continua funcional quando o armazenamento do navegador está indisponível.
+		}
+		storageReady = true;
+	});
+
+	$effect(() => {
+		const pathname = page.url.pathname;
+		const active = groups.find((group) =>
+			group.items.some((item) => matchesPath(item.href, pathname))
+		);
+		untrack(() => {
+			if (active && !expanded[active.id]) expanded = { ...expanded, [active.id]: true };
+		});
+	});
+
+	$effect(() => {
+		if (!storageReady) return;
+		try {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(expanded));
+		} catch {
+			// Persistência é opcional.
+		}
+	});
+
+	function toggleGroup(id: GroupId) {
+		expanded = { ...expanded, [id]: !expanded[id] };
+	}
 </script>
 
 {#snippet navLink(item: NavItem)}
@@ -52,7 +130,8 @@
 	<a
 		href={item.href}
 		class={[
-			'relative flex h-10 items-center gap-3 rounded-sm px-3 text-[14px] font-semibold',
+			'relative flex h-10 items-center gap-3 rounded-sm text-[14px] font-semibold',
+			item.nested ? 'pr-3 pl-7' : 'px-3',
 			'[transition:background_0.15s,color_0.15s] hover:no-underline',
 			active
 				? [
@@ -91,17 +170,64 @@
 		</button>
 	</div>
 
-	<nav class="flex flex-col gap-5.5" aria-label="Menu principal">
-		{#each sections as section (section.title)}
-			<div class="flex flex-col gap-0.5">
-				<p class="mb-1.5 px-3 text-[11px] font-bold tracking-[0.08em] text-fg-subtle uppercase">
-					{section.title}
-				</p>
-				{#each section.items as item (item.href)}
-					{@render navLink(item)}
-				{/each}
+	<nav class="flex flex-col gap-1" aria-label="Menu principal">
+		{#each topItems as item (item.href)}
+			{@render navLink(item)}
+		{/each}
+
+		<div class="my-2 h-px bg-border"></div>
+
+		{#each groups as group (group.id)}
+			{@const isOpen = expanded[group.id]}
+			{@const active = groupIsActive(group)}
+			<div>
+				<button
+					type="button"
+					class={[
+						'flex h-10 w-full cursor-pointer items-center gap-3 rounded-sm px-3 text-[13.5px] font-bold',
+						'text-fg-muted [transition:background_0.15s,color_0.15s,box-shadow_0.15s]',
+						'hover:bg-surface hover:text-fg focus-visible:shadow-focus',
+						active && !isOpen && 'bg-[rgb(124_92_255/0.08)] text-primary-hover'
+					]}
+					aria-expanded={isOpen}
+					aria-controls={`sidebar-group-${group.id}`}
+					onclick={() => toggleGroup(group.id)}
+				>
+					<span class="grid size-[18px] shrink-0 place-items-center" aria-hidden="true">
+						<span class={['size-1.5 rounded-full', active ? 'bg-primary' : 'bg-fg-subtle']}></span>
+					</span>
+					<span class="flex-1 text-left">{group.label}</span>
+					<Icon
+						name="chevron-down"
+						size={15}
+						class={[
+							'transition-transform duration-200 motion-reduce:transition-none',
+							isOpen && 'rotate-180'
+						]}
+					/>
+				</button>
+				<div
+					id={`sidebar-group-${group.id}`}
+					class={[
+						'grid transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none',
+						isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+					]}
+					aria-hidden={!isOpen}
+					inert={!isOpen}
+				>
+					<div class="min-h-0 overflow-hidden">
+						<div class="flex flex-col gap-0.5 py-0.5">
+							{#each group.items as item (item.href)}
+								{@render navLink({ ...item, nested: true })}
+							{/each}
+						</div>
+					</div>
+				</div>
 			</div>
 		{/each}
+
+		<div class="my-2 h-px bg-border"></div>
+		{@render navLink(integrations)}
 	</nav>
 
 	<div class="mt-auto flex flex-col gap-3 pt-6">

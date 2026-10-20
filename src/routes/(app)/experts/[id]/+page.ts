@@ -1,9 +1,11 @@
 import { error } from '@sveltejs/kit';
-import { getExpert } from '#lib/services/experts.js';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ params }) => {
-	const expert = await getExpert(params.id);
+export const load: PageLoad = async ({ params, parent }) => {
+	const { experts, expertsBackendUnavailable } = await parent();
+	if (expertsBackendUnavailable) error(503, 'Não foi possível carregar os experts.');
+
+	const expert = experts.find((item) => item.id === params.id);
 	if (!expert) error(404, 'Expert não encontrado.');
 	return { expert };
 };

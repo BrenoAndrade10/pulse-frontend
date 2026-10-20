@@ -14,7 +14,7 @@
 
 <div>
 	<label
-		class="inline-flex cursor-pointer items-start gap-2.5 text-[13.5px] text-fg-muted select-none"
+		class="relative inline-flex cursor-pointer items-start gap-2.5 text-[13.5px] text-fg-muted select-none"
 		for={id}
 	>
 		<input

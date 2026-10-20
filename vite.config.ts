@@ -34,7 +34,9 @@ export default defineConfig(({ mode }) => {
 						// Svelte/Vite aplicam estilos inline; Google Fonts serve o CSS das fontes.
 						'style-src': ['self', 'unsafe-inline', 'https://fonts.googleapis.com'],
 						'font-src': ['self', 'https://fonts.gstatic.com'],
-						'img-src': ['self', 'data:'],
+						// Fotos e vídeos do Instagram vêm pelo proxy da API, nunca direto da Meta.
+						'img-src': ['self', 'data:', ...(apiOrigin ? [apiOrigin] : [])],
+						'media-src': ['self', ...(apiOrigin ? [apiOrigin] : [])],
 						'connect-src': ['self', ...(apiOrigin ? [apiOrigin] : [])],
 						// O cliente de dev do Vite usa um SharedWorker via blob: (só em desenvolvimento).
 						'worker-src': ['self', ...(mode === 'development' ? (['blob:'] as const) : [])],

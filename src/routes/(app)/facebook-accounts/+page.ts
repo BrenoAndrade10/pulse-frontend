@@ -1,4 +1,4 @@
-import { listExperts } from '#lib/services/experts.js';
+import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async () => ({ experts: await listExperts() });
+export const load: PageLoad = () => redirect(307, '/integrations#instagram');

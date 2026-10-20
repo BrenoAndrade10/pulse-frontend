@@ -53,3 +53,21 @@ const compactCurrency = new Intl.NumberFormat('pt-BR', {
 
 /** Versão curta para eixos de gráfico (ex.: "R$ 6 mil"). */
 export const formatCurrencyCompact = (v: number) => compactCurrency.format(v);
+
+const relative = new Intl.RelativeTimeFormat('pt-BR', { numeric: 'auto' });
+const RELATIVE_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
+	['day', 86_400],
+	['hour', 3_600],
+	['minute', 60]
+];
+
+/** "agora mesmo", "há 5 minutos", "ontem"... */
+export function formatRelativeTime(iso: string, now = Date.now()): string {
+	const seconds = Math.round((new Date(iso).getTime() - now) / 1000);
+	if (Math.abs(seconds) < 60) return 'agora mesmo';
+
+	for (const [unit, size] of RELATIVE_UNITS) {
+		if (Math.abs(seconds) >= size) return relative.format(Math.round(seconds / size), unit);
+	}
+	return relative.format(seconds, 'second');
+}

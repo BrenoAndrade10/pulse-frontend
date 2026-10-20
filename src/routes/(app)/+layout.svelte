@@ -2,14 +2,16 @@
 	import { untrack } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import ContextBar from '#lib/components/app/ContextBar.svelte';
 	import Logo from '#lib/components/auth/Logo.svelte';
 	import Sidebar from '#lib/components/app/Sidebar.svelte';
+	import Alert from '#lib/components/ui/Alert.svelte';
 	import Icon from '#lib/components/ui/Icon.svelte';
 	import { auth } from '#lib/auth/session.svelte.js';
 	import { loginPathFor } from '#lib/utils/redirect.js';
 	import type { LayoutProps } from './$types';
 
-	let { children }: LayoutProps = $props();
+	let { data, children }: LayoutProps = $props();
 
 	let menuOpen = $state(false);
 
@@ -55,7 +57,20 @@
 			<Logo />
 		</header>
 
-		<main class="mx-auto max-w-[1320px] px-10 pt-9 pb-14 max-lg:px-4 max-lg:pt-6 max-lg:pb-10">
+		<ContextBar
+			experts={data.experts}
+			launches={data.launches}
+			expertId={data.selectedExpertId}
+			launchId={data.selectedLaunchId}
+		/>
+
+		<main class="mx-auto max-w-[1320px] px-10 pt-7 pb-14 max-lg:px-4 max-lg:pt-6 max-lg:pb-10">
+			{#if data.expertsBackendUnavailable}
+				<div class="mb-5">
+					<Alert>Não foi possível carregar os experts. Verifique o backend e tente novamente.</Alert
+					>
+				</div>
+			{/if}
 			{@render children()}
 		</main>
 	</div>

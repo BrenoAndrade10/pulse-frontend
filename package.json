@@ -36,5 +36,10 @@
 	"imports": {
 		"#lib": "./src/lib/index.js",
 		"#lib/*": "./src/lib/*"
+	},
+	"dependencies": {
+		"@lucide/svelte": "^1.59.0",
+		"axios": "^1.20.0",
+		"simple-icons": "^16.35.0"
 	}
 }

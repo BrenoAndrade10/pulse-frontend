@@ -19,10 +19,10 @@
 	<EmptyState
 		icon="megaphone"
 		title="Nenhuma campanha encontrada"
-		description="As campanhas são importadas automaticamente das contas do Facebook conectadas."
+		description="As campanhas são importadas automaticamente das contas de anúncios conectadas pelo Meta Ads."
 	>
 		{#snippet action()}
-			<a class={buttonClass({ variant: 'secondary' })} href="/facebook-accounts">Conectar contas</a>
+			<a class={buttonClass({ variant: 'secondary' })} href="/integrations">Conectar contas</a>
 		{/snippet}
 	</EmptyState>
 </Card>

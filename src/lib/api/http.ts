@@ -2,7 +2,6 @@ import { PUBLIC_API_URL } from '$app/env/public';
 
 const REQUEST_TIMEOUT_MS = 15_000;
 
-/** Erro padronizado da API: `{ result: 'ERROR', reason, data }`. */
 export class ApiError extends Error {
 	constructor(
 		readonly status: number,
@@ -13,7 +12,6 @@ export class ApiError extends Error {
 		this.name = 'ApiError';
 	}
 
-	/** Mensagens de validação (yup) devolvidas pela API, quando houver. */
 	get validationMessages(): string[] {
 		const errors = (this.data as { errors?: unknown } | null)?.errors;
 
@@ -25,14 +23,9 @@ export type HttpRequest = {
 	method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 	body?: unknown;
 	headers?: Record<string, string>;
-	/**
-	 * Só as rotas /auth/* precisam enviar e receber o cookie do refresh token.
-	 * Todo o resto usa apenas o header Authorization.
-	 */
 	withCredentials?: boolean;
 };
 
-/** Chamada HTTP crua à API, sem lógica de autenticação. */
 export async function httpRequest<T>(path: string, request: HttpRequest = {}): Promise<T> {
 	const headers: Record<string, string> = { Accept: 'application/json', ...request.headers };
 
@@ -47,7 +40,6 @@ export async function httpRequest<T>(path: string, request: HttpRequest = {}): P
 			body: request.body === undefined ? undefined : JSON.stringify(request.body),
 			credentials: request.withCredentials ? 'include' : 'omit',
 			cache: 'no-store',
-			// Não envia a URL da página atual para a API.
 			referrerPolicy: 'no-referrer',
 			signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
 		});

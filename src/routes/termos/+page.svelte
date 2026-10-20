@@ -12,6 +12,7 @@
 		{ id: 'integracoes', title: 'Integrações com a Meta' },
 		{ id: 'uso-aceitavel', title: 'Uso aceitável' },
 		{ id: 'dados', title: 'Dados e privacidade' },
+		{ id: 'tratamento-de-dados', title: 'Pixel, leads e tratamento de dados' },
 		{ id: 'planos', title: 'Planos, pagamento e cancelamento' },
 		{ id: 'propriedade', title: 'Propriedade intelectual' },
 		{ id: 'disponibilidade', title: 'Disponibilidade e suporte' },
@@ -49,6 +50,12 @@
 		acompanharem a operação de marketing digital dos experts que gerenciam: cadastro de experts e metas,
 		conexão de contas de anúncios e perfis da Meta (Facebook e Instagram) e visualização consolidada de
 		métricas como investimento, receita, ROAS, leads e custo por lead.
+	</p>
+	<p>
+		O {P} também oferece um <strong>pixel de rastreamento</strong>, que você instala nas suas
+		páginas para registrar visitas, cliques e envios de formulário, e a
+		<strong>captação de leads</strong> dos formulários que você mapear, com acesso, exportação em CSV
+		e exclusão dos leads pelo painel.
 	</p>
 	<p>
 		As métricas exibidas dependem dos dados fornecidos pelas plataformas integradas. O {P} não garante
@@ -111,6 +118,10 @@
 			inserir dados pessoais de terceiros sem base legal adequada ou dados pessoais sensíveis;
 		</li>
 		<li>
+			instalar o pixel em páginas sem informar os visitantes, ou mapear campos de formulário com
+			dados pessoais sensíveis, senhas, dados de cartão ou dados de crianças e adolescentes;
+		</li>
+		<li>
 			tentar acessar contas, dados ou áreas sem autorização, contornar mecanismos de segurança ou
 			explorar vulnerabilidades;
 		</li>
@@ -138,7 +149,71 @@
 		qualquer momento, nos termos da Política de Privacidade.
 	</p>
 
-	<h2 id="planos">8. Planos, pagamento e cancelamento</h2>
+	<h2 id="tratamento-de-dados">8. Pixel, leads e tratamento de dados</h2>
+	<p>
+		Esta seção funciona como o acordo de tratamento de dados entre você e o {P} para os dados dos visitantes
+		das suas páginas e dos leads dos seus formulários. Nesse tratamento, você é o
+		<strong>controlador</strong> e o {P} é o <strong>operador</strong> (art. 5º, VI e VII, e art. 39 da
+		LGPD).
+	</p>
+	<h3>Suas obrigações, como controlador</h3>
+	<ul>
+		<li>
+			Ter base legal adequada (art. 7º da LGPD) para registrar a navegação dos visitantes e coletar
+			os dados dos formulários.
+		</li>
+		<li>
+			Informar os titulares, com um aviso de privacidade nas suas páginas que mencione o uso do
+			pixel e do {P} como operador.
+		</li>
+		<li>
+			Obter consentimento quando ele for exigido — por exemplo, com um banner de cookies integrado
+			ao modo de consentimento do pixel e com uma caixa de consentimento no formulário.
+		</li>
+		<li>
+			Não mapear dados pessoais sensíveis (art. 11 da LGPD, como saúde, religião ou biometria) nem
+			tratar dados de crianças e adolescentes sem as salvaguardas do art. 14 da LGPD.
+		</li>
+		<li>
+			Atender os pedidos dos titulares (art. 18 da LGPD), usando as ferramentas de acesso,
+			exportação e exclusão de leads da plataforma.
+		</li>
+		<li>
+			Manter em segurança os arquivos que exportar e restringir o acesso da sua equipe ao
+			necessário.
+		</li>
+	</ul>
+	<h3>Nossas obrigações, como operador</h3>
+	<ul>
+		<li>Tratar os dados apenas para prestar o serviço e conforme as suas instruções.</li>
+		<li>
+			Manter a confidencialidade e exigir o mesmo de quem atua em nosso nome. Não vendemos os dados.
+		</li>
+		<li>
+			Proteger os dados com criptografia em trânsito e em repouso, isolamento por empresa, controle
+			de acesso e registros de operações como as exportações.
+		</li>
+		<li>
+			Comunicar a você, sem demora injustificada, incidentes de segurança que afetem esses dados e
+			apoiar as comunicações exigidas pela ANPD.
+		</li>
+		<li>
+			Apoiar o atendimento aos direitos dos titulares e encaminhar a você os pedidos que recebermos
+			diretamente.
+		</li>
+		<li>
+			Usar apenas os suboperadores listados na <a href="/privacidade#compartilhamento"
+				>Política de Privacidade</a
+			> (Neon, Upstash, ClickHouse Cloud, Netlify e, quando você ativar a integração, Meta), com transferência
+			internacional nas hipóteses do art. 33 da LGPD.
+		</li>
+		<li>
+			Ao fim do contrato, eliminar os dados dos visitantes e leads em até 90 dias, salvo obrigação
+			legal de guarda. Você pode exportá-los antes do encerramento.
+		</li>
+	</ul>
+
+	<h2 id="planos">9. Planos, pagamento e cancelamento</h2>
 	<ul>
 		<li>
 			O {P} pode oferecer planos gratuitos e pagos. Preços, limites, periodicidade e forma de pagamento
@@ -159,7 +234,7 @@
 		</li>
 	</ul>
 
-	<h2 id="propriedade">9. Propriedade intelectual</h2>
+	<h2 id="propriedade">10. Propriedade intelectual</h2>
 	<p>
 		O software, a marca, o layout e os demais elementos do {P} pertencem a {LEGAL.companyName} ou a seus
 		licenciantes e são protegidos pela legislação de propriedade intelectual. Estes Termos concedem a
@@ -167,14 +242,14 @@
 		ativa, sem transferir qualquer direito de propriedade.
 	</p>
 
-	<h2 id="disponibilidade">10. Disponibilidade e suporte</h2>
+	<h2 id="disponibilidade">11. Disponibilidade e suporte</h2>
 	<p>
 		Empregamos esforços razoáveis para manter o {P} disponível e seguro, mas o serviço pode passar por
 		interrupções para manutenção, atualizações ou por eventos fora do nosso controle. Sempre que possível,
 		manutenções programadas serão comunicadas com antecedência. O suporte é prestado pelo e-mail {LEGAL.supportEmail}.
 	</p>
 
-	<h2 id="responsabilidade">11. Limitação de responsabilidade</h2>
+	<h2 id="responsabilidade">12. Limitação de responsabilidade</h2>
 	<p>
 		Na máxima extensão permitida pela lei, o {P} não responde por: decisões de negócio ou de investimento
 		em mídia tomadas com base nas métricas exibidas; dados incorretos, incompletos ou atrasados fornecidos
@@ -186,7 +261,7 @@
 		previstos no Código de Defesa do Consumidor quando aplicável.
 	</p>
 
-	<h2 id="encerramento">12. Suspensão e encerramento</h2>
+	<h2 id="encerramento">13. Suspensão e encerramento</h2>
 	<ul>
 		<li>Você pode encerrar sua conta a qualquer momento.</li>
 		<li>
@@ -200,7 +275,7 @@
 		</li>
 	</ul>
 
-	<h2 id="alteracoes">13. Alterações destes termos</h2>
+	<h2 id="alteracoes">14. Alterações destes termos</h2>
 	<p>
 		Podemos alterar estes Termos para refletir mudanças no serviço ou na legislação. Alterações
 		relevantes serão comunicadas por e-mail ou na plataforma com antecedência razoável. Se você não
@@ -208,14 +283,14 @@
 		concordância.
 	</p>
 
-	<h2 id="lei-foro">14. Lei aplicável e foro</h2>
+	<h2 id="lei-foro">15. Lei aplicável e foro</h2>
 	<p>
 		Estes Termos são regidos pelas leis da República Federativa do Brasil. Se você for consumidor,
 		fica eleito o foro do seu domicílio (art. 101, I, do Código de Defesa do Consumidor). Nos demais
 		casos, fica eleito o foro da comarca de {LEGAL.forum}, com renúncia a qualquer outro.
 	</p>
 
-	<h2 id="contato">15. Contato</h2>
+	<h2 id="contato">16. Contato</h2>
 	<p>
 		Dúvidas sobre estes Termos: <strong>{LEGAL.supportEmail}</strong>. Assuntos de privacidade e
 		dados pessoais: <strong>{LEGAL.privacyEmail}</strong>.

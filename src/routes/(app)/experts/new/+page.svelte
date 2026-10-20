@@ -19,7 +19,7 @@
 <div class="max-w-[880px]">
 	<PageHeader
 		title="Novo expert"
-		description="Depois de salvar, você poderá conectar a conta do Facebook."
+		description="Depois de salvar, você poderá conectar a conta do Instagram."
 		back={{ href: '/experts', label: 'Experts' }}
 	/>
 

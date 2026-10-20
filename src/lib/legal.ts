@@ -25,8 +25,8 @@ export const LEGAL = {
 	hostingProvider: '[PROVEDOR DE HOSPEDAGEM]',
 	/** Prazo para eliminar os dados após o encerramento da conta. */
 	accountDeletionDays: 30,
-	termsUpdatedAt: '2026-10-12',
-	privacyUpdatedAt: '2026-10-12'
+	termsUpdatedAt: '2026-10-18',
+	privacyUpdatedAt: '2026-10-18'
 } as const;
 
 export const pendingLegalFields = Object.entries(LEGAL)

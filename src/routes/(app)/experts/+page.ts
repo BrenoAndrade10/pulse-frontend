@@ -1,4 +1,6 @@
-import { listExperts } from '#lib/services/experts.js';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async () => ({ experts: await listExperts() });
+export const load: PageLoad = async ({ parent }) => {
+	const { experts } = await parent();
+	return { experts };
+};

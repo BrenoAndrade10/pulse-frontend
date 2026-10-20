@@ -21,7 +21,11 @@ const emptyMetrics = (): Metrics => ({
 	sales: null
 });
 
-export type DashboardFilters = { period: Period; expertId: string | null };
+export type DashboardFilters = {
+	period: Period;
+	expertId: string | null;
+	launchId: string | null;
+};
 
 export async function getDashboard(filters: DashboardFilters): Promise<DashboardData> {
 	// TODO: buscar da API. Sem integração com a Meta ainda não existem dados.

@@ -37,6 +37,27 @@
 	--shadow-focus: 0 0 0 3px rgb(124 92 255 / 0.35);
 
 	--animate-spin: spin 0.7s linear infinite;
+	--animate-fade-in: fade-in 0.24s ease-out both;
+
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+			transform: translateY(4px);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+}
+
+/* Rolagem sem barra visível (ex.: carrossel com deslizar). */
+@utility scrollbar-none {
+	scrollbar-width: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
 }
 
 /* Gradiente da marca: bg-gradient-brand (fundo) e text-gradient-brand (texto). */

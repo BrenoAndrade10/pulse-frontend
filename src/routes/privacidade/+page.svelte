@@ -16,7 +16,7 @@
 		{ id: 'seguranca', title: 'Segurança e incidentes' },
 		{ id: 'direitos', title: 'Seus direitos' },
 		{ id: 'exclusao-de-dados-meta', title: 'Exclusão de dados da Meta' },
-		{ id: 'dados-de-terceiros', title: 'Dados de terceiros inseridos por clientes' },
+		{ id: 'dados-de-terceiros', title: 'Dados de terceiros: experts, visitantes e leads' },
 		{ id: 'menores', title: 'Crianças e adolescentes' },
 		{ id: 'alteracoes', title: 'Alterações desta política' },
 		{ id: 'contato', title: 'Contato e encarregado' }
@@ -48,9 +48,12 @@
 	<h2 id="abrangencia">2. A quem se aplica</h2>
 	<p>
 		Esta Política se aplica às pessoas que criam conta e usam o {P} — profissionais e empresas que gerenciam
-		experts e campanhas de marketing digital — e às pessoas cujos dados são cadastrados na plataforma
-		por nossos clientes (por exemplo, os experts). O {P} é um serviço profissional e não é destinado a
-		menores de 18 anos.
+		experts e campanhas de marketing digital —, às pessoas cujos dados são cadastrados na plataforma por
+		nossos clientes (por exemplo, os experts) e às pessoas que visitam as páginas em que nossos clientes
+		instalaram o pixel do {P} ou que preenchem formulários nessas páginas (“visitantes” e “leads”). Para
+		visitantes e leads, veja especialmente a
+		<a href="#dados-de-terceiros">seção 12</a>. O painel do {P} é um serviço profissional e não é destinado
+		a menores de 18 anos.
 	</p>
 
 	<h2 id="dados-coletados">3. Dados que tratamos</h2>
@@ -95,6 +98,26 @@
 					<td>Meta Platforms, mediante sua autorização</td>
 				</tr>
 				<tr>
+					<td>Visitantes das páginas dos clientes (pixel)</td>
+					<td>
+						Eventos de navegação: visualização de página, cliques em elementos configurados e envio
+						de formulários; endereço da página e de origem (referrer), parâmetros de campanha (UTM e
+						fbclid), data e hora, navegador e dispositivo aproximados (user agent) e um
+						identificador anônimo (cookie <code>_pulse_id</code>). O endereço IP é usado apenas para
+						estimar a região aproximada e é guardado somente como resumo criptográfico (hash).
+					</td>
+					<td>Coletados pelo pixel instalado pelo cliente nas páginas dele</td>
+				</tr>
+				<tr>
+					<td>Leads (formulários mapeados)</td>
+					<td>
+						Somente os campos que o cliente escolher mapear: nome, e-mail, telefone, campos
+						personalizados e a marcação da caixa de consentimento, além do histórico de cadastros
+						por lançamento. Senhas e dados de cartão nunca são lidos.
+					</td>
+					<td>Preenchidos pelo próprio titular no formulário da página do cliente</td>
+				</tr>
+				<tr>
 					<td>Atendimento</td>
 					<td>Mensagens e informações que você nos enviar pelos canais de contato.</td>
 					<td>Você</td>
@@ -104,7 +127,7 @@
 	</div>
 	<p>
 		Não tratamos dados pessoais sensíveis (art. 5º, II, da LGPD) e pedimos que você não os insira na
-		plataforma.
+		plataforma nem os mapeie nos formulários rastreados pelo pixel.
 	</p>
 
 	<h2 id="finalidades">4. Finalidades e bases legais</h2>
@@ -145,6 +168,16 @@
 					<td>Exercer direitos em processos judiciais, administrativos ou arbitrais</td>
 					<td>Exercício regular de direitos (art. 7º, VI)</td>
 				</tr>
+				<tr>
+					<td>
+						Registrar eventos das páginas dos clientes e armazenar os leads dos formulários
+						mapeados, para que o cliente meça campanhas e acesse seus contatos
+					</td>
+					<td>
+						Definida pelo cliente, que é o controlador (por exemplo, consentimento ou legítimo
+						interesse); o {P} trata como operador, seguindo as instruções do cliente (seção 12)
+					</td>
+				</tr>
 			</tbody>
 		</table>
 	</div>
@@ -155,7 +188,8 @@
 
 	<h2 id="cookies">5. Cookies e armazenamento local</h2>
 	<p>
-		Usamos apenas o que é estritamente necessário para o funcionamento e a segurança do serviço:
+		<strong>No painel do {P}</strong>, usamos apenas o que é estritamente necessário para o
+		funcionamento e a segurança do serviço:
 	</p>
 	<ul>
 		<li>
@@ -169,10 +203,34 @@
 		</li>
 	</ul>
 	<p>
-		<strong>Não usamos cookies de publicidade, de rastreamento ou de análise de terceiros.</strong>
+		<strong
+			>No painel, não usamos cookies de publicidade, de rastreamento ou de análise de terceiros.</strong
+		>
 		Por serem estritamente necessários, esses recursos não dependem de consentimento. As fontes tipográficas
 		do site são carregadas do Google Fonts, o que faz seu navegador informar ao Google o seu endereço
 		IP no carregamento da página.
+	</p>
+	<p>
+		<strong>Nas páginas dos clientes que instalaram o pixel do {P}</strong>, são usados:
+	</p>
+	<ul>
+		<li>
+			<strong><code>_pulse_id</code></strong> — cookie primário (do próprio domínio da página do cliente)
+			com um identificador anônimo, usado para reconhecer o mesmo navegador entre visitas e medir campanhas.
+			Dura até 12 meses. Não contém nome, e-mail nem outros dados de identificação direta.
+		</li>
+		<li>
+			<strong>Armazenamento de sessão do navegador</strong> — parâmetros de campanha (UTM) da visita atual
+			e, só para o cliente que está configurando o pixel, o acesso temporário ao editor. Apagado ao fechar
+			a aba.
+		</li>
+	</ul>
+	<p>
+		O cliente pode exigir consentimento antes de qualquer coleta, configurando o pixel com
+		<code>data-consent="required"</code> e informando a escolha do visitante (por exemplo, pelo banner
+		de cookies da página). Enquanto o consentimento não é dado, ou se for recusado, o pixel não envia
+		nenhum evento e não cria o cookie. Cabe ao cliente, como controlador, decidir quando o consentimento
+		é necessário e oferecer o banner.
 	</p>
 
 	<h2 id="compartilhamento">6. Compartilhamento</h2>
@@ -183,11 +241,15 @@
 		<li>
 			<strong>Operadores que nos prestam serviços</strong>, contratualmente obrigados a tratar os
 			dados só conforme nossas instruções: banco de dados gerenciado (Neon), armazenamento de
-			sessões (Upstash), hospedagem ({LEGAL.hostingProvider}) e fontes tipográficas (Google Fonts).
+			sessões (Upstash), banco de dados analítico de eventos do pixel (ClickHouse Cloud), hospedagem
+			({LEGAL.hostingProvider}), hospedagem do painel e do script do pixel (Netlify) e fontes
+			tipográficas (Google Fonts).
 		</li>
 		<li>
 			<strong>Meta Platforms</strong>, somente quando você conecta uma conta do Facebook/Instagram,
-			para obter os dados autorizados por você. O uso dos seus dados pela própria Meta segue a
+			para obter os dados autorizados por você. Quando o cliente ativar o envio de eventos à Meta
+			(Conversions API), os eventos poderão ser enviados com e-mail e telefone do lead apenas em
+			forma de resumo criptográfico (hash SHA-256). O uso dos dados pela própria Meta segue a
 			política de privacidade dela.
 		</li>
 		<li><strong>Autoridades públicas</strong>, quando houver obrigação legal ou ordem judicial.</li>
@@ -225,6 +287,18 @@
 			desconectada, quando a autorização é revogada ou mediante solicitação (veja a seção 11).
 		</li>
 		<li>
+			<strong>Eventos do pixel:</strong> 13 meses, sendo apagados automaticamente depois disso.
+		</li>
+		<li>
+			<strong>Métricas agregadas:</strong> totais de visitas, cliques e cadastros por lançamento, dia,
+			página e origem são anonimizados, não permitem identificar nenhuma pessoa (art. 12 da LGPD) e podem
+			ser mantidos por prazo indeterminado para comparação histórica.
+		</li>
+		<li>
+			<strong>Leads:</strong> enquanto a conta do cliente estiver ativa ou até o cliente excluí-los. Após
+			o encerramento da conta do cliente, são eliminados em até 90 dias.
+		</li>
+		<li>
 			Dados necessários ao cumprimento de obrigação legal ou ao exercício de direitos podem ser
 			mantidos pelo prazo exigido em lei (art. 16 da LGPD).
 		</li>
@@ -235,6 +309,15 @@
 	<ul>
 		<li>Senhas protegidas com argon2id e nunca armazenadas em texto;</li>
 		<li>Tokens de acesso a plataformas de terceiros criptografados (AES-256-GCM);</li>
+		<li>
+			Dados dos leads criptografados em repouso (AES-256-GCM), com identificação por resumo
+			criptográfico com chave (HMAC) para reconhecer a mesma pessoa sem expor o dado;
+		</li>
+		<li>
+			Endereço IP dos visitantes guardado apenas como hash e eventos do pixel armazenados sem dados
+			de identificação direta, apenas com o identificador interno do lead;
+		</li>
+		<li>Registro de quem exportou os leads e quando;</li>
 		<li>Comunicação criptografada (HTTPS/TLS) e cookies HttpOnly, Secure e SameSite;</li>
 		<li>
 			Credenciais de acesso de curta duração, renovação com detecção de reuso e encerramento remoto
@@ -252,7 +335,11 @@
 	</p>
 
 	<h2 id="direitos">10. Seus direitos</h2>
-	<p>Nos termos do art. 18 da LGPD, você pode solicitar, a qualquer momento:</p>
+	<p>
+		Nos termos do art. 18 da LGPD, você pode solicitar, a qualquer momento (se você é visitante ou
+		lead da página de um cliente, veja como fazer o pedido na
+		<a href="#dados-de-terceiros">seção 12</a>):
+	</p>
 	<ul>
 		<li>confirmação da existência de tratamento e acesso aos seus dados;</li>
 		<li>correção de dados incompletos, inexatos ou desatualizados;</li>
@@ -285,7 +372,7 @@
 	<p>Você pode solicitar a exclusão dos dados obtidos da Meta de qualquer uma destas formas:</p>
 	<ol>
 		<li>
-			No {P}, abra o expert, vá em <strong>Conta do Facebook</strong> e desconecte a conta;
+			No {P}, abra o expert, vá em <strong>Integrações da Meta</strong> e desconecte a conta;
 		</li>
 		<li>
 			No Facebook, acesse <strong>Configurações e privacidade → Configurações → Apps e sites</strong
@@ -301,13 +388,40 @@
 		precisarmos manter por obrigação legal, e confirmamos a conclusão pelo mesmo canal.
 	</p>
 
-	<h2 id="dados-de-terceiros">12. Dados de terceiros inseridos por clientes</h2>
+	<h2 id="dados-de-terceiros">12. Dados de terceiros: experts, visitantes e leads</h2>
 	<p>
-		Quando nossos clientes cadastram dados de outras pessoas — por exemplo, os experts que gerenciam
-		—, o cliente é o <strong>controlador</strong> desses dados e responsável por ter base legal para
-		tratá-los; o {P} atua como <strong>operador</strong>, tratando-os apenas para prestar o serviço.
-		Se você é um expert e quer exercer seus direitos, procure a empresa que cadastrou seus dados; se
-		nos procurar diretamente, encaminharemos o pedido a ela e apoiaremos o atendimento.
+		Quando nossos clientes tratam dados de outras pessoas por meio do {P} — os experts que gerenciam,
+		os visitantes das páginas em que instalaram o pixel e os leads dos formulários dessas páginas —, o
+		cliente é o <strong>controlador</strong> desses dados e responsável por ter base legal para
+		tratá-los; o {P} atua como <strong>operador</strong>, tratando-os apenas para prestar o serviço
+		e conforme as instruções do cliente.
+	</p>
+	<h3>Como funciona o pixel</h3>
+	<ul>
+		<li>
+			O cliente instala o pixel do {P} nas páginas dele e escolhe, no editor, quais cliques e formulários
+			viram eventos.
+		</li>
+		<li>
+			Nos formulários, o pixel lê <strong>somente os campos que o cliente mapeou</strong> (nome, e-mail,
+			telefone, campos personalizados e a caixa de consentimento). Ele nunca lê senhas nem dados de cartão.
+		</li>
+		<li>
+			Os dados dos leads ficam criptografados. A mesma pessoa é reconhecida como um único lead por
+			expert, com o histórico dos cadastros em cada lançamento.
+		</li>
+		<li>
+			O cliente pode ver, exportar (em CSV) e excluir os leads dele no painel. As exportações ficam
+			registradas.
+		</li>
+	</ul>
+	<h3>Como exercer seus direitos</h3>
+	<p>
+		Se você é um expert, um visitante ou um lead e quer exercer os direitos do art. 18 da LGPD
+		(acesso, correção, eliminação, entre outros), procure a empresa responsável pela página ou que
+		cadastrou seus dados — ela é a controladora. Se nos procurar diretamente em
+		<strong>{LEGAL.privacyEmail}</strong>, encaminharemos o pedido a ela e apoiaremos o atendimento,
+		inclusive com as ferramentas de exportação e exclusão da plataforma.
 	</p>
 
 	<h2 id="menores">13. Crianças e adolescentes</h2>

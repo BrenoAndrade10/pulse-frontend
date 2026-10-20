@@ -26,7 +26,7 @@
 			Configure sua operação
 		</h2>
 		<p class="mt-2 mb-5 text-[13.5px] text-fg-muted">
-			Cadastre seus experts e conecte as contas do Facebook para começar a ver os resultados aqui.
+			Cadastre seus experts e conecte as contas do Instagram para começar a ver os resultados aqui.
 		</p>
 		<div
 			class="h-1.5 overflow-hidden rounded-[3px] bg-border"

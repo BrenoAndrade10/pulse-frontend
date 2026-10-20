@@ -43,15 +43,13 @@
 <div class="max-w-[880px]">
 	<PageHeader
 		title={data.expert.name}
-		description="Configurações, conta do Facebook e metas do expert."
+		description="Configurações e conta do Instagram do expert."
 		back={{ href: '/experts', label: 'Experts' }}
 	/>
 
 	{#if justCreated}
 		<div class="mb-5">
-			<Alert variant="success">
-				Expert cadastrado! Agora conecte a conta do Facebook para importar os dados das campanhas.
-			</Alert>
+			<Alert variant="success">Expert cadastrado! Agora conecte a conta do Instagram.</Alert>
 		</div>
 	{/if}
 
@@ -68,7 +66,7 @@
 		<Card title="Zona de perigo">
 			<div class="flex flex-wrap items-center justify-between gap-4">
 				<p class="text-[13.5px] text-fg-muted">
-					Excluir o expert remove as configurações e desconecta a conta do Facebook.
+					Excluir o expert remove as configurações e desconecta a conta do Instagram.
 				</p>
 				<Button variant="danger" onclick={() => dialog?.showModal()}>
 					<Icon name="trash" size={15} />Excluir expert

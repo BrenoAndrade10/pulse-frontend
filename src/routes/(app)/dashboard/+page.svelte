@@ -8,7 +8,6 @@
 	import Card from '#lib/components/ui/Card.svelte';
 	import EmptyState from '#lib/components/ui/EmptyState.svelte';
 	import type { IconName } from '#lib/components/ui/Icon.svelte';
-	import Select from '#lib/components/ui/Select.svelte';
 	import { buttonClass } from '#lib/components/ui/button.js';
 	import { APP_NAME } from '#lib/config.js';
 	import { PERIODS } from '#lib/services/dashboard.js';
@@ -39,44 +38,35 @@
 		{ key: 'sales', label: 'Vendas', icon: 'bag', format: formatNumber }
 	];
 
-	const expertOptions = $derived([
-		{ value: '', label: 'Todos os experts' },
-		...data.experts.map((e) => ({ value: e.id, label: e.name }))
-	]);
-
 	const hasExperts = $derived(data.experts.length > 0);
 	const connectedCount = $derived(
-		data.experts.filter((e) => e.facebook.status === 'connected').length
+		data.experts.filter((e) => e.instagram.status === 'connected').length
 	);
-	const expiredCount = $derived(data.experts.filter((e) => e.facebook.status === 'expired').length);
+	const expiredCount = $derived(
+		data.experts.filter((e) => e.instagram.status === 'expired').length
+	);
 
 	const onboardingSteps = $derived([
 		{
 			title: 'Cadastre seu primeiro expert',
-			description: 'Nome, nicho e dados básicos de quem você gerencia.',
+			description: 'Nome, e-mail e dados básicos de quem você gerencia.',
 			href: '/experts/new',
 			cta: 'Cadastrar',
 			done: hasExperts
 		},
 		{
-			title: 'Conecte a conta do Facebook',
-			description: 'Autorize a conta de anúncios de cada expert para importar os dados.',
-			href: '/facebook-accounts',
+			title: 'Conecte o Instagram',
+			description:
+				'Autorize a conta profissional de cada expert para importar publicações e Reels.',
+			href: '/integrations#instagram',
 			cta: 'Conectar',
 			done: connectedCount > 0
-		},
-		{
-			title: 'Defina as metas de performance',
-			description: 'ROAS alvo, CPL máximo e orçamento diário por expert.',
-			href: hasExperts ? `/experts/${data.experts[0].id}` : '/experts/new',
-			cta: 'Definir metas',
-			done: data.experts.some((e) => e.goals.roas != null)
 		}
 	]);
 
 	const showOnboarding = $derived(onboardingSteps.some((s) => !s.done));
 
-	function setFilter(key: 'period' | 'expert', value: string) {
+	function setFilter(key: 'period', value: string) {
 		const params = Object.fromEntries(page.url.searchParams);
 		if (value) params[key] = value;
 		else delete params[key];
@@ -96,16 +86,6 @@
 
 <PageHeader title="Dashboard" description="Visão consolidada das campanhas dos seus experts.">
 	{#snippet actions()}
-		<div class="w-[220px] max-[561px]:w-full">
-			<Select
-				id="expert-filter"
-				aria-label="Filtrar por expert"
-				value={data.expertId ?? ''}
-				options={expertOptions}
-				disabled={!hasExperts}
-				onchange={(e) => setFilter('expert', e.currentTarget.value)}
-			/>
-		</div>
 		<div
 			class="inline-flex rounded-md border border-border bg-surface p-[3px]"
 			role="group"
@@ -170,12 +150,12 @@
 			<EmptyState
 				icon="bar-chart"
 				title="Nenhum dado para exibir"
-				description="Os resultados aparecem aqui assim que houver uma conta do Facebook conectada com campanhas ativas."
+				description="Os resultados aparecem aqui assim que houver uma conta de anúncios do Meta Ads conectada com campanhas ativas."
 			/>
 		{/if}
 	</Card>
 
-	<Card title="Contas do Facebook" description="Status das conexões dos experts.">
+	<Card title="Instagram" description="Status das conexões dos experts.">
 		{#if hasExperts}
 			<ul class="flex flex-col gap-1">
 				<li class="flex items-center justify-between border-b border-border py-3 text-[14px]">
@@ -201,14 +181,14 @@
 			</ul>
 			<a
 				class={[buttonClass({ variant: 'secondary', size: 'sm' }), 'mt-4.5 w-full']}
-				href="/facebook-accounts">Gerenciar conexões</a
+				href="/integrations#instagram">Gerenciar conexões</a
 			>
 		{:else}
 			<EmptyState
 				compact
-				icon="facebook"
+				icon="instagram"
 				title="Nenhuma conta conectada"
-				description="Cadastre um expert para conectar a conta de anúncios dele."
+				description="Cadastre um expert para conectar a conta profissional do Instagram dele."
 			/>
 		{/if}
 	</Card>
