@@ -60,7 +60,7 @@ export const META_INTEGRATIONS: MetaIntegration[] = [
 		connectLabel: 'Conectar com Facebook',
 		icon: 'whatsapp',
 		tone: 'bg-[rgb(37_211_102/0.14)] text-[#3ddc84]',
-		available: false
+		available: true
 	}
 ];
 

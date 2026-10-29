@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import '../app.css';
-	import favicon from '#lib/assets/favicon.svg';
 	import { INSTAGRAM_OAUTH_CHANNEL, isInstagramOAuthResult } from '#lib/services/experts.js';
 	import type { LayoutProps } from './$types';
 
@@ -20,7 +19,8 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+	<link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
 </svelte:head>
 
 {@render children()}

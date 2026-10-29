@@ -8,7 +8,7 @@ const SECURITY_HEADERS: Record<string, string> = {
 	'X-Content-Type-Options': 'nosniff',
 	'X-Frame-Options': 'DENY',
 	'Referrer-Policy': 'strict-origin-when-cross-origin',
-	'Cross-Origin-Opener-Policy': 'same-origin',
+	'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
 	'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()'
 };
 

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount, untrack } from 'svelte';
 	import { page } from '$app/state';
 	import Logo from '#lib/components/auth/Logo.svelte';
 	import Icon, { type IconName } from '#lib/components/ui/Icon.svelte';
@@ -14,7 +13,6 @@
 	type GroupId = 'attract' | 'capture' | 'relationship' | 'analysis';
 	type NavGroup = { id: GroupId; label: string; items: NavItem[] };
 
-	const STORAGE_KEY = 'pulse:sidebar-groups';
 	const topItems: NavItem[] = [
 		{ href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
 		{ href: '/experts', label: 'Experts', icon: 'users' },
@@ -54,12 +52,11 @@
 	const integrations: NavItem = { href: '/integrations', label: 'Integrações', icon: 'plug' };
 
 	let expanded = $state<Record<GroupId, boolean>>({
-		attract: true,
-		capture: true,
-		relationship: true,
-		analysis: true
+		attract: false,
+		capture: false,
+		relationship: false,
+		analysis: false
 	});
-	let storageReady = $state(false);
 
 	const fullName = $derived(
 		[auth.user?.firstName, auth.user?.lastName].filter(Boolean).join(' ') || 'Minha conta'
@@ -78,47 +75,6 @@
 		pathname === href || pathname.startsWith(`${href}/`);
 	const isActive = (href: string) => matchesPath(href, page.url.pathname);
 	const groupIsActive = (group: NavGroup) => group.items.some((item) => isActive(item.href));
-
-	onMount(() => {
-		try {
-			const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') as Partial<
-				Record<GroupId, unknown>
-			>;
-			const savedState: Record<GroupId, boolean> = {
-				attract: typeof saved.attract === 'boolean' ? saved.attract : expanded.attract,
-				capture: typeof saved.capture === 'boolean' ? saved.capture : expanded.capture,
-				relationship:
-					typeof saved.relationship === 'boolean' ? saved.relationship : expanded.relationship,
-				analysis: typeof saved.analysis === 'boolean' ? saved.analysis : expanded.analysis
-			};
-			const active = groups.find((group) =>
-				group.items.some((item) => matchesPath(item.href, page.url.pathname))
-			);
-			expanded = active ? { ...savedState, [active.id]: true } : savedState;
-		} catch {
-			// O menu continua funcional quando o armazenamento do navegador está indisponível.
-		}
-		storageReady = true;
-	});
-
-	$effect(() => {
-		const pathname = page.url.pathname;
-		const active = groups.find((group) =>
-			group.items.some((item) => matchesPath(item.href, pathname))
-		);
-		untrack(() => {
-			if (active && !expanded[active.id]) expanded = { ...expanded, [active.id]: true };
-		});
-	});
-
-	$effect(() => {
-		if (!storageReady) return;
-		try {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(expanded));
-		} catch {
-			// Persistência é opcional.
-		}
-	});
 
 	function toggleGroup(id: GroupId) {
 		expanded = { ...expanded, [id]: !expanded[id] };

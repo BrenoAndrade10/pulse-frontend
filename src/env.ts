@@ -16,5 +16,23 @@ export const variables = defineEnvVars({
 
 			return url.origin;
 		}
+	},
+	PUBLIC_META_APP_ID: {
+		public: true,
+		static: true,
+		description: 'ID do app da Meta usado no Embedded Signup do WhatsApp',
+		schema: (value) => metaId('PUBLIC_META_APP_ID', value)
+	},
+	PUBLIC_WHATSAPP_CONFIG_ID: {
+		public: true,
+		static: true,
+		description: 'ID da configuração do Login do Facebook para Empresas (Embedded Signup)',
+		schema: (value) => metaId('PUBLIC_WHATSAPP_CONFIG_ID', value)
 	}
 });
+
+function metaId(name: string, value: string | undefined): string {
+	if (!value) return '';
+	if (!/^\d{1,32}$/.test(value)) throw new Error(`${name} deve conter apenas números.`);
+	return value;
+}

@@ -15,7 +15,7 @@
 </script>
 
 <section
-	class="overflow-hidden rounded-lg border border-border bg-[#efeae2] text-[#111b21] dark:bg-[#0b141a] dark:text-[#e9edef]"
+	class="min-w-0 overflow-hidden rounded-lg border border-border bg-[#efeae2] text-[#111b21] dark:bg-[#0b141a] dark:text-[#e9edef]"
 	aria-label="Prévia da mensagem no WhatsApp"
 >
 	<header class="flex items-center gap-3 bg-[#008069] px-4 py-3 text-white dark:bg-[#202c33]">
@@ -29,7 +29,8 @@
 	</header>
 
 	<div
-		class="min-h-96 bg-[radial-gradient(circle_at_20%_15%,rgb(0_0_0/0.035)_1px,transparent_1px)] bg-size-[18px_18px] p-4"
+		class="min-h-96 bg-[radial-gradient(circle_at_20%_15%,rgb(0_0_0/0.035)_1px,transparent_1px)] bg-size-[18px_18px] p-4 max-[360px]:min-h-80 max-[360px]:p-3"
+		aria-live="polite"
 	>
 		<div class="ml-auto max-w-[88%] text-[13.5px]">
 			<div class="rounded-lg rounded-tr-sm bg-[#d9fdd3] px-3 py-2 shadow-sm dark:bg-[#005c4b]">

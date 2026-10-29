@@ -27,3 +27,13 @@ export type AuthResponse = AuthProfile & {
 	/** Validade do access token, em segundos. */
 	expiresIn: number;
 };
+
+export type TwoFactorChallenge = {
+	status: 'two_factor_required';
+	next: 'email' | 'totp';
+	challengeToken: string;
+	expiresAt: string;
+	emailHint?: string;
+};
+
+export type LoginResponse = AuthResponse | TwoFactorChallenge;

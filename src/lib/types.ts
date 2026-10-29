@@ -9,6 +9,19 @@ export type ExpertConnection = {
 
 export type IntegrationChannel = 'instagram' | 'meta-ads' | 'whatsapp';
 
+export type WhatsAppQualityRating = 'GREEN' | 'YELLOW' | 'RED' | 'UNKNOWN';
+
+export type WhatsAppConnection =
+	| { status: 'disconnected' }
+	| {
+			status: 'connected';
+			phoneNumberId: string;
+			displayPhoneNumber: string;
+			verifiedName: string;
+			qualityRating: WhatsAppQualityRating;
+			connectedAt: string;
+	  };
+
 export type ExpertStatus = 'active' | 'inactive';
 
 export type Expert = {

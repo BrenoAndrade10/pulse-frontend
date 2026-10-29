@@ -11,6 +11,7 @@
 	import { validateEmail, validateRequired } from '#lib/utils/validation.js';
 	import InstagramConnectionCard from './InstagramConnectionCard.svelte';
 	import IntegrationConnectionCard from './IntegrationConnectionCard.svelte';
+	import WhatsAppConnectionCard from './WhatsAppConnectionCard.svelte';
 
 	type Props = {
 		expert?: Expert;
@@ -105,6 +106,10 @@
 						expertId={expert?.id ?? null}
 						connection={expert?.instagram ?? null}
 					/>
+				{:else if integration.channel === 'whatsapp'}
+					{#key expert?.id}
+						<WhatsAppConnectionCard expertId={expert?.id ?? null} />
+					{/key}
 				{:else}
 					<IntegrationConnectionCard
 						{integration}

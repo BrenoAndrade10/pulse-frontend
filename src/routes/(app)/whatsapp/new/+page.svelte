@@ -45,7 +45,6 @@
 		expert={data.expert}
 		launches={data.launches}
 		pixel={editor.pixel}
-		groupsState={editor.groups}
 		automation={null}
 	/>
 {/if}

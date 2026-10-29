@@ -6,7 +6,8 @@ export class ApiError extends Error {
 	constructor(
 		readonly status: number,
 		readonly reason: string,
-		readonly data: unknown = null
+		readonly data: unknown = null,
+		readonly retryAfterSeconds: number | null = null
 	) {
 		super(reason);
 		this.name = 'ApiError';
@@ -17,6 +18,14 @@ export class ApiError extends Error {
 
 		return Array.isArray(errors) ? errors.filter((e): e is string => typeof e === 'string') : [];
 	}
+}
+
+function parseRetryAfter(value: string | null): number | null {
+	if (!value) return null;
+	const seconds = Number(value);
+	if (Number.isFinite(seconds) && seconds >= 0) return Math.ceil(seconds);
+	const date = Date.parse(value);
+	return Number.isNaN(date) ? null : Math.max(0, Math.ceil((date - Date.now()) / 1000));
 }
 
 export type HttpRequest = {
@@ -57,7 +66,8 @@ export async function httpRequest<T>(path: string, request: HttpRequest = {}): P
 		throw new ApiError(
 			response.status,
 			typeof reason === 'string' ? reason : 'UNEXPECTED_ERROR',
-			data ?? null
+			data ?? null,
+			parseRetryAfter(response.headers.get('Retry-After'))
 		);
 	}
 

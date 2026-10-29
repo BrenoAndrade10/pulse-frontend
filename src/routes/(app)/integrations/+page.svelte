@@ -1,5 +1,6 @@
 <script lang="ts">
 	import PageHeader from '#lib/components/app/PageHeader.svelte';
+	import WhatsAppConnectionCard from '#lib/components/experts/WhatsAppConnectionCard.svelte';
 	import Badge from '#lib/components/ui/Badge.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import { buttonClass } from '#lib/components/ui/button.js';
@@ -53,7 +54,12 @@
 				icon: integration.icon,
 				available: integration.available,
 				detail: `${integration.asset} · ${integration.authorization}`,
-				href: integration.channel === 'instagram' ? '#instagram' : null
+				href:
+					integration.channel === 'instagram'
+						? '#instagram'
+						: integration.channel === 'whatsapp'
+							? '#whatsapp'
+							: null
 			}))
 		},
 		{
@@ -199,5 +205,34 @@
 				{/each}
 			</ul>
 		</Card>
+	{/if}
+</section>
+
+<section id="whatsapp" class="mt-9 scroll-mt-6" aria-labelledby="whatsapp-title">
+	<div class="mb-4">
+		<h2 id="whatsapp-title" class="text-[18px] font-bold">WhatsApp Business</h2>
+		<p class="mt-1 text-[13.5px] text-fg-muted">
+			Conexão do expert selecionado para mensagens e automações.
+		</p>
+	</div>
+
+	{#if data.experts.length === 0}
+		<Card>
+			<EmptyState
+				icon="whatsapp"
+				title="Nenhum expert para conectar"
+				description="Cadastre um expert antes de conectar um número do WhatsApp Business."
+			>
+				{#snippet action()}
+					<a class={buttonClass()} href="/experts/new">
+						<Icon name="plus" size={16} />Cadastrar expert
+					</a>
+				{/snippet}
+			</EmptyState>
+		</Card>
+	{:else}
+		{#key data.selectedExpertId}
+			<WhatsAppConnectionCard expertId={data.selectedExpertId} />
+		{/key}
 	{/if}
 </section>

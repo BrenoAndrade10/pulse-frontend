@@ -6,7 +6,14 @@ import {
 	readAccessToken,
 	storeAccessToken
 } from '#lib/auth/tokenVault.js';
-import type { AuthMembership, AuthProfile, AuthResponse, AuthUser } from '#lib/auth/types.js';
+import type {
+	AuthMembership,
+	AuthProfile,
+	AuthResponse,
+	AuthUser,
+	LoginResponse,
+	TwoFactorChallenge
+} from '#lib/auth/types.js';
 
 type SessionStatus = 'unknown' | 'authenticated' | 'anonymous';
 
@@ -65,6 +72,11 @@ function applyAuthResponse(response: AuthResponse): void {
 	state.status = 'authenticated';
 	state.endReason = null;
 	scheduleRenewal();
+}
+
+export function completeLogin(response: AuthResponse): void {
+	applyAuthResponse(response);
+	tabChannel?.postMessage({ type: 'login' } satisfies TabMessage);
 }
 
 function clearSession(reason: SessionEndReason): void {
@@ -133,16 +145,15 @@ export async function getAccessToken(): Promise<string> {
 	return token;
 }
 
-export async function login(credentials: LoginCredentials): Promise<void> {
-	applyAuthResponse(
-		await httpRequest<AuthResponse>('/auth/login', {
-			method: 'POST',
-			body: credentials,
-			withCredentials: true
-		})
-	);
-
-	tabChannel?.postMessage({ type: 'login' } satisfies TabMessage);
+export async function login(credentials: LoginCredentials): Promise<TwoFactorChallenge | null> {
+	const response = await httpRequest<LoginResponse>('/auth/login', {
+		method: 'POST',
+		body: credentials,
+		withCredentials: true
+	});
+	if ('status' in response) return response;
+	completeLogin(response);
+	return null;
 }
 
 export async function logout(): Promise<void> {

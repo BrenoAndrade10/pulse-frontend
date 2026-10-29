@@ -10,10 +10,7 @@ const RETRYABLE_REASONS = new Set(['UNAUTHENTICATED', 'INVALID_ACCESS_TOKEN']);
  *
  * Use este cliente para tudo que não for /auth/*.
  */
-export async function apiRequest<T>(
-	path: string,
-	request: Omit<HttpRequest, 'withCredentials'> = {}
-): Promise<T> {
+export async function apiRequest<T>(path: string, request: HttpRequest = {}): Promise<T> {
 	const send = (token: string) =>
 		httpRequest<T>(path, {
 			...request,
