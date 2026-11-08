@@ -13,13 +13,3 @@ export const LOCALE_STORAGE_KEY = 'pulse:locale';
 export function isLocale(value: unknown): value is Locale {
 	return LOCALES.some((locale) => locale.code === value);
 }
-
-export function matchLocale(candidates: readonly string[]): Locale | null {
-	for (const candidate of candidates) {
-		const language = candidate.toLowerCase().split('-')[0];
-		const match = LOCALES.find((locale) => locale.code.toLowerCase().split('-')[0] === language);
-		if (match) return match.code;
-	}
-
-	return null;
-}

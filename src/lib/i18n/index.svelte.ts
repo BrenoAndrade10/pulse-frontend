@@ -1,12 +1,5 @@
 import { browser } from '$app/env';
-import {
-	DEFAULT_LOCALE,
-	LOCALES,
-	LOCALE_STORAGE_KEY,
-	isLocale,
-	matchLocale,
-	type Locale
-} from './locales.js';
+import { DEFAULT_LOCALE, LOCALES, LOCALE_STORAGE_KEY, isLocale, type Locale } from './locales.js';
 import { messages, type Messages } from './messages/index.js';
 import type { DotPaths, PluralForms } from './types.js';
 
@@ -39,9 +32,7 @@ export const i18n = {
 	},
 	init(): void {
 		if (!browser) return;
-		apply(
-			readStored() ?? matchLocale(navigator.languages ?? [navigator.language]) ?? DEFAULT_LOCALE
-		);
+		apply(readStored() ?? DEFAULT_LOCALE);
 	},
 	set(locale: Locale): void {
 		apply(locale);
