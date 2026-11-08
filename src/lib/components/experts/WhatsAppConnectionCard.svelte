@@ -4,6 +4,7 @@
 	import Badge from '#lib/components/ui/Badge.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Icon from '#lib/components/ui/Icon.svelte';
+	import { t, type MessageKey } from '#lib/i18n/index.svelte.js';
 	import {
 		EmbeddedSignupCancelledError,
 		EmbeddedSignupError,
@@ -19,7 +20,7 @@
 	import type { WhatsAppConnection, WhatsAppQualityRating } from '#lib/types.js';
 	import { formatDate } from '#lib/utils/format.js';
 	import type { BadgeVariant } from '#lib/utils/integrations.js';
-	import { metaIntegration } from '#lib/utils/integrations.js';
+	import { INTEGRATION_STATE, metaIntegration } from '#lib/utils/integrations.js';
 	import IntegrationConnectionCard from './IntegrationConnectionCard.svelte';
 
 	type Props = { expertId: string | null };
@@ -27,12 +28,13 @@
 	let { expertId }: Props = $props();
 
 	const integration = metaIntegration('whatsapp');
-	const qualityLabels: Record<WhatsAppQualityRating, { label: string; variant: BadgeVariant }> = {
-		GREEN: { label: 'Alta', variant: 'success' },
-		YELLOW: { label: 'Média', variant: 'warning' },
-		RED: { label: 'Baixa', variant: 'danger' },
-		UNKNOWN: { label: 'Não informada', variant: 'neutral' }
-	};
+	const qualityLabels: Record<WhatsAppQualityRating, { label: MessageKey; variant: BadgeVariant }> =
+		{
+			GREEN: { label: 'integrations.whatsapp.qualityLevels.high', variant: 'success' },
+			YELLOW: { label: 'integrations.whatsapp.qualityLevels.medium', variant: 'warning' },
+			RED: { label: 'integrations.whatsapp.qualityLevels.low', variant: 'danger' },
+			UNKNOWN: { label: 'integrations.whatsapp.qualityLevels.unknown', variant: 'neutral' }
+		};
 
 	let connection = $state<WhatsAppConnection>({ status: 'disconnected' });
 	let loadState = $state<'loading' | 'ready' | 'error'>('loading');
@@ -43,11 +45,20 @@
 	let dialog = $state<HTMLDialogElement>();
 
 	const connected = $derived(connection.status === 'connected' ? connection : null);
+	const setupPending = $derived(!connected && !isWhatsAppEmbeddedSignupConfigured);
 	const detail = $derived(
 		connected
-			? `Conectado em ${formatDate(connected.connectedAt)}`
-			: 'Autorize a conta e o número do WhatsApp Business deste expert.'
+			? t('integrations.whatsapp.connectedAt', { date: formatDate(connected.connectedAt) })
+			: setupPending
+				? t('integrations.whatsapp.notConfigured')
+				: t('integrations.whatsapp.authorize')
 	);
+	const badge = $derived.by(() => {
+		const entry =
+			INTEGRATION_STATE[connected ? 'connected' : setupPending ? 'pending_setup' : 'not_connected'];
+
+		return { label: t(entry.label), variant: entry.variant };
+	});
 
 	function formatPhone(value: string): string {
 		const digits = value.replace(/\D/g, '');
@@ -88,12 +99,12 @@
 			if (id !== expertId) return;
 			connection = nextConnection;
 			loadState = 'ready';
-			actionFeedback = { variant: 'success', text: 'WhatsApp conectado com sucesso.' };
+			actionFeedback = { variant: 'success', text: t('integrations.whatsapp.connectedSuccess') };
 		} catch (error) {
 			if (id !== expertId) return;
 			actionFeedback =
 				error instanceof EmbeddedSignupCancelledError
-					? { variant: 'warning', text: 'A conexão com o WhatsApp foi cancelada.' }
+					? { variant: 'warning', text: t('integrations.whatsapp.cancelled') }
 					: {
 							variant: 'error',
 							text:
@@ -114,7 +125,7 @@
 			await disconnectWhatsApp(expertId);
 			connection = { status: 'disconnected' };
 			dialog?.close();
-			actionFeedback = { variant: 'success', text: 'WhatsApp desconectado.' };
+			actionFeedback = { variant: 'success', text: t('integrations.whatsapp.disconnected') };
 		} catch (error) {
 			dialog?.close();
 			actionFeedback = { variant: 'error', text: whatsappConnectionErrorMessage(error) };
@@ -128,7 +139,7 @@
 	<article
 		class="flex min-h-41 animate-pulse flex-col gap-4 rounded-md border border-border bg-surface p-4.5"
 		aria-busy="true"
-		aria-label="Carregando conexão do WhatsApp"
+		aria-label={t('integrations.whatsapp.loadingAria')}
 	>
 		<div class="flex items-start gap-3.5">
 			<span class="size-10.5 rounded-[12px] bg-white/6"></span>
@@ -143,54 +154,48 @@
 {:else if loadState === 'error'}
 	<IntegrationConnectionCard
 		{integration}
-		badge={{ label: 'Erro', variant: 'danger' }}
-		detail="Não foi possível consultar a conexão deste expert."
+		badge={{ label: t('integrations.whatsapp.badgeError'), variant: 'danger' }}
+		detail={t('integrations.whatsapp.loadError')}
 	>
 		{#snippet actions()}
-			<Button size="sm" variant="secondary" onclick={loadConnection}>Tentar novamente</Button>
+			<Button size="sm" variant="secondary" onclick={loadConnection}
+				>{t('common.actions.retry')}</Button
+			>
 		{/snippet}
 		<Alert>{errorMessage}</Alert>
 	</IntegrationConnectionCard>
 {:else}
 	<IntegrationConnectionCard
 		{integration}
-		badge={connected
-			? { label: 'Conectado', variant: 'success' }
-			: { label: 'Não conectado', variant: 'neutral' }}
+		{badge}
 		accountName={connected ? formatPhone(connected.displayPhoneNumber) : null}
 		{detail}
 	>
 		{#snippet actions()}
 			{#if connected}
-				<Button size="sm" variant="ghost" onclick={() => dialog?.showModal()}>Desconectar</Button>
-			{:else}
-				<Button
-					size="sm"
-					loading={connecting}
-					disabled={!expertId || !isWhatsAppEmbeddedSignupConfigured}
-					onclick={handleConnect}
+				<Button size="sm" variant="ghost" onclick={() => dialog?.showModal()}
+					>{t('integrations.actions.disconnect')}</Button
 				>
+			{:else if !setupPending}
+				<Button size="sm" loading={connecting} disabled={!expertId} onclick={handleConnect}>
 					<Icon name="whatsapp" size={15} />
-					{isWhatsAppEmbeddedSignupConfigured
-						? 'Conectar WhatsApp'
-						: 'WhatsApp ainda não configurado nesta instalação'}
+					{t('integrations.whatsapp.connect')}
 				</Button>
 			{/if}
 		{/snippet}
 
 		{#if connected}
 			<div class="flex flex-wrap items-center gap-2 text-[13px] text-fg-muted">
-				<span>Nome verificado: <strong class="text-fg">{connected.verifiedName}</strong></span>
+				<span
+					>{t('integrations.whatsapp.verifiedName')}
+					<strong class="text-fg">{connected.verifiedName}</strong></span
+				>
 				<span aria-hidden="true">·</span>
-				<span>Qualidade</span>
+				<span>{t('integrations.whatsapp.quality')}</span>
 				<Badge variant={qualityLabels[connected.qualityRating].variant}>
-					{qualityLabels[connected.qualityRating].label}
+					{t(qualityLabels[connected.qualityRating].label)}
 				</Badge>
 			</div>
-		{/if}
-
-		{#if !isWhatsAppEmbeddedSignupConfigured && !connected}
-			<Alert variant="warning">WhatsApp ainda não configurado nesta instalação</Alert>
 		{/if}
 
 		{#if actionFeedback}
@@ -209,14 +214,18 @@
 	bind:this={dialog}
 	aria-labelledby="disconnect-whatsapp-title"
 >
-	<h2 id="disconnect-whatsapp-title" class="text-[18px] font-bold">Desconectar WhatsApp?</h2>
+	<h2 id="disconnect-whatsapp-title" class="text-[18px] font-bold">
+		{t('integrations.whatsapp.disconnectTitle')}
+	</h2>
 	<p class="mt-2 mb-6 text-fg-muted">
-		As automações de WhatsApp deste expert vão parar até que um número seja conectado novamente.
+		{t('integrations.whatsapp.disconnectWarning')}
 	</p>
 	<div class="flex justify-end gap-2.5">
 		<Button variant="ghost" disabled={disconnecting} onclick={() => dialog?.close()}>
-			Cancelar
+			{t('common.actions.cancel')}
 		</Button>
-		<Button variant="danger" loading={disconnecting} onclick={handleDisconnect}>Desconectar</Button>
+		<Button variant="danger" loading={disconnecting} onclick={handleDisconnect}
+			>{t('integrations.actions.disconnect')}</Button
+		>
 	</div>
 </dialog>

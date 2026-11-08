@@ -5,6 +5,7 @@
 	import Button from '#lib/components/ui/Button.svelte';
 	import TextField from '#lib/components/ui/TextField.svelte';
 	import { APP_NAME } from '#lib/config.js';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import {
 		AuthError,
 		PASSWORD_RESET_EMAIL_STORAGE_KEY,
@@ -54,10 +55,7 @@
 			sent = true;
 			startCooldown(60);
 		} catch (error) {
-			formError =
-				error instanceof AuthError
-					? error.message
-					: 'Não foi possível solicitar a redefinição. Tente novamente.';
+			formError = error instanceof AuthError ? error.message : t('auth.errors.resetRequestFailed');
 			if (error instanceof AuthError && error.retryAfterSeconds) {
 				startCooldown(error.retryAfterSeconds);
 			}
@@ -68,17 +66,14 @@
 </script>
 
 <svelte:head>
-	<title>Esqueci minha senha · {APP_NAME}</title>
+	<title>{t('auth.forgot.pageTitle')} · {APP_NAME}</title>
 </svelte:head>
 
-<AuthShell
-	title="Esqueceu sua senha?"
-	subtitle="Informe seu e-mail para receber as instruções de redefinição."
->
+<AuthShell title={t('auth.forgot.title')} subtitle={t('auth.forgot.subtitle')}>
 	<form class="flex flex-col gap-4.5" novalidate onsubmit={handleSubmit}>
 		{#if sent}
 			<Alert variant="success">
-				Se existir uma conta com este e-mail, enviaremos as instruções para redefinir a senha.
+				{t('auth.forgot.sent')}
 			</Alert>
 		{/if}
 
@@ -90,8 +85,8 @@
 			id="email"
 			name="email"
 			type="email"
-			label="E-mail"
-			placeholder="voce@empresa.com"
+			label={t('auth.fields.email')}
+			placeholder={t('auth.fields.emailPlaceholder')}
 			autocomplete="email"
 			bind:value={email}
 			onblur={() => (touched = true)}
@@ -101,13 +96,13 @@
 		<Button type="submit" fullWidth loading={submitting} disabled={cooldownSeconds > 0}>
 			{sent
 				? cooldownSeconds > 0
-					? `Reenviar em ${cooldownSeconds}s`
-					: 'Reenviar'
-				: 'Enviar link'}
+					? t('auth.forgot.resendIn', { seconds: cooldownSeconds })
+					: t('auth.forgot.resend')
+				: t('auth.forgot.submit')}
 		</Button>
 	</form>
 
 	{#snippet footer()}
-		<a class="font-semibold" href="/login">Voltar ao login</a>
+		<a class="font-semibold" href="/login">{t('auth.forgot.backToLogin')}</a>
 	{/snippet}
 </AuthShell>

@@ -2,6 +2,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { selectExpert, selectLaunch } from '#lib/context/selection.js';
 	import Icon from '#lib/components/ui/Icon.svelte';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import type { Expert, Launch } from '#lib/types.js';
 
 	let {
@@ -30,10 +31,11 @@
 		<div
 			class="flex shrink-0 items-center gap-2 text-[12px] font-bold text-fg-subtle uppercase max-[701px]:hidden"
 		>
-			<Icon name="target" size={15} />Contexto
+			<Icon name="target" size={15} />{t('nav.context.title')}
 		</div>
 		<label class="flex min-w-0 flex-1 flex-col gap-1">
-			<span class="text-[10.5px] font-bold text-fg-subtle uppercase">Expert</span>
+			<span class="text-[10.5px] font-bold text-fg-subtle uppercase">{t('nav.context.expert')}</span
+			>
 			<span class="relative">
 				<select
 					class="h-9 w-full cursor-pointer appearance-none rounded-md border border-border bg-surface pr-8 pl-3 text-[13px] font-semibold text-fg focus-visible:border-primary"
@@ -41,7 +43,11 @@
 					disabled={experts.length === 0}
 					onchange={(event) => changeExpert(event.currentTarget.value)}
 				>
-					{#if experts.length === 0}<option value="">Nenhum expert</option>{/if}
+					<option value=""
+						>{experts.length === 0
+							? t('nav.context.noExperts')
+							: t('nav.context.allExperts')}</option
+					>
 					{#each experts as expert (expert.id)}<option value={expert.id}>{expert.name}</option
 						>{/each}
 				</select>
@@ -53,15 +59,21 @@
 			</span>
 		</label>
 		<label class="flex min-w-0 flex-1 flex-col gap-1">
-			<span class="text-[10.5px] font-bold text-fg-subtle uppercase">Lançamento</span>
+			<span class="text-[10.5px] font-bold text-fg-subtle uppercase">{t('nav.context.launch')}</span
+			>
 			<span class="relative">
 				<select
 					class="h-9 w-full cursor-pointer appearance-none rounded-md border border-border bg-surface pr-8 pl-3 text-[13px] font-semibold text-fg focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-60"
 					value={launchId ?? ''}
 					disabled={launches.length === 0 || !expertId}
+					title={expertId ? undefined : t('nav.context.selectExpertHint')}
 					onchange={(event) => changeLaunch(event.currentTarget.value)}
 				>
-					{#if launches.length === 0}<option value="">Nenhum lançamento</option>{/if}
+					<option value="">
+						{expertId && launches.length === 0
+							? t('nav.context.noLaunches')
+							: t('nav.context.allLaunches')}
+					</option>
 					{#each launches as launch (launch.id)}<option value={launch.id}>{launch.name}</option
 						>{/each}
 				</select>

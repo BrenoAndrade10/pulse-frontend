@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { APP_NAME } from '#lib/config.js';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import PageHeader from '#lib/components/app/PageHeader.svelte';
 	import MessagePreview from '#lib/components/whatsapp/MessagePreview.svelte';
 	import Alert from '#lib/components/ui/Alert.svelte';
@@ -98,7 +99,7 @@
 		}))
 	);
 	const launchOptions = $derived([
-		{ value: '', label: 'Qualquer lançamento' },
+		{ value: '', label: t('whatsapp.editor.trigger.anyLaunch') },
 		...launches.map((launch) => ({ value: launch.id, label: launch.name }))
 	]);
 	const unknownVariables = $derived(unknownWhatsAppVariables(`${header}\n${body}\n${footer}`));
@@ -119,34 +120,34 @@
 	const show = (field: string) => submitted || touched[field];
 	const nameError = $derived(
 		show('name') && !name.trim()
-			? 'Informe um nome para a automação.'
+			? t('whatsapp.editor.errors.nameRequired')
 			: name.length > WHATSAPP_NAME_LIMIT
-				? `Use no máximo ${WHATSAPP_NAME_LIMIT} caracteres.`
+				? t('whatsapp.editor.errors.maxChars', { limit: WHATSAPP_NAME_LIMIT })
 				: undefined
 	);
 	const bodyError = $derived(
 		show('body') && !body.trim()
-			? 'Escreva a mensagem que será enviada.'
+			? t('whatsapp.editor.errors.bodyRequired')
 			: body.length > WHATSAPP_BODY_LIMIT
-				? `Use no máximo ${WHATSAPP_BODY_LIMIT} caracteres.`
+				? t('whatsapp.editor.errors.maxChars', { limit: WHATSAPP_BODY_LIMIT })
 				: undefined
 	);
 	const delayError = $derived(
 		show('delay') &&
 			delayMode === 'later' &&
 			(!Number.isInteger(Number(delayValue)) || Number(delayValue) < 1)
-			? 'Informe um número inteiro maior que zero.'
+			? t('whatsapp.editor.errors.delayInvalid')
 			: undefined
 	);
 	const buttonsError = $derived.by(() => {
 		if (!submitted && !touched.buttons) return undefined;
 		for (const button of buttons) {
-			if (!button.label.trim()) return 'Informe o texto de todos os botões.';
+			if (!button.label.trim()) return t('whatsapp.editor.errors.buttonLabel');
 			if (button.type === 'quick_reply' && !button.reply.trim()) {
-				return 'Informe a resposta automática de todos os botões.';
+				return t('whatsapp.editor.errors.buttonReply');
 			}
 			if (button.type === 'url' && !isValidHttpsUrl(button.url.trim())) {
-				return 'Informe uma URL válida começando com https://.';
+				return t('whatsapp.editor.errors.buttonUrl');
 			}
 		}
 		return undefined;
@@ -163,11 +164,7 @@
 	);
 
 	beforeNavigate((navigation) => {
-		if (
-			!allowNavigation &&
-			dirty &&
-			!window.confirm('Você tem alterações não salvas. Deseja sair?')
-		) {
+		if (!allowNavigation && dirty && !window.confirm(t('whatsapp.editor.confirmLeave'))) {
 			navigation.cancel();
 		}
 	});
@@ -238,14 +235,14 @@
 			allowNavigation = true;
 			await goto('/whatsapp');
 		} catch {
-			saveError = 'Não foi possível salvar o rascunho. Tente novamente.';
+			saveError = t('whatsapp.editor.errors.save');
 		} finally {
 			saving = false;
 		}
 	}
 
 	function cancel() {
-		if (!dirty || window.confirm('Descartar as alterações desta automação?')) {
+		if (!dirty || window.confirm(t('whatsapp.editor.confirmDiscard'))) {
 			allowNavigation = true;
 			void goto('/whatsapp');
 		}
@@ -253,17 +250,21 @@
 </script>
 
 <svelte:head>
-	<title>{automation ? 'Editar automação' : 'Nova automação'} · {APP_NAME}</title>
+	<title
+		>{automation ? t('whatsapp.editor.titleEdit') : t('whatsapp.editor.titleNew')} · {APP_NAME}</title
+	>
 </svelte:head>
 
 <PageHeader
-	title={automation ? 'Editar automação' : 'Nova automação'}
-	description="Configure quando e como a mensagem será enviada pelo WhatsApp."
+	title={automation ? t('whatsapp.editor.titleEdit') : t('whatsapp.editor.titleNew')}
+	description={t('whatsapp.editor.description')}
 />
 
 <form class="pb-32" novalidate onsubmit={saveDraft}>
 	<fieldset class="mb-5" aria-describedby="destination-help">
-		<legend class="mb-3 text-[14px] font-bold text-fg">Onde a mensagem será enviada?</legend>
+		<legend class="mb-3 text-[14px] font-bold text-fg"
+			>{t('whatsapp.editor.destination.legend')}</legend
+		>
 		<div class="grid grid-cols-2 gap-3 max-[620px]:grid-cols-1" role="radiogroup">
 			<button
 				type="button"
@@ -282,9 +283,11 @@
 					<Icon name="message-circle" size={20} />
 				</span>
 				<span class="min-w-0">
-					<strong class="block text-[14px] text-fg">Conversa privada</strong>
+					<strong class="block text-[14px] text-fg"
+						>{t('whatsapp.editor.destination.privateTitle')}</strong
+					>
 					<span class="mt-1 block text-[12.5px] leading-relaxed text-fg-muted"
-						>Envie uma mensagem diretamente para o lead do evento.</span
+						>{t('whatsapp.editor.destination.privateDescription')}</span
 					>
 				</span>
 			</button>
@@ -306,17 +309,19 @@
 				</span>
 				<span class="min-w-0 flex-1">
 					<span class="flex flex-wrap items-center gap-2">
-						<strong class="text-[14px] text-fg">Grupo do WhatsApp</strong>
-						<Badge>Em breve</Badge>
+						<strong class="text-[14px] text-fg"
+							>{t('whatsapp.editor.destination.groupTitle')}</strong
+						>
+						<Badge>{t('whatsapp.editor.destination.soon')}</Badge>
 					</span>
 					<span class="mt-1 block text-[12.5px] leading-relaxed text-fg-muted"
-						>Envie uma mensagem para participantes de um grupo.</span
+						>{t('whatsapp.editor.destination.groupDescription')}</span
 					>
 				</span>
 			</button>
 		</div>
 		<p id="destination-help" class="mt-2 text-[12.5px] text-fg-subtle">
-			O envio para grupos ainda não está disponível na integração atual.
+			{t('whatsapp.editor.destination.help')}
 		</p>
 	</fieldset>
 
@@ -325,38 +330,43 @@
 			class="grid grid-cols-[minmax(0,1fr)_minmax(300px,400px)] items-start gap-5 max-[900px]:grid-cols-1"
 		>
 			<Card
-				title="Automação de grupo somente leitura"
-				description="Este destino pertence a uma versão anterior da automação."
+				title={t('whatsapp.editor.legacy.title')}
+				description={t('whatsapp.editor.legacy.description')}
 			>
 				<div class="flex flex-col gap-4">
 					<Alert variant="warning">
-						O envio para grupos ainda não está disponível na integração atual. Esta automação não
-						pode ser alterada ou salva.
+						{t('whatsapp.editor.legacy.alert')}
 					</Alert>
 					<dl class="grid grid-cols-2 gap-4 text-[13.5px] max-[520px]:grid-cols-1">
 						<div>
-							<dt class="text-fg-subtle">Nome</dt>
+							<dt class="text-fg-subtle">{t('whatsapp.editor.legacy.name')}</dt>
 							<dd class="mt-1 font-semibold">{initial.name}</dd>
 						</div>
 						<div>
-							<dt class="text-fg-subtle">Grupo</dt>
+							<dt class="text-fg-subtle">{t('whatsapp.editor.legacy.group')}</dt>
 							<dd class="mt-1 font-semibold">
 								{initial.destination.type === 'group' ? initial.destination.groupName : ''}
 							</dd>
 						</div>
 						<div>
-							<dt class="text-fg-subtle">Evento</dt>
+							<dt class="text-fg-subtle">{t('whatsapp.editor.legacy.event')}</dt>
 							<dd class="mt-1 font-semibold">{initial.eventName}</dd>
 						</div>
 						<div>
-							<dt class="text-fg-subtle">Estado</dt>
-							<dd class="mt-1 font-semibold">{initial.isActive ? 'Ativa' : 'Rascunho'}</dd>
+							<dt class="text-fg-subtle">{t('whatsapp.editor.legacy.state')}</dt>
+							<dd class="mt-1 font-semibold">
+								{initial.isActive
+									? t('whatsapp.editor.legacy.active')
+									: t('whatsapp.editor.legacy.draft')}
+							</dd>
 						</div>
 					</dl>
 				</div>
 			</Card>
 			<div class="min-[901px]:sticky min-[901px]:top-5">
-				<p class="mb-2 text-[12px] font-bold tracking-[0.06em] text-fg-subtle uppercase">Prévia</p>
+				<p class="mb-2 text-[12px] font-bold tracking-[0.06em] text-fg-subtle uppercase">
+					{t('whatsapp.editor.preview')}
+				</p>
 				<MessagePreview {message} />
 			</div>
 		</div>
@@ -366,43 +376,49 @@
 		>
 			<div class="flex min-w-0 flex-col gap-5">
 				<Card
-					title="1. Informações gerais"
-					description="Identifique esta automação para encontrá-la depois."
+					title={t('whatsapp.editor.general.title')}
+					description={t('whatsapp.editor.general.description')}
 				>
 					<TextField
 						id="automation-name"
-						label="Nome da automação"
+						label={t('whatsapp.editor.general.name')}
 						maxlength={WHATSAPP_NAME_LIMIT}
 						bind:value={name}
 						error={nameError}
 						onblur={() => mark('name')}
-						placeholder="Ex.: Boas-vindas após cadastro"
+						placeholder={t('whatsapp.editor.general.namePlaceholder')}
 					/>
 				</Card>
 
-				<Card title="2. Gatilho" description="Escolha o evento que inicia esta automação.">
+				<Card
+					title={t('whatsapp.editor.trigger.title')}
+					description={t('whatsapp.editor.trigger.description')}
+				>
 					<div class="grid grid-cols-2 gap-3 max-[560px]:grid-cols-1">
 						<Select
 							id="automation-event"
-							label="Evento"
+							label={t('whatsapp.editor.trigger.event')}
 							options={eventOptions}
 							bind:value={eventName}
 						/>
 						<Select
 							id="automation-launch"
-							label="Lançamento"
+							label={t('whatsapp.editor.trigger.launch')}
 							options={launchOptions}
 							bind:value={launchId}
 						/>
 					</div>
 					{#if !pixel}
 						<p class="mt-3 text-[12.5px] text-fg-subtle">
-							Os eventos personalizados aparecerão depois que o rastreamento for configurado.
+							{t('whatsapp.editor.trigger.pixelHint')}
 						</p>
 					{/if}
 				</Card>
 
-				<Card title="3. Destinatários" description="Defina quem receberá esta mensagem.">
+				<Card
+					title={t('whatsapp.editor.recipients.title')}
+					description={t('whatsapp.editor.recipients.description')}
+				>
 					<div class="rounded-md border border-border bg-surface p-4">
 						<div class="flex items-start gap-3">
 							<span
@@ -410,25 +426,25 @@
 								><Icon name="user-plus" size={17} /></span
 							>
 							<div>
-								<strong class="text-[13.5px]">Lead do evento</strong>
+								<strong class="text-[13.5px]">{t('whatsapp.editor.recipients.lead')}</strong>
 								<p class="mt-1 text-[12.5px] leading-relaxed text-fg-muted">
-									A mensagem será enviada para o contato que disparou o evento.
+									{t('whatsapp.editor.recipients.leadDescription')}
 								</p>
 							</div>
 						</div>
 					</div>
 					<div class="mt-3">
-						<Alert variant="warning">O lead precisa ter informado o WhatsApp no formulário.</Alert>
+						<Alert variant="warning">{t('whatsapp.editor.recipients.warning')}</Alert>
 					</div>
 				</Card>
 
 				<Card
-					title="4. Momento do envio"
-					description="Escolha se a mensagem será imediata ou terá atraso."
+					title={t('whatsapp.editor.timing.title')}
+					description={t('whatsapp.editor.timing.description')}
 				>
 					<div class="flex flex-col gap-4">
 						<fieldset>
-							<legend class="sr-only">Momento do envio</legend>
+							<legend class="sr-only">{t('whatsapp.editor.timing.legend')}</legend>
 							<div class="grid grid-cols-2 gap-3 max-[480px]:grid-cols-1">
 								<label
 									class={[
@@ -441,8 +457,9 @@
 										checked={delayMode === 'now'}
 										onchange={() => (delayMode = 'now')}
 									/><span
-										><strong class="block text-fg">Na hora</strong><span
-											class="text-[12.5px] text-fg-muted">Enviar assim que o evento acontecer.</span
+										><strong class="block text-fg">{t('whatsapp.editor.timing.now')}</strong><span
+											class="text-[12.5px] text-fg-muted"
+											>{t('whatsapp.editor.timing.nowDescription')}</span
 										></span
 									></label
 								>
@@ -459,8 +476,9 @@
 										checked={delayMode === 'later'}
 										onchange={() => (delayMode = 'later')}
 									/><span
-										><strong class="block text-fg">Com atraso</strong><span
-											class="text-[12.5px] text-fg-muted">Aguardar antes de enviar.</span
+										><strong class="block text-fg">{t('whatsapp.editor.timing.later')}</strong><span
+											class="text-[12.5px] text-fg-muted"
+											>{t('whatsapp.editor.timing.laterDescription')}</span
 										></span
 									></label
 								>
@@ -470,7 +488,7 @@
 							<div class="grid grid-cols-2 gap-3 max-[420px]:grid-cols-1">
 								<TextField
 									id="automation-delay"
-									label="Tempo"
+									label={t('whatsapp.editor.timing.time')}
 									type="number"
 									min="1"
 									step="1"
@@ -480,10 +498,10 @@
 								/>
 								<Select
 									id="automation-delay-unit"
-									label="Unidade"
+									label={t('whatsapp.editor.timing.unit')}
 									options={[
-										{ value: 'minutes', label: 'Minutos' },
-										{ value: 'hours', label: 'Horas' }
+										{ value: 'minutes', label: t('whatsapp.editor.timing.minutes') },
+										{ value: 'hours', label: t('whatsapp.editor.timing.hours') }
 									]}
 									bind:value={delayUnit}
 								/>
@@ -492,11 +510,14 @@
 					</div>
 				</Card>
 
-				<Card title="5. Mensagem" description="Personalize o conteúdo enviado ao contato.">
+				<Card
+					title={t('whatsapp.editor.message.title')}
+					description={t('whatsapp.editor.message.description')}
+				>
 					<div class="flex flex-col gap-4">
 						<TextField
 							id="automation-header"
-							label="Cabeçalho (opcional)"
+							label={t('whatsapp.editor.message.header')}
 							maxlength={WHATSAPP_HEADER_LIMIT}
 							bind:value={header}
 							hint={`${header.length}/${WHATSAPP_HEADER_LIMIT}`}
@@ -504,7 +525,7 @@
 						<div class="flex flex-col gap-1.5">
 							<div class="flex items-end justify-between gap-3">
 								<label class="text-[13px] font-semibold text-fg-muted" for="automation-body"
-									>Corpo da mensagem</label
+									>{t('whatsapp.editor.message.body')}</label
 								><span
 									class={[
 										'text-[12px] tabular-nums',
@@ -514,34 +535,34 @@
 							</div>
 							<div
 								class="flex flex-wrap gap-1 rounded-t-md border border-b-0 border-border bg-surface px-2 py-1.5"
-								aria-label="Formatação da mensagem"
+								aria-label={t('whatsapp.editor.message.formatting')}
 							>
 								<button
 									type="button"
 									class="size-8 rounded-sm font-bold outline-none hover:bg-surface-hover focus-visible:shadow-focus"
-									aria-label="Negrito"
-									title="Negrito"
+									aria-label={t('whatsapp.editor.message.bold')}
+									title={t('whatsapp.editor.message.bold')}
 									onclick={() => insertText('*', '*')}>B</button
 								>
 								<button
 									type="button"
 									class="size-8 rounded-sm italic outline-none hover:bg-surface-hover focus-visible:shadow-focus"
-									aria-label="Itálico"
-									title="Itálico"
+									aria-label={t('whatsapp.editor.message.italic')}
+									title={t('whatsapp.editor.message.italic')}
 									onclick={() => insertText('_', '_')}>I</button
 								>
 								<button
 									type="button"
 									class="size-8 rounded-sm line-through outline-none hover:bg-surface-hover focus-visible:shadow-focus"
-									aria-label="Riscado"
-									title="Riscado"
+									aria-label={t('whatsapp.editor.message.strike')}
+									title={t('whatsapp.editor.message.strike')}
 									onclick={() => insertText('~', '~')}>S</button
 								>
 								<button
 									type="button"
 									class="h-8 rounded-sm px-2 font-mono outline-none hover:bg-surface-hover focus-visible:shadow-focus"
-									aria-label="Monoespaçado"
-									title="Monoespaçado"
+									aria-label={t('whatsapp.editor.message.mono')}
+									title={t('whatsapp.editor.message.mono')}
 									onclick={() => insertText('```', '```')}>&lt;/&gt;</button
 								>
 							</div>
@@ -556,11 +577,13 @@
 								bind:value={body}
 								onblur={() => mark('body')}
 								aria-invalid={bodyError ? 'true' : undefined}
-								placeholder={'Oi, {{primeiro_nome}}! Sua inscrição foi confirmada.'}></textarea>
+								placeholder={t('whatsapp.editor.message.placeholder')}></textarea>
 							{#if bodyError}<p class="text-[12.5px] text-danger" role="alert">{bodyError}</p>{/if}
 						</div>
 						<div>
-							<p class="mb-2 text-[12.5px] text-fg-subtle">Inserir variável:</p>
+							<p class="mb-2 text-[12.5px] text-fg-subtle">
+								{t('whatsapp.editor.message.insertVariable')}
+							</p>
 							<div class="flex flex-wrap gap-1.5">
 								{#each WHATSAPP_VARIABLES as variable (variable)}<button
 										type="button"
@@ -570,13 +593,13 @@
 							</div>
 						</div>
 						{#if unknownVariables.length > 0}<Alert variant="warning"
-								>Variável desconhecida: {unknownVariables
-									.map((value) => `{{${value}}}`)
-									.join(', ')}.</Alert
+								>{t('whatsapp.editor.message.unknownVariable', {
+									variables: unknownVariables.map((value) => `{{${value}}}`).join(', ')
+								})}</Alert
 							>{/if}
 						<TextField
 							id="automation-footer"
-							label="Rodapé (opcional)"
+							label={t('whatsapp.editor.message.footer')}
 							maxlength={WHATSAPP_FOOTER_LIMIT}
 							bind:value={footer}
 							hint={`${footer.length}/${WHATSAPP_FOOTER_LIMIT}`}
@@ -585,18 +608,18 @@
 				</Card>
 
 				<Card
-					title="6. Botões"
-					description="Adicione respostas rápidas, um link ou envie sem botões."
+					title={t('whatsapp.editor.buttons.title')}
+					description={t('whatsapp.editor.buttons.description')}
 				>
 					<div class="flex flex-col gap-4">
 						<Select
 							id="automation-button-type"
-							label="Tipo"
+							label={t('whatsapp.editor.buttons.type')}
 							value={buttonMode}
 							options={[
-								{ value: 'none', label: 'Sem botões' },
-								{ value: 'quick_reply', label: 'Resposta rápida' },
-								{ value: 'url', label: 'Link' }
+								{ value: 'none', label: t('whatsapp.editor.buttons.none') },
+								{ value: 'quick_reply', label: t('whatsapp.editor.buttons.quickReply') },
+								{ value: 'url', label: t('whatsapp.editor.buttons.link') }
 							]}
 							onchange={(event) =>
 								changeButtonMode(event.currentTarget.value as 'none' | 'quick_reply' | 'url')}
@@ -604,24 +627,26 @@
 						{#each buttons as button, index (button.id)}
 							<div class="rounded-md border border-border bg-surface p-3.5 max-[360px]:p-3">
 								<div class="mb-3 flex items-center justify-between gap-2">
-									<strong class="text-[13px]">Botão {index + 1}</strong>
+									<strong class="text-[13px]"
+										>{t('whatsapp.editor.buttons.button', { number: index + 1 })}</strong
+									>
 									<div class="flex">
 										<button
 											type="button"
 											class="grid size-8 place-items-center rounded-sm text-fg-muted outline-none hover:bg-surface-hover focus-visible:shadow-focus disabled:opacity-35"
 											disabled={index === 0}
-											aria-label="Mover botão para cima"
+											aria-label={t('whatsapp.editor.buttons.moveUp')}
 											onclick={() => moveButton(index, -1)}>↑</button
 										><button
 											type="button"
 											class="grid size-8 place-items-center rounded-sm text-fg-muted outline-none hover:bg-surface-hover focus-visible:shadow-focus disabled:opacity-35"
 											disabled={index === buttons.length - 1}
-											aria-label="Mover botão para baixo"
+											aria-label={t('whatsapp.editor.buttons.moveDown')}
 											onclick={() => moveButton(index, 1)}>↓</button
 										><button
 											type="button"
 											class="grid size-8 place-items-center rounded-sm text-danger outline-none hover:bg-danger/10 focus-visible:shadow-focus"
-											aria-label="Remover botão"
+											aria-label={t('whatsapp.editor.buttons.remove')}
 											onclick={() => removeButton(index)}><Icon name="trash" size={15} /></button
 										>
 									</div>
@@ -629,7 +654,7 @@
 								<div class="flex flex-col gap-3">
 									<TextField
 										id={`button-label-${button.id}`}
-										label="Rótulo"
+										label={t('whatsapp.editor.buttons.label')}
 										maxlength={WHATSAPP_BUTTON_LABEL_LIMIT}
 										value={button.label}
 										oninput={(event) => updateButton(index, { label: event.currentTarget.value })}
@@ -638,7 +663,8 @@
 											<div class="flex justify-between gap-2">
 												<label
 													class="text-[13px] font-semibold text-fg-muted"
-													for={`button-reply-${button.id}`}>Resposta automática</label
+													for={`button-reply-${button.id}`}
+													>{t('whatsapp.editor.buttons.reply')}</label
 												><span class="text-[12px] text-fg-subtle"
 													>{button.reply.length}/{WHATSAPP_BUTTON_REPLY_LIMIT}</span
 												>
@@ -653,7 +679,7 @@
 												onblur={() => mark('buttons')}></textarea>
 										</div>{:else}<TextField
 											id={`button-url-${button.id}`}
-											label="URL"
+											label={t('whatsapp.editor.buttons.url')}
 											type="url"
 											value={button.url}
 											oninput={(event) => updateButton(index, { url: event.currentTarget.value })}
@@ -666,7 +692,7 @@
 								variant="secondary"
 								size="sm"
 								onclick={addQuickReply}
-								><Icon name="plus" size={14} />Adicionar resposta rápida</Button
+								><Icon name="plus" size={14} />{t('whatsapp.editor.buttons.addQuickReply')}</Button
 							>{/if}
 						{#if buttonsError}<p class="text-[12.5px] text-danger" role="alert">
 								{buttonsError}
@@ -678,7 +704,7 @@
 
 			<div class="min-[901px]:sticky min-[901px]:top-5">
 				<p class="mb-2 text-[12px] font-bold tracking-[0.06em] text-fg-subtle uppercase">
-					Prévia em tempo real
+					{t('whatsapp.editor.previewLive')}
 				</p>
 				<MessagePreview {message} />
 			</div>
@@ -691,25 +717,27 @@
 		<div
 			class="mx-auto flex max-w-[1440px] items-center justify-between gap-4 max-[700px]:items-end"
 		>
-			<Button variant="ghost" disabled={saving} onclick={cancel}>Cancelar</Button>
+			<Button variant="ghost" disabled={saving} onclick={cancel}
+				>{t('common.actions.cancel')}</Button
+			>
 			<div class="flex items-end gap-2 max-[700px]:flex-col">
 				<p
 					class="max-w-80 text-right text-[11.5px] leading-snug text-fg-subtle max-[700px]:max-w-56"
 				>
-					O envio automático será liberado quando o backend de automações estiver disponível.
+					{t('whatsapp.editor.footer.help')}
 				</p>
 				<div class="flex gap-2 max-[420px]:flex-col-reverse">
-					<Button type="submit" loading={saving} disabled={legacyGroup}>Salvar rascunho</Button>
-					<span
-						title="O envio automático será liberado quando o backend de automações estiver disponível."
+					<Button type="submit" loading={saving} disabled={legacyGroup}
+						>{t('whatsapp.editor.footer.saveDraft')}</Button
 					>
-						<Button disabled aria-describedby="activation-help">Ativar automação</Button>
+					<span title={t('whatsapp.editor.footer.help')}>
+						<Button disabled aria-describedby="activation-help"
+							>{t('whatsapp.editor.footer.activate')}</Button
+						>
 					</span>
 				</div>
 			</div>
 		</div>
-		<span id="activation-help" class="sr-only"
-			>O envio automático será liberado quando o backend de automações estiver disponível.</span
-		>
+		<span id="activation-help" class="sr-only">{t('whatsapp.editor.footer.help')}</span>
 	</div>
 </form>

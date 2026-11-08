@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Icon from '#lib/components/ui/Icon.svelte';
+	import { t, type MessageKey } from '#lib/i18n/index.svelte.js';
 	import { playExclusive } from '#lib/instagram/playback.js';
 	import type { InstagramPost } from '#lib/types.js';
 	import { coverUrl, MEDIA_KIND, mediaKind, slidesOf } from '#lib/utils/instagramMedia.js';
@@ -7,13 +8,14 @@
 	type Props = { post: InstagramPost };
 
 	const ARROWS = [
-		{ dir: -1, icon: 'chevron-left', side: 'left-2', label: 'Item anterior' },
-		{ dir: 1, icon: 'chevron-right', side: 'right-2', label: 'Próximo item' }
-	] as const;
+		{ dir: -1, icon: 'chevron-left', side: 'left-2', label: 'reels.media.previous' },
+		{ dir: 1, icon: 'chevron-right', side: 'right-2', label: 'reels.media.next' }
+	] as const satisfies readonly { dir: number; icon: string; side: string; label: MessageKey }[];
 
 	let { post }: Props = $props();
 
-	const kind = $derived(MEDIA_KIND[mediaKind(post)]);
+	const kindMeta = $derived(MEDIA_KIND[mediaKind(post)]);
+	const kind = $derived({ icon: kindMeta.icon, label: t(kindMeta.labelKey) });
 	const slides = $derived(slidesOf(post));
 	const fallbackCover = $derived(coverUrl(post));
 
@@ -89,7 +91,7 @@
 		<span class="flex flex-col items-center gap-2">
 			<Icon name={kind.icon} size={28} />
 			{#if hadMedia}
-				<span class="text-[12px]">Mídia indisponível no momento</span>
+				<span class="text-[12px]">{t('reels.media.unavailable')}</span>
 			{/if}
 		</span>
 	</span>
@@ -98,8 +100,10 @@
 <div
 	class="group/media relative aspect-[4/5] overflow-hidden bg-surface"
 	role="group"
-	aria-roledescription={slides.length > 1 ? 'carrossel' : undefined}
-	aria-label={slides.length > 1 ? `${kind.label} com ${slides.length} itens` : kind.label}
+	aria-roledescription={slides.length > 1 ? t('reels.media.carousel') : undefined}
+	aria-label={slides.length > 1
+		? t('reels.media.groupWithItems', { kind: kind.label, count: slides.length })
+		: kind.label}
 	onpointerenter={() => hoverPreview && void play()}
 	onpointerleave={() => hoverPreview && pause()}
 >
@@ -108,7 +112,7 @@
 			<img
 				class="size-full object-cover opacity-0 transition-opacity duration-300"
 				src={fallbackCover}
-				alt={post.caption ? `Capa: ${post.caption}` : `Capa: ${kind.label}`}
+				alt={t('reels.media.coverAlt', { text: post.caption ?? kind.label })}
 				loading="lazy"
 				decoding="async"
 				onerror={() => (brokenImages[-1] = true)}
@@ -126,8 +130,10 @@
 			{#each slides as slide, index (slide.id)}
 				<div
 					class="relative size-full shrink-0 snap-center"
-					aria-roledescription={slides.length > 1 ? 'item' : undefined}
-					aria-label={slides.length > 1 ? `${index + 1} de ${slides.length}` : undefined}
+					aria-roledescription={slides.length > 1 ? t('reels.media.item') : undefined}
+					aria-label={slides.length > 1
+						? t('reels.media.itemOf', { index: index + 1, total: slides.length })
+						: undefined}
 				>
 					{#if slide.type === 'image' || failed[index]}
 						{@const src = slide.type === 'image' ? slide.src : slide.poster}
@@ -170,7 +176,7 @@
 					'focus-visible:shadow-none focus-visible:[&>span]:shadow-focus'
 				]}
 				type="button"
-				aria-label={playing ? 'Pausar vídeo' : 'Reproduzir vídeo'}
+				aria-label={playing ? t('reels.media.pause') : t('reels.media.play')}
 				onclick={togglePlay}
 			>
 				<span
@@ -186,7 +192,7 @@
 			<button
 				class="absolute right-2.5 bottom-2.5 grid size-8 place-items-center rounded-full bg-[rgb(0_0_0/0.55)] text-white backdrop-blur-sm"
 				type="button"
-				aria-label={muted ? 'Ativar som' : 'Desativar som'}
+				aria-label={muted ? t('reels.media.unmute') : t('reels.media.mute')}
 				aria-pressed={!muted}
 				onclick={toggleMute}
 			>
@@ -206,7 +212,7 @@
 						hidden && 'pointer-events-none opacity-0!'
 					]}
 					type="button"
-					aria-label={arrow.label}
+					aria-label={t(arrow.label)}
 					tabindex={hidden ? -1 : 0}
 					onclick={() => goTo(active + arrow.dir)}
 				>
@@ -245,7 +251,7 @@
 			href={post.permalink}
 			target="_blank"
 			rel="noreferrer"
-			aria-label="Abrir no Instagram"
+			aria-label={t('reels.media.openInstagram')}
 		>
 			<Icon name="external-link" size={14} />
 		</a>

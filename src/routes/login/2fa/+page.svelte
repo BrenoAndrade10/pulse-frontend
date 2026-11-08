@@ -7,6 +7,7 @@
 	import Checkbox from '#lib/components/ui/Checkbox.svelte';
 	import TextField from '#lib/components/ui/TextField.svelte';
 	import { APP_NAME } from '#lib/config.js';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import { clearTwoFactorChallenge, getTwoFactorChallenge } from '#lib/auth/twoFactorChallenge.js';
 	import { AuthError } from '#lib/services/auth.js';
 	import {
@@ -67,8 +68,7 @@
 			void expireChallenge();
 			return;
 		}
-		errorMessage =
-			error instanceof AuthError ? error.message : 'Não foi possível verificar. Tente novamente.';
+		errorMessage = error instanceof AuthError ? error.message : t('auth.errors.verifyShortFailed');
 		if (error instanceof AuthError && error.retryAfterSeconds) {
 			retryUntil = Date.now() + error.retryAfterSeconds * 1000;
 			retrySeconds = error.retryAfterSeconds;
@@ -136,7 +136,7 @@
 			resendUntil = Date.now() + 60_000;
 			resendSeconds = 60;
 			code = '';
-			successMessage = 'Enviamos um novo código para o seu e-mail.';
+			successMessage = t('auth.twoFactor.resent');
 			focusCode();
 		} catch (error) {
 			handleError(error);
@@ -155,33 +155,38 @@
 	}
 </script>
 
-<svelte:head><title>Verificação em duas etapas · {APP_NAME}</title></svelte:head>
+<svelte:head><title>{t('auth.twoFactor.pageTitle')} · {APP_NAME}</title></svelte:head>
 
 <AuthShell
-	title="Verificação em duas etapas"
+	title={t('auth.twoFactor.title')}
 	subtitle={isEmailChallenge
-		? `Enviamos um código para ${challenge.emailHint ?? 'seu e-mail'}. Ele expira em ${countdown}.`
-		: `Informe o código do aplicativo autenticador. Tempo restante: ${countdown}`}
+		? t('auth.twoFactor.emailSubtitle', {
+				hint: challenge.emailHint ?? t('auth.twoFactor.emailHintFallback'),
+				countdown
+			})
+		: t('auth.twoFactor.appSubtitle', { countdown })}
 >
 	{#if errorMessage}<div class="mb-4"><Alert>{errorMessage}</Alert></div>{/if}
 	{#if successMessage}<div class="mb-4"><Alert variant="success">{successMessage}</Alert></div>{/if}
 	{#if retrySeconds > 0}
-		<div class="mb-4"><Alert variant="warning">Tente novamente em {retrySeconds}s.</Alert></div>
+		<div class="mb-4">
+			<Alert variant="warning">{t('auth.twoFactor.retryIn', { seconds: retrySeconds })}</Alert>
+		</div>
 	{/if}
 
 	{#if showLowRecoveryWarning}
 		<div class="flex flex-col gap-4">
 			<Alert variant="warning">
-				Restam {recoveryCodesRemaining} códigos de recuperação. Gere novos em Configurações → Segurança.
+				{t('auth.twoFactor.lowRecovery', { count: recoveryCodesRemaining ?? 0 })}
 			</Alert>
-			<Button fullWidth onclick={() => goto('/dashboard')}>Continuar</Button>
+			<Button fullWidth onclick={() => goto('/dashboard')}>{t('common.actions.continue')}</Button>
 		</div>
 	{:else}
 		<form class="flex flex-col gap-4" onsubmit={submitCode}>
 			{#if usingRecovery}
 				<TextField
 					id="two-factor-code"
-					label="Código de recuperação"
+					label={t('auth.twoFactor.recoveryLabel')}
 					placeholder="XXXXX-XXXXX"
 					autocomplete="one-time-code"
 					maxlength={11}
@@ -191,7 +196,7 @@
 			{:else}
 				<TextField
 					id="two-factor-code"
-					label="Código de 6 dígitos"
+					label={t('auth.twoFactor.codeLabel')}
 					placeholder="000000"
 					inputmode="numeric"
 					autocomplete="one-time-code"
@@ -201,9 +206,11 @@
 				/>
 			{/if}
 			<Checkbox id="trust-device" bind:checked={trustDevice}
-				>Confiar neste navegador por 30 dias</Checkbox
+				>{t('auth.twoFactor.trustDevice')}</Checkbox
 			>
-			<Button type="submit" fullWidth loading={busy} disabled={retrySeconds > 0}>Verificar</Button>
+			<Button type="submit" fullWidth loading={busy} disabled={retrySeconds > 0}
+				>{t('auth.twoFactor.verify')}</Button
+			>
 			{#if isEmailChallenge}
 				<Button
 					variant="ghost"
@@ -212,7 +219,9 @@
 					disabled={resendSeconds > 0 || retrySeconds > 0}
 					onclick={resendCode}
 				>
-					{resendSeconds > 0 ? `Reenviar código em ${resendSeconds}s` : 'Reenviar código'}
+					{resendSeconds > 0
+						? t('auth.twoFactor.resendIn', { seconds: resendSeconds })
+						: t('auth.twoFactor.resend')}
 				</Button>
 			{:else}
 				<button
@@ -220,7 +229,7 @@
 					class="cursor-pointer text-[13.5px] font-semibold text-primary-hover"
 					onclick={toggleRecovery}
 				>
-					{usingRecovery ? 'Usar código do aplicativo' : 'Usar um código de recuperação'}
+					{usingRecovery ? t('auth.twoFactor.useApp') : t('auth.twoFactor.useRecovery')}
 				</button>
 			{/if}
 		</form>

@@ -8,6 +8,7 @@
 	import Alert from '#lib/components/ui/Alert.svelte';
 	import Icon from '#lib/components/ui/Icon.svelte';
 	import { auth } from '#lib/auth/session.svelte.js';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import { loginPathFor } from '#lib/utils/redirect.js';
 	import type { LayoutProps } from './$types';
 
@@ -50,7 +51,7 @@
 				type="button"
 				class="grid size-10 cursor-pointer place-items-center rounded-sm border border-border bg-surface text-fg"
 				onclick={() => (menuOpen = true)}
-				aria-label="Abrir menu"
+				aria-label={t('nav.aria.openMenu')}
 			>
 				<Icon name="menu" size={20} />
 			</button>
@@ -67,8 +68,7 @@
 		<main class="mx-auto max-w-[1320px] px-10 pt-7 pb-14 max-lg:px-4 max-lg:pt-6 max-lg:pb-10">
 			{#if data.expertsBackendUnavailable}
 				<div class="mb-5">
-					<Alert>Não foi possível carregar os experts. Verifique o backend e tente novamente.</Alert
-					>
+					<Alert>{t('nav.expertsUnavailable')}</Alert>
 				</div>
 			{/if}
 			{@render children()}

@@ -3,6 +3,7 @@
 	import PageHeader from '#lib/components/app/PageHeader.svelte';
 	import ExpertForm from '#lib/components/experts/ExpertForm.svelte';
 	import { APP_NAME } from '#lib/config.js';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import { createExpert } from '#lib/services/experts.js';
 	import type { ExpertInput } from '#lib/types.js';
 
@@ -13,15 +14,15 @@
 </script>
 
 <svelte:head>
-	<title>Novo expert · {APP_NAME}</title>
+	<title>{t('experts.new.pageTitle')} · {APP_NAME}</title>
 </svelte:head>
 
 <div class="max-w-[880px]">
 	<PageHeader
-		title="Novo expert"
-		description="Depois de salvar, você poderá conectar a conta do Instagram."
-		back={{ href: '/experts', label: 'Experts' }}
+		title={t('experts.new.pageTitle')}
+		description={t('experts.new.description')}
+		back={{ href: '/experts', label: t('experts.title') }}
 	/>
 
-	<ExpertForm submitLabel="Salvar expert" cancelHref="/experts" onsubmit={handleSubmit} />
+	<ExpertForm submitLabel={t('experts.new.submit')} cancelHref="/experts" onsubmit={handleSubmit} />
 </div>

@@ -7,19 +7,17 @@ export function listLaunches(expertId: string): Promise<Launch[]> {
 	return apiRequest<Launch[]>(`${basePath}?expertId=${encodeURIComponent(expertId)}`);
 }
 
-export function createLaunch(expertId: string, input: LaunchInput): Promise<Launch> {
+export function createLaunch(input: LaunchInput): Promise<Launch> {
 	return apiRequest<Launch>(basePath, {
 		method: 'POST',
-		body: { ...input, expertId }
+		body: input
 	});
 }
 
 export function updateLaunch(
-	expertId: string,
 	launchId: string,
-	input: LaunchInput
+	input: Omit<LaunchInput, 'expertId'> & { expertId?: string }
 ): Promise<Launch> {
-	void expertId;
 	return apiRequest<Launch>(`${basePath}/${encodeURIComponent(launchId)}`, {
 		method: 'PATCH',
 		body: input

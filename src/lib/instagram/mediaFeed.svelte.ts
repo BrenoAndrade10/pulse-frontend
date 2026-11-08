@@ -1,4 +1,5 @@
 import { ApiError } from '#lib/api/http.js';
+import type { MessageKey } from '#lib/i18n/index.svelte.js';
 import { listInstagramMedia } from '#lib/services/instagramMedia.js';
 import type { InstagramPost } from '#lib/types.js';
 import { appendNewMedia, mergeFreshMedia } from './mergeMedia.js';
@@ -14,7 +15,7 @@ export class InstagramMediaFeed {
 	loadingMore = $state(false);
 	scanning = $state(false);
 	scanStopped = $state(false);
-	paginationError = $state<string | null>(null);
+	paginationError = $state<MessageKey | null>(null);
 	working = $state(false);
 
 	private fetchedAt = 0;
@@ -50,7 +51,7 @@ export class InstagramMediaFeed {
 				this.append(page.data);
 				this.nextCursor = page.paging?.after;
 			} catch {
-				this.paginationError = 'Não foi possível carregar mais publicações.';
+				this.paginationError = 'reels.errors.loadMore';
 			} finally {
 				this.loadingMore = false;
 			}
@@ -74,8 +75,7 @@ export class InstagramMediaFeed {
 				}
 				this.scanStopped = Boolean(this.nextCursor);
 			} catch {
-				this.paginationError =
-					'Não foi possível buscar em todas as publicações. Os resultados mostram só as já carregadas.';
+				this.paginationError = 'reels.errors.searchIncomplete';
 				this.scanStopped = true;
 			} finally {
 				this.scanning = false;

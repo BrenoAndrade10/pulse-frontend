@@ -1,4 +1,5 @@
 import { error } from '@sveltejs/kit';
+import { t } from '#lib/i18n/index.svelte.js';
 import { getTrackingPixel } from '#lib/services/tracking.js';
 import { getWhatsAppAutomation } from '#lib/services/whatsappAutomations.js';
 import type { TrackingPixel, WhatsAppAutomation } from '#lib/types.js';
@@ -17,7 +18,7 @@ export const load: PageLoad = async ({ parent, params }) => {
 				getWhatsAppAutomation(expert.id, params.id),
 				getTrackingPixel(expert.id).catch(() => null)
 			]).then(([automation, pixel]) => {
-				if (!automation) error(404, 'Automação não encontrada.');
+				if (!automation) error(404, t('whatsapp.page.notFound'));
 				return { automation, pixel };
 			})
 		: Promise.resolve(null);

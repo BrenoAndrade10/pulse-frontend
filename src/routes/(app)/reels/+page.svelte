@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import PageHeader from '#lib/components/app/PageHeader.svelte';
+	import SelectExpertState from '#lib/components/app/SelectExpertState.svelte';
 	import MediaPreview from '#lib/components/instagram/MediaPreview.svelte';
 	import CommentAutomationDialog from '#lib/components/reels/CommentAutomationDialog.svelte';
 	import Alert from '#lib/components/ui/Alert.svelte';
@@ -13,6 +14,7 @@
 	import Icon from '#lib/components/ui/Icon.svelte';
 	import Select from '#lib/components/ui/Select.svelte';
 	import { APP_NAME } from '#lib/config.js';
+	import { t, type MessageKey } from '#lib/i18n/index.svelte.js';
 	import { mediaFeedFor } from '#lib/instagram/mediaFeedRegistry.js';
 	import type { CommentAutomation, InstagramPost } from '#lib/types.js';
 	import { formatDate } from '#lib/utils/format.js';
@@ -124,41 +126,40 @@
 	});
 
 	type ErrorContent = {
-		title: string;
-		description: string;
+		title: MessageKey;
+		description: MessageKey;
 		action: 'connect' | 'reconnect' | 'retry';
 	};
 
 	const errorContent: Record<string, ErrorContent> = {
 		INSTAGRAM_NOT_CONNECTED: {
-			title: 'Instagram não conectado',
-			description: 'Conecte a conta profissional deste expert para ver as publicações.',
+			title: 'reels.errors.notConnected.title',
+			description: 'reels.errors.notConnected.description',
 			action: 'connect'
 		},
 		INSTAGRAM_ACCESS_TOKEN_EXPIRED: {
-			title: 'Conexão expirada',
-			description: 'Reconecte o Instagram deste expert para continuar importando as publicações.',
+			title: 'reels.errors.expired.title',
+			description: 'reels.errors.expired.description',
 			action: 'reconnect'
 		},
 		INSTAGRAM_ACCESS_TOKEN_INVALID: {
-			title: 'Acesso ao Instagram recusado',
-			description:
-				'A Meta não aceitou mais a autorização desta conta. Reconecte o Instagram do expert.',
+			title: 'reels.errors.invalid.title',
+			description: 'reels.errors.invalid.description',
 			action: 'reconnect'
 		},
 		INSTAGRAM_GRAPH_API_ERROR: {
-			title: 'O Instagram não respondeu',
-			description: 'A conta continua conectada. Tente novamente em alguns instantes.',
+			title: 'reels.errors.unavailable.title',
+			description: 'reels.errors.unavailable.description',
 			action: 'retry'
 		},
 		INSTAGRAM_GRAPH_API_UNAVAILABLE: {
-			title: 'O Instagram não respondeu',
-			description: 'A conta continua conectada. Tente novamente em alguns instantes.',
+			title: 'reels.errors.unavailable.title',
+			description: 'reels.errors.unavailable.description',
 			action: 'retry'
 		},
 		UNEXPECTED_ERROR: {
-			title: 'Não foi possível carregar as publicações',
-			description: 'Tente novamente em alguns instantes.',
+			title: 'reels.errors.unexpected.title',
+			description: 'reels.errors.unexpected.description',
 			action: 'retry'
 		}
 	};
@@ -170,8 +171,15 @@
 		loadError ? (errorContent[loadError] ?? errorContent.UNEXPECTED_ERROR) : null
 	);
 
-	const plural = (count: number, one: string, many: string) =>
-		count === 1 ? `1 ${one}` : `${count} ${many}`;
+	const kindOptions = $derived(
+		KIND_FILTER_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))
+	);
+	const dmOptions = $derived(
+		DM_FILTER_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))
+	);
+	const sortOptions = $derived(
+		MEDIA_SORT_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))
+	);
 
 	function clearFilters() {
 		query = '';
@@ -181,18 +189,18 @@
 </script>
 
 <svelte:head>
-	<title>Publicações · {APP_NAME}</title>
+	<title>{t('reels.page.title')} · {APP_NAME}</title>
 </svelte:head>
 
 <PageHeader
-	title="Publicações"
+	title={t('reels.page.title')}
 	description={data.expert
-		? `Fotos, carrosséis, vídeos e Reels do Instagram de ${data.expert.name}.`
-		: 'Conteúdos publicados pelas contas conectadas.'}
+		? t('reels.page.descriptionExpert', { name: data.expert.name })
+		: t('reels.page.descriptionAll')}
 >
 	{#snippet actions()}
 		<a class={buttonClass({ variant: 'secondary' })} href="/integrations#instagram">
-			<Icon name="instagram" size={16} />Configurar Instagram
+			<Icon name="instagram" size={16} />{t('reels.page.configureInstagram')}
 		</a>
 	{/snippet}
 </PageHeader>
@@ -217,28 +225,28 @@
 {/snippet}
 
 {#if !data.expert}
-	<Card>
-		<EmptyState
-			icon="users"
-			title="Nenhum expert cadastrado"
-			description="Cadastre um expert antes de conectar uma conta do Instagram."
-		>
-			{#snippet action()}
-				<a class={buttonClass()} href="/experts/new">Cadastrar expert</a>
-			{/snippet}
-		</EmptyState>
-	</Card>
+	<SelectExpertState
+		hasExperts={data.experts.length > 0}
+		subjectKey="reels.selectExpert.subject"
+		emptyDescriptionKey="reels.selectExpert.emptyDescription"
+	/>
 {:else if currentError}
 	<Card>
-		<EmptyState icon="instagram" title={currentError.title} description={currentError.description}>
+		<EmptyState
+			icon="instagram"
+			title={t(currentError.title)}
+			description={t(currentError.description)}
+		>
 			{#snippet action()}
 				{#if currentError.action === 'retry'}
 					<Button loading={feed?.status === 'loading'} onclick={() => feed?.retry()}>
-						Tentar novamente
+						{t('common.actions.retry')}
 					</Button>
 				{:else}
 					<a class={buttonClass()} href="/experts/{data.expert.id}#instagram">
-						{currentError.action === 'reconnect' ? 'Reconectar Instagram' : 'Conectar Instagram'}
+						{currentError.action === 'reconnect'
+							? t('reels.errors.reconnect')
+							: t('reels.errors.connect')}
 					</a>
 				{/if}
 			{/snippet}
@@ -248,16 +256,15 @@
 	<Card>
 		<EmptyState
 			icon="image"
-			title="Nenhuma publicação ainda"
-			description="As publicações desta conta do Instagram aparecerão aqui."
+			title={t('reels.empty.title')}
+			description={t('reels.empty.description')}
 		/>
 	</Card>
 {:else if feed}
 	{#if automationsStatus === 'error'}
 		<div class="mb-4">
 			<Alert>
-				Não foi possível carregar as DMs automáticas. As publicações aparecem normalmente; atualize
-				a página para configurar as DMs.
+				{t('reels.page.automationsError')}
 			</Alert>
 		</div>
 	{/if}
@@ -273,20 +280,20 @@
 			<span class="pointer-events-none pl-3.5 text-fg-subtle" aria-hidden="true">
 				<Icon name="search" size={16} />
 			</span>
-			<label class="sr-only" for="media-search">Buscar publicações</label>
+			<label class="sr-only" for="media-search">{t('reels.search.label')}</label>
 			<input
 				class="h-10.5 min-w-0 flex-1 border-0 bg-transparent px-2.5 text-[14px] text-fg outline-none placeholder:text-fg-subtle focus-visible:shadow-none [&::-webkit-search-cancel-button]:hidden"
 				id="media-search"
 				type="search"
 				bind:value={query}
-				placeholder="Buscar pela legenda ou colar o link da publicação"
+				placeholder={t('reels.search.placeholder')}
 				autocomplete="off"
 			/>
 			{#if query}
 				<button
 					class="mr-1.5 grid size-7.5 place-items-center rounded-md text-fg-muted hover:bg-surface-hover hover:text-fg"
 					type="button"
-					aria-label="Limpar busca"
+					aria-label={t('reels.search.clear')}
 					onclick={() => (query = '')}
 				>
 					<Icon name="x" size={15} />
@@ -296,26 +303,26 @@
 		<div class="w-44 max-[621px]:w-[calc(50%-6px)]">
 			<Select
 				id="media-kind-filter"
-				aria-label="Filtrar por tipo"
+				aria-label={t('reels.search.kindFilter')}
 				bind:value={kindFilter}
-				options={KIND_FILTER_OPTIONS}
+				options={kindOptions}
 			/>
 		</div>
 		<div class="w-48 max-[621px]:w-[calc(50%-6px)]">
 			<Select
 				id="media-dm-filter"
-				aria-label="Filtrar por DM automática"
+				aria-label={t('reels.search.dmFilter')}
 				bind:value={dmFilter}
-				options={DM_FILTER_OPTIONS}
+				options={dmOptions}
 				disabled={automationsStatus !== 'ready'}
 			/>
 		</div>
 		<div class="w-44 max-[621px]:w-full">
 			<Select
 				id="media-sort"
-				aria-label="Ordenar publicações"
+				aria-label={t('reels.search.sort')}
 				bind:value={sort}
-				options={MEDIA_SORT_OPTIONS}
+				options={sortOptions}
 			/>
 		</div>
 	</div>
@@ -327,17 +334,19 @@
 		{#if feed.status === 'loading'}
 			<span class="h-3.5 w-56 rounded bg-surface motion-safe:animate-pulse" aria-hidden="true"
 			></span>
-			<span class="sr-only">Carregando publicações</span>
+			<span class="sr-only">{t('reels.status.loading')}</span>
 		{:else if feed.scanning}
 			<span
 				class="size-3.5 rounded-full border-2 border-fg-subtle border-t-transparent motion-safe:animate-spin"
 				aria-hidden="true"
 			></span>
-			Buscando em todas as publicações… {feed.items.length} carregadas até agora.
+			{t('reels.status.scanning', { count: feed.items.length })}
 		{:else if needsEverything}
 			<span>
-				{plural(visiblePosts.length, 'publicação encontrada', 'publicações encontradas')}
-				{feed.hasMore ? `nas ${feed.items.length} mais recentes` : `de ${feed.items.length}`}.
+				{t('reels.status.found', { count: visiblePosts.length })}
+				{feed.hasMore
+					? t('reels.status.foundInRecent', { count: feed.items.length })
+					: t('reels.status.foundInTotal', { count: feed.items.length })}.
 			</span>
 			{#if feed.hasMore && feed.scanStopped}
 				<button
@@ -345,19 +354,15 @@
 					type="button"
 					onclick={() => feed.continueScan()}
 				>
-					Buscar nas mais antigas
+					{t('reels.status.searchOlder')}
 				</button>
 			{/if}
 		{:else if automationsStatus === 'ready'}
 			<Icon name="message-circle" size={15} />
 			{#if activeAutomations === 0}
-				Escolha uma publicação e configure a palavra-chave que dispara a DM automática.
+				{t('reels.status.chooseOne')}
 			{:else}
-				{plural(
-					activeAutomations,
-					'publicação com DM automática ativa.',
-					'publicações com DM automática ativa.'
-				)}
+				{t('reels.status.activeCount', { count: activeAutomations })}
 			{/if}
 		{/if}
 	</div>
@@ -367,12 +372,14 @@
 			<Card>
 				<EmptyState
 					icon="search"
-					title="Nenhuma publicação encontrada"
-					description="Tente outras palavras da legenda, cole o link da publicação ou mude os filtros."
+					title={t('reels.empty.noResultsTitle')}
+					description={t('reels.empty.noResultsDescription')}
 				>
 					{#snippet action()}
 						{#if filtering}
-							<Button variant="secondary" onclick={clearFilters}>Limpar filtros</Button>
+							<Button variant="secondary" onclick={clearFilters}
+								>{t('reels.empty.clearFilters')}</Button
+							>
 						{/if}
 					{/snippet}
 				</EmptyState>
@@ -393,13 +400,19 @@
 				<MediaPreview {post} />
 				<div class="flex flex-1 flex-col p-3.5">
 					<p class="line-clamp-2 min-h-10 text-[13px] leading-5 text-fg-muted">
-						{post.caption ?? 'Sem legenda'}
+						{post.caption ?? t('reels.card.noCaption')}
 					</p>
 					<div class="mt-3 flex items-center justify-between gap-3 text-[12px] text-fg-subtle">
-						<span>{post.timestamp ? formatDate(post.timestamp) : 'Data indisponível'}</span>
+						<span
+							>{post.timestamp ? formatDate(post.timestamp) : t('reels.card.dateUnavailable')}</span
+						>
 						<span class="flex gap-3 tabular-nums">
-							<span title="Curtidas">{post.likeCount ?? 0} curtidas</span>
-							<span title="Comentários">{post.commentsCount ?? 0} comentários</span>
+							<span title={t('reels.card.likesTitle')}
+								>{t('reels.card.likes', { count: post.likeCount ?? 0 })}</span
+							>
+							<span title={t('reels.card.commentsTitle')}
+								>{t('reels.card.comments', { count: post.commentsCount ?? 0 })}</span
+							>
 						</span>
 					</div>
 					<div class="mt-auto pt-3">
@@ -412,7 +425,7 @@
 									></span>
 								{:else if automation}
 									<Badge variant={automation.isActive ? 'success' : 'neutral'}>
-										{automation.isActive ? 'DM ativa' : 'DM pausada'}
+										{automation.isActive ? t('reels.card.dmActive') : t('reels.card.dmPaused')}
 									</Badge>
 									<p
 										class="mt-1 flex min-w-0 items-center gap-1.5 text-[12px] text-fg-subtle"
@@ -420,30 +433,30 @@
 									>
 										<span class="truncate">{automation.keywords.join(', ')}</span>
 										{#if automation.button}
-											<span class="shrink-0" title="DM com botão">
+											<span class="shrink-0" title={t('reels.card.withButton')}>
 												<Icon name="link" size={12} />
-												<span class="sr-only">com botão</span>
+												<span class="sr-only">{t('reels.card.withButtonSr')}</span>
 											</span>
 										{/if}
 										{#if automation.commentReply}
-											<span class="shrink-0" title="Responde o comentário">
+											<span class="shrink-0" title={t('reels.card.repliesComment')}>
 												<Icon name="message-circle" size={12} />
-												<span class="sr-only">responde o comentário</span>
+												<span class="sr-only">{t('reels.card.repliesCommentSr')}</span>
 											</span>
 										{/if}
 									</p>
 								{:else}
-									<span class="text-[12px] text-fg-subtle">Sem DM automática</span>
+									<span class="text-[12px] text-fg-subtle">{t('reels.card.noDm')}</span>
 								{/if}
 							</div>
 							<Button
 								variant="secondary"
 								size="sm"
 								disabled={automationsStatus !== 'ready'}
-								aria-label={automation ? 'Editar DM automática' : 'Configurar DM automática'}
+								aria-label={automation ? t('reels.card.editAria') : t('reels.card.configureAria')}
 								onclick={() => (editingPost = post)}
 							>
-								{automation ? 'Editar' : 'Configurar DM'}
+								{automation ? t('reels.card.edit') : t('reels.card.configure')}
 							</Button>
 						</div>
 					</div>
@@ -459,13 +472,13 @@
 	</div>
 
 	{#if feed.paginationError}
-		<p class="mt-5 text-center text-[13px] text-danger">{feed.paginationError}</p>
+		<p class="mt-5 text-center text-[13px] text-danger">{t(feed.paginationError)}</p>
 	{/if}
 
 	<div class="mt-6 flex min-h-10 justify-center" bind:this={sentinel}>
 		{#if feed.status === 'ready' && feed.hasMore && !needsEverything && !feed.loadingMore}
 			<Button variant="ghost" size="sm" disabled={feed.working} onclick={() => feed.loadMore()}>
-				Carregar mais
+				{t('reels.page.loadMore')}
 			</Button>
 		{/if}
 	</div>

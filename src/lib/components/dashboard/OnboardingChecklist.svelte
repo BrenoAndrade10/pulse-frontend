@@ -1,12 +1,17 @@
 <script lang="ts">
 	import Icon from '#lib/components/ui/Icon.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
 	import { buttonClass } from '#lib/components/ui/button.js';
+	import { t } from '#lib/i18n/index.svelte.js';
+	import type { OnboardingStep } from '#lib/onboarding/steps.js';
 
-	type Step = { title: string; description: string; href: string; cta: string; done: boolean };
+	type Props = { steps: OnboardingStep[]; ondismiss: () => void; onfinish: () => void };
 
-	let { steps }: { steps: Step[] } = $props();
+	let { steps, ondismiss, onfinish }: Props = $props();
 
 	const completed = $derived(steps.filter((s) => s.done).length);
+	const allDone = $derived(steps.length > 0 && completed === steps.length);
+	const nextId = $derived(steps.find((s) => !s.done)?.id ?? null);
 </script>
 
 <section
@@ -20,13 +25,13 @@
 >
 	<div>
 		<p class="mb-1.5 text-[11.5px] font-bold tracking-[0.08em] text-primary-hover uppercase">
-			Primeiros passos
+			{allDone ? t('dashboard.checklist.allDoneEyebrow') : t('dashboard.checklist.eyebrow')}
 		</p>
 		<h2 id="onboarding-title" class="text-[20px] font-extrabold tracking-[-0.02em]">
-			Configure sua operação
+			{allDone ? t('dashboard.checklist.allDoneTitle') : t('dashboard.checklist.title')}
 		</h2>
 		<p class="mt-2 mb-5 text-[13.5px] text-fg-muted">
-			Cadastre seus experts e conecte as contas do Instagram para começar a ver os resultados aqui.
+			{allDone ? t('dashboard.checklist.allDoneDescription') : t('dashboard.checklist.description')}
 		</p>
 		<div
 			class="h-1.5 overflow-hidden rounded-[3px] bg-border"
@@ -34,45 +39,73 @@
 			aria-valuemin="0"
 			aria-valuemax={steps.length}
 			aria-valuenow={completed}
-			aria-label="Progresso da configuração"
+			aria-label={t('dashboard.checklist.progress')}
 		>
 			<span
-				class="block h-full bg-gradient-brand [transition:width_0.3s]"
+				class="block h-full bg-gradient-brand [transition:width_0.3s] motion-reduce:transition-none"
 				style:width="{(completed / steps.length) * 100}%"
 			></span>
 		</div>
-		<p class="mt-2 text-[12.5px] text-fg-subtle">{completed} de {steps.length} concluídos</p>
+		<p class="mt-2 text-[12.5px] text-fg-subtle">
+			{t('dashboard.checklist.progressCount', { completed, total: steps.length })}
+		</p>
+		{#if allDone}
+			<div class="mt-5">
+				<Button size="sm" onclick={onfinish}>{t('dashboard.checklist.finish')}</Button>
+			</div>
+		{:else}
+			<div class="mt-5">
+				<Button variant="ghost" size="sm" onclick={ondismiss}
+					>{t('dashboard.checklist.dismiss')}</Button
+				>
+			</div>
+		{/if}
 	</div>
 
 	<ol class="flex flex-col gap-2.5">
-		{#each steps as step, i (step.title)}
+		{#each steps as step, i (step.id)}
+			{@const next = step.id === nextId}
 			<li
 				class={[
 					'flex items-center gap-3.5 px-4 py-3.5 max-[641px]:flex-wrap',
-					'rounded-md border border-border bg-[rgb(255_255_255/0.02)]'
+					'rounded-md border',
+					next
+						? 'border-[rgb(124_92_255/0.55)] bg-[rgb(124_92_255/0.1)]'
+						: 'border-border bg-[rgb(255_255_255/0.02)]'
 				]}
+				aria-current={next ? 'step' : undefined}
 			>
 				<span
 					class={[
 						'grid size-7 shrink-0 place-items-center rounded-full border text-[12.5px] font-bold',
 						step.done
 							? 'border-transparent bg-success text-[#06281a]'
-							: 'border-border-strong text-fg-muted'
+							: next
+								? 'border-primary text-primary-hover'
+								: 'border-border-strong text-fg-muted'
 					]}
 					aria-hidden="true"
 				>
 					{#if step.done}<Icon name="check" size={14} />{:else}{i + 1}{/if}
 				</span>
 				<div class="min-w-0 flex-1">
+					{#if next}
+						<p class="mb-0.5 text-[11px] font-bold tracking-[0.06em] text-primary-hover uppercase">
+							{t('dashboard.checklist.next')}
+						</p>
+					{/if}
 					<p class={['text-[14px] font-bold', step.done && 'text-fg-muted line-through']}>
 						{step.title}
-						{#if step.done}<span class="sr-only">(concluído)</span>{/if}
+						{#if step.done}<span class="sr-only">{t('dashboard.checklist.doneSr')}</span>{/if}
 					</p>
 					<p class="mt-0.5 text-[12.5px] text-fg-subtle">{step.description}</p>
 				</div>
 				{#if !step.done}
 					<a
-						class={[buttonClass({ variant: 'secondary', size: 'sm' }), 'max-[641px]:ml-10.5']}
+						class={[
+							buttonClass({ variant: next ? 'primary' : 'secondary', size: 'sm' }),
+							'max-[641px]:ml-10.5'
+						]}
 						href={step.href}>{step.cta}</a
 					>
 				{/if}

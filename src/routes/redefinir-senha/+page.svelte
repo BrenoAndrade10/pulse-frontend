@@ -7,6 +7,7 @@
 	import { buttonClass } from '#lib/components/ui/button.js';
 	import TextField from '#lib/components/ui/TextField.svelte';
 	import { APP_NAME } from '#lib/config.js';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import { AuthError, logout, resetPassword } from '#lib/services/auth.js';
 	import {
 		getPasswordStrength,
@@ -32,9 +33,9 @@
 	const errors = $derived({
 		password: validatePassword(password),
 		confirmPassword: !confirmPassword
-			? 'Confirme sua senha.'
+			? t('auth.register.confirmRequired')
 			: confirmPassword !== password
-				? 'As senhas não coincidem.'
+				? t('auth.register.mismatch')
 				: undefined
 	});
 
@@ -64,10 +65,7 @@
 				token = null;
 				return;
 			}
-			formError =
-				error instanceof AuthError
-					? error.message
-					: 'Não foi possível alterar sua senha. Tente novamente.';
+			formError = error instanceof AuthError ? error.message : t('auth.errors.resetFailed');
 			if (error instanceof AuthError && error.retryAfterSeconds) {
 				retryUntil = Date.now() + error.retryAfterSeconds * 1000;
 				retrySeconds = error.retryAfterSeconds;
@@ -79,20 +77,20 @@
 </script>
 
 <svelte:head>
-	<title>Redefinir senha · {APP_NAME}</title>
+	<title>{t('auth.reset.pageTitle')} · {APP_NAME}</title>
 	<meta name="referrer" content="no-referrer" />
 </svelte:head>
 
 <AuthShell
-	title={token ? 'Crie uma nova senha' : 'Link inválido ou expirado'}
-	subtitle={token
-		? 'Escolha uma senha segura para voltar a acessar sua conta.'
-		: 'Solicite um novo link para redefinir sua senha.'}
+	title={token ? t('auth.reset.title') : t('auth.reset.invalidTitle')}
+	subtitle={token ? t('auth.reset.subtitle') : t('auth.reset.invalidSubtitle')}
 >
 	{#if !token}
-		<Alert>Este link de redefinição não é válido ou já expirou.</Alert>
+		<Alert>{t('auth.reset.invalidAlert')}</Alert>
 		<div class="mt-4">
-			<a class={buttonClass({ fullWidth: true })} href="/esqueci-senha">Pedir novo link</a>
+			<a class={buttonClass({ fullWidth: true })} href="/esqueci-senha"
+				>{t('auth.reset.requestNew')}</a
+			>
 		</div>
 	{:else}
 		<form class="flex flex-col gap-4.5" novalidate onsubmit={handleSubmit}>
@@ -105,13 +103,13 @@
 					id="password"
 					name="password"
 					type="password"
-					label="Nova senha"
-					placeholder="Crie uma senha"
+					label={t('auth.fields.newPassword')}
+					placeholder={t('auth.fields.createPasswordPlaceholder')}
 					autocomplete="new-password"
 					bind:value={password}
 					onblur={() => (passwordTouched = true)}
 					error={submitted || passwordTouched ? errors.password : undefined}
-					hint="Mínimo de {MIN_PASSWORD_LENGTH} caracteres."
+					hint={t('auth.fields.passwordHint', { min: MIN_PASSWORD_LENGTH })}
 				/>
 				{#if password}
 					<div
@@ -134,7 +132,7 @@
 							{/each}
 						</div>
 						<span class="text-[12px] whitespace-nowrap text-fg-muted">
-							Força: {strength.label}
+							{t('auth.fields.strength', { label: strength.label })}
 						</span>
 					</div>
 				{/if}
@@ -144,8 +142,8 @@
 				id="confirm-password"
 				name="confirmPassword"
 				type="password"
-				label="Confirmar nova senha"
-				placeholder="Repita a senha"
+				label={t('auth.fields.confirmNewPassword')}
+				placeholder={t('auth.fields.repeatPasswordPlaceholder')}
 				autocomplete="new-password"
 				bind:value={confirmPassword}
 				onblur={() => (confirmationTouched = true)}
@@ -153,12 +151,12 @@
 			/>
 
 			<Button type="submit" fullWidth loading={submitting} disabled={retrySeconds > 0}>
-				Alterar senha
+				{t('auth.reset.submit')}
 			</Button>
 		</form>
 	{/if}
 
 	{#snippet footer()}
-		<a class="font-semibold" href="/login">Voltar ao login</a>
+		<a class="font-semibold" href="/login">{t('auth.forgot.backToLogin')}</a>
 	{/snippet}
 </AuthShell>

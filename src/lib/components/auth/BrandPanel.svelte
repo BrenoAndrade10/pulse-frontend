@@ -1,14 +1,23 @@
 <script lang="ts">
 	import type { ClassValue } from 'svelte/elements';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import Logo from './Logo.svelte';
 
 	let { class: className }: { class?: ClassValue } = $props();
 
 	const kpis = [
-		{ label: 'ROAS', value: '4,8x', delta: '+32%' },
-		{ label: 'CTR', value: '3,9%', delta: '+0,8 p.p.' },
-		{ label: 'Leads', value: '12,4 mil', delta: '+18%' }
-	];
+		{
+			label: 'ROAS',
+			value: 'auth.brand.kpis.roas.value',
+			delta: 'auth.brand.kpis.roas.delta'
+		},
+		{ label: 'CTR', value: 'auth.brand.kpis.ctr.value', delta: 'auth.brand.kpis.ctr.delta' },
+		{
+			label: 'Leads',
+			value: 'auth.brand.kpis.leads.value',
+			delta: 'auth.brand.kpis.leads.delta'
+		}
+	] as const;
 
 	const chip = [
 		'absolute inline-flex items-center gap-2 rounded-full px-3.5 py-[9px] whitespace-nowrap',
@@ -49,12 +58,11 @@
 		<h2
 			class="mb-4 text-[length:clamp(30px,3.2vw,42px)] leading-[1.12] font-extrabold tracking-[-0.03em]"
 		>
-			Suas campanhas,<br />
-			<span class="text-gradient-brand">em alta performance.</span>
+			{t('auth.brand.headlineLine1')}<br />
+			<span class="text-gradient-brand">{t('auth.brand.headlineLine2')}</span>
 		</h2>
 		<p class="mb-10 max-w-[440px] text-[16px] text-fg-muted">
-			Acompanhe métricas, otimize investimentos e escale resultados de marketing digital em um só
-			lugar.
+			{t('auth.brand.description')}
 		</p>
 
 		<div class="relative pt-6 pr-6 pb-8" aria-hidden="true">
@@ -65,10 +73,10 @@
 				]}
 			>
 				<div class="mb-3.5 flex items-center justify-between">
-					<span class="text-[14px] font-bold">Desempenho das campanhas</span>
+					<span class="text-[14px] font-bold">{t('auth.brand.chartTitle')}</span>
 					<span
 						class="rounded-full border border-border bg-surface-hover px-2.5 py-1 text-[11.5px] text-fg-muted"
-						>Últimos 30 dias</span
+						>{t('auth.brand.chartPeriod')}</span
 					>
 				</div>
 				<svg class="block h-27.5 w-full" viewBox="0 0 320 110" preserveAspectRatio="none">
@@ -109,8 +117,8 @@
 							<span class="text-[11.5px] font-semibold tracking-[0.06em] text-fg-subtle uppercase"
 								>{kpi.label}</span
 							>
-							<span class="text-[18px] font-extrabold tracking-[-0.02em]">{kpi.value}</span>
-							<span class="text-[12px] font-semibold text-success">↑ {kpi.delta}</span>
+							<span class="text-[18px] font-extrabold tracking-[-0.02em]">{t(kpi.value)}</span>
+							<span class="text-[12px] font-semibold text-success">↑ {t(kpi.delta)}</span>
 						</div>
 					{/each}
 				</div>
@@ -118,16 +126,16 @@
 
 			<div class={[chip, 'top-0 -right-2 animate-[brand-float_6s_ease-in-out_infinite]']}>
 				<span class="size-2 rounded-full bg-success shadow-[0_0_0_4px_rgb(61_220_151/0.2)]"></span>
-				Campanha "Black Friday" escalada
+				{t('auth.brand.chipCampaign')}
 			</div>
 			<div class={[chip, 'right-10 bottom-0 animate-[brand-float_6s_ease-in-out_-3s_infinite]']}>
 				<span class="rounded-full bg-gradient-brand px-2 py-0.5 font-bold">+R$ 48k</span>
-				em receita atribuída
+				{t('auth.brand.chipRevenue')}
 			</div>
 		</div>
 	</div>
 
-	<p class="text-[13px] text-fg-subtle">Ads · Social · E-mail · Analytics — integrados.</p>
+	<p class="text-[13px] text-fg-subtle">{t('auth.brand.footer')}</p>
 </aside>
 
 <style>

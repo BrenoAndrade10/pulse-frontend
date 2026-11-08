@@ -9,6 +9,7 @@
 	import TextField from '#lib/components/ui/TextField.svelte';
 	import { setTwoFactorChallenge } from '#lib/auth/twoFactorChallenge.js';
 	import { APP_NAME } from '#lib/config.js';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import { AuthError, login, PASSWORD_RESET_EMAIL_STORAGE_KEY } from '#lib/services/auth.js';
 	import { safeRedirectPath } from '#lib/utils/redirect.js';
 	import { validateEmail, validateRequired } from '#lib/utils/validation.js';
@@ -29,7 +30,7 @@
 
 	const errors = $derived({
 		email: validateEmail(email),
-		password: validateRequired(password, 'Informe sua senha.')
+		password: validateRequired(password, t('auth.login.passwordRequired'))
 	});
 
 	onMount(() => {
@@ -71,8 +72,7 @@
 			// Não mantém a senha em memória/na tela após uma tentativa falha.
 			password = '';
 			submitted = false;
-			formError =
-				err instanceof AuthError ? err.message : 'Não foi possível entrar. Tente novamente.';
+			formError = err instanceof AuthError ? err.message : t('auth.errors.loginFailed');
 			if (err instanceof AuthError && err.retryAfterSeconds) {
 				retryUntil = Date.now() + err.retryAfterSeconds * 1000;
 				retrySeconds = err.retryAfterSeconds;
@@ -84,19 +84,19 @@
 </script>
 
 <svelte:head>
-	<title>Entrar · {APP_NAME}</title>
+	<title>{t('auth.login.pageTitle')} · {APP_NAME}</title>
 </svelte:head>
 
-<AuthShell title="Bem-vindo de volta" subtitle="Entre para acompanhar suas campanhas.">
+<AuthShell title={t('auth.login.title')} subtitle={t('auth.login.subtitle')}>
 	<form class="flex flex-col gap-4.5" novalidate onsubmit={handleSubmit}>
 		{#if justRegistered}
-			<Alert variant="success">Conta criada com sucesso! Faça login para continuar.</Alert>
+			<Alert variant="success">{t('auth.login.registered')}</Alert>
 		{:else if passwordReset}
-			<Alert variant="success">Senha alterada. Entre com a nova senha.</Alert>
+			<Alert variant="success">{t('auth.login.passwordReset')}</Alert>
 		{:else if sessionExpired}
-			<Alert>Sua sessão expirou. Entre novamente para continuar.</Alert>
+			<Alert>{t('auth.login.sessionExpired')}</Alert>
 		{:else if twoFactorExpired}
-			<Alert>Sua verificação expirou. Entre novamente.</Alert>
+			<Alert>{t('auth.twoFactor.expired')}</Alert>
 		{/if}
 		{#if formError}
 			<Alert>{formError}</Alert>
@@ -106,8 +106,8 @@
 			id="email"
 			name="email"
 			type="email"
-			label="E-mail"
-			placeholder="voce@empresa.com"
+			label={t('auth.fields.email')}
+			placeholder={t('auth.fields.emailPlaceholder')}
 			autocomplete="email"
 			bind:value={email}
 			error={submitted ? errors.email : undefined}
@@ -117,26 +117,29 @@
 			id="password"
 			name="password"
 			type="password"
-			label="Senha"
-			placeholder="Sua senha"
+			label={t('auth.fields.password')}
+			placeholder={t('auth.login.passwordPlaceholder')}
 			autocomplete="current-password"
 			bind:value={password}
 			error={submitted ? errors.password : undefined}
 		/>
 
 		<div class="flex items-center justify-between gap-3 text-[13.5px]">
-			<Checkbox id="remember" name="remember" bind:checked={remember}>Lembrar de mim</Checkbox>
+			<Checkbox id="remember" name="remember" bind:checked={remember}
+				>{t('auth.login.remember')}</Checkbox
+			>
 			<a class="font-semibold" href="/esqueci-senha" onclick={rememberEmail}>
-				Esqueci minha senha
+				{t('auth.login.forgot')}
 			</a>
 		</div>
 
 		<Button type="submit" fullWidth loading={submitting} disabled={retrySeconds > 0}
-			>{submitting ? 'Entrando…' : 'Entrar'}</Button
+			>{submitting ? t('auth.login.submitting') : t('auth.login.submit')}</Button
 		>
 	</form>
 
 	{#snippet footer()}
-		Ainda não tem conta? <a class="font-semibold" href="/register">Criar conta grátis</a>
+		{t('auth.login.noAccount')}
+		<a class="font-semibold" href="/register">{t('auth.login.createAccount')}</a>
 	{/snippet}
 </AuthShell>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Icon, { type IconName } from '#lib/components/ui/Icon.svelte';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import { formatDelta } from '#lib/utils/format.js';
 
 	type Props = {
@@ -32,7 +33,7 @@
 		{value}
 	</p>
 	{#if delta == null}
-		<p class="text-[12.5px] font-semibold text-fg-subtle">Sem dados no período</p>
+		<p class="text-[12.5px] font-semibold text-fg-subtle">{t('dashboard.kpi.noData')}</p>
 	{:else}
 		<p
 			class={[
@@ -41,7 +42,8 @@
 			]}
 		>
 			{delta > 0 ? '↑' : delta < 0 ? '↓' : '→'}
-			{formatDelta(delta)} <span class="font-medium text-fg-subtle">vs. período anterior</span>
+			{formatDelta(delta)}
+			<span class="font-medium text-fg-subtle">{t('dashboard.kpi.vsPrevious')}</span>
 		</p>
 	{/if}
 </article>

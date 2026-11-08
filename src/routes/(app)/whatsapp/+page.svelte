@@ -1,5 +1,6 @@
 <script lang="ts">
 	import PageHeader from '#lib/components/app/PageHeader.svelte';
+	import SelectExpertState from '#lib/components/app/SelectExpertState.svelte';
 	import Alert from '#lib/components/ui/Alert.svelte';
 	import Badge from '#lib/components/ui/Badge.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
@@ -9,6 +10,7 @@
 	import Icon from '#lib/components/ui/Icon.svelte';
 	import Select from '#lib/components/ui/Select.svelte';
 	import { APP_NAME } from '#lib/config.js';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import {
 		createWhatsAppAutomation,
 		deleteWhatsAppAutomation,
@@ -44,17 +46,17 @@
 	});
 
 	const eventOptions = $derived([
-		{ value: 'all', label: 'Todos os eventos' },
+		{ value: 'all', label: t('whatsapp.list.filters.allEvents') },
 		...uniqueWhatsAppEventNames(automations.map((item) => item.eventName)).map((value) => ({
 			value,
 			label: value
 		}))
 	]);
-	const destinationOptions = [
-		{ value: 'all', label: 'Todos os destinos' },
-		{ value: 'private', label: 'Privado' },
-		{ value: 'group', label: 'Grupo' }
-	];
+	const destinationOptions = $derived([
+		{ value: 'all', label: t('whatsapp.list.filters.allDestinations') },
+		{ value: 'private', label: t('whatsapp.list.destination.private') },
+		{ value: 'group', label: t('whatsapp.list.destination.group') }
+	]);
 	const visible = $derived(
 		automations.filter(
 			(item) =>
@@ -76,7 +78,7 @@
 			await setWhatsAppAutomationActive(data.expert.id, automation.id, !previous);
 		} catch {
 			automation.isActive = previous;
-			actionError = 'Não foi possível alterar o status da automação.';
+			actionError = t('whatsapp.list.errors.toggle');
 		} finally {
 			busyId = undefined;
 		}
@@ -88,7 +90,7 @@
 		actionError = undefined;
 		try {
 			const copy = await createWhatsAppAutomation(data.expert.id, {
-				name: `${automation.name} (cópia)`.slice(0, 60),
+				name: t('whatsapp.list.copyName', { name: automation.name }).slice(0, 60),
 				eventName: automation.eventName,
 				launchId: automation.launchId,
 				destination: automation.destination,
@@ -98,7 +100,7 @@
 			});
 			automations = [copy, ...automations];
 		} catch {
-			actionError = 'Não foi possível duplicar a automação.';
+			actionError = t('whatsapp.list.errors.duplicate');
 		} finally {
 			busyId = undefined;
 		}
@@ -119,38 +121,34 @@
 			removing = null;
 		} catch {
 			dialog?.close();
-			actionError = 'Não foi possível excluir a automação.';
+			actionError = t('whatsapp.list.errors.delete');
 		} finally {
 			busyId = undefined;
 		}
 	}
 </script>
 
-<svelte:head><title>WhatsApp · {APP_NAME}</title></svelte:head>
+<svelte:head><title>{t('whatsapp.list.pageTitle')} · {APP_NAME}</title></svelte:head>
 
 <PageHeader
-	title="Mensagens do WhatsApp"
+	title={t('whatsapp.list.title')}
 	description={data.expert
-		? `Automatize mensagens para os leads de ${data.expert.name}.`
-		: 'Automatize mensagens a partir dos eventos dos seus experts.'}
+		? t('whatsapp.list.descriptionExpert', { name: data.expert.name })
+		: t('whatsapp.list.descriptionNoExpert')}
 >
 	{#snippet actions()}
 		{#if data.expert}<a class={buttonClass()} href="/whatsapp/new"
-				><Icon name="plus" size={16} />Criar automação</a
+				><Icon name="plus" size={16} />{t('whatsapp.list.create')}</a
 			>{/if}
 	{/snippet}
 </PageHeader>
 
 {#if !data.expert}
-	<Card
-		><EmptyState
-			icon="users"
-			title="Nenhum expert cadastrado"
-			description="As automações são configuradas por expert. Cadastre um para começar."
-			>{#snippet action()}<a class={buttonClass()} href="/experts/new">Cadastrar expert</a
-				>{/snippet}</EmptyState
-		></Card
-	>
+	<SelectExpertState
+		hasExperts={data.experts.length > 0}
+		subjectKey="whatsapp.selectExpert.subject"
+		emptyDescriptionKey="whatsapp.selectExpert.emptyDescription"
+	/>
 {:else if status === 'loading'}
 	<div class="flex flex-col gap-3" aria-hidden="true">
 		{#each { length: 3 }, index (index)}<div
@@ -162,23 +160,23 @@
 				></span>
 			</div>{/each}
 	</div>
-	<span class="sr-only" aria-live="polite">Carregando automações</span>
+	<span class="sr-only" aria-live="polite">{t('whatsapp.list.loading')}</span>
 {:else if status === 'error'}
 	<Card
 		><EmptyState
 			icon="whatsapp"
-			title="Não foi possível carregar as automações"
-			description="Atualize a página e tente novamente."
+			title={t('whatsapp.list.loadError.title')}
+			description={t('whatsapp.list.loadError.description')}
 		/></Card
 	>
 {:else if automations.length === 0}
 	<Card
 		><EmptyState
 			icon="whatsapp"
-			title="Nenhuma automação criada"
-			description="Envie mensagens automaticamente quando seus leads realizarem uma ação."
+			title={t('whatsapp.list.empty.title')}
+			description={t('whatsapp.list.empty.description')}
 			>{#snippet action()}<a class={buttonClass()} href="/whatsapp/new"
-					><Icon name="plus" size={16} />Criar automação</a
+					><Icon name="plus" size={16} />{t('whatsapp.list.create')}</a
 				>{/snippet}</EmptyState
 		></Card
 	>
@@ -186,13 +184,13 @@
 	<div class="mb-4 grid grid-cols-2 gap-3 max-[561px]:grid-cols-1">
 		<Select
 			id="whatsapp-event-filter"
-			aria-label="Filtrar por evento"
+			aria-label={t('whatsapp.list.filters.event')}
 			options={eventOptions}
 			bind:value={eventFilter}
 		/>
 		<Select
 			id="whatsapp-destination-filter"
-			aria-label="Filtrar por destino"
+			aria-label={t('whatsapp.list.filters.destination')}
 			options={destinationOptions}
 			bind:value={destinationFilter}
 		/>
@@ -202,14 +200,14 @@
 		<Card
 			><EmptyState
 				icon="search"
-				title="Nenhuma automação encontrada"
-				description="Altere os filtros para ver outras automações."
+				title={t('whatsapp.list.filters.noResults.title')}
+				description={t('whatsapp.list.filters.noResults.description')}
 				>{#snippet action()}<Button
 						variant="secondary"
 						onclick={() => {
 							eventFilter = 'all';
 							destinationFilter = 'all';
-						}}>Limpar filtros</Button
+						}}>{t('whatsapp.list.filters.clear')}</Button
 					>{/snippet}</EmptyState
 			></Card
 		>
@@ -226,24 +224,35 @@
 							<div class="flex flex-wrap items-center gap-2">
 								<h2 class="font-bold">{automation.name}</h2>
 								<Badge variant={automation.isActive ? 'success' : 'neutral'}
-									>{automation.isActive ? 'Ativa' : 'Pausada'}</Badge
+									>{automation.isActive
+										? t('whatsapp.list.status.active')
+										: t('whatsapp.list.status.paused')}</Badge
 								>
 							</div>
 							<p class="mt-1 text-[13px] text-fg-muted">
 								<strong class="text-fg">{automation.eventName}</strong> → {automation.destination
 									.type === 'private'
-									? 'Privado'
-									: `Grupo “${automation.destination.groupName}”`}{#if automation.delay}
-									· após {automation.delay.value}
-									{automation.delay.unit === 'minutes' ? 'min' : 'h'}{/if}
+									? t('whatsapp.list.destination.private')
+									: t('whatsapp.list.destination.groupNamed', {
+											name: automation.destination.groupName
+										})}{#if automation.delay}
+									· {t(
+										automation.delay.unit === 'minutes'
+											? 'whatsapp.list.delayMinutes'
+											: 'whatsapp.list.delayHours',
+										{ value: automation.delay.value }
+									)}{/if}
 							</p>
 							<p class="mt-2 line-clamp-2 text-[13px] text-fg-subtle">
 								{messageSummary(automation)}
 							</p>
 							<p class="mt-1.5 text-[12px] text-fg-subtle">
-								{automation.message.buttons.length === 1
-									? '1 botão'
-									: `${automation.message.buttons.length} botões`}
+								{t(
+									automation.message.buttons.length === 1
+										? 'whatsapp.list.buttonsOne'
+										: 'whatsapp.list.buttonsOther',
+									{ count: automation.message.buttons.length }
+								)}
 							</p>
 						</div>
 						<button
@@ -254,7 +263,12 @@
 							]}
 							role="switch"
 							aria-checked={automation.isActive}
-							aria-label={`${automation.isActive ? 'Pausar' : 'Ativar'} ${automation.name}`}
+							aria-label={t(
+								automation.isActive ? 'whatsapp.list.pause' : 'whatsapp.list.activate',
+								{
+									name: automation.name
+								}
+							)}
 							disabled={busyId === automation.id}
 							onclick={() => toggle(automation)}
 							><span
@@ -268,18 +282,20 @@
 					<div class="mt-4 flex flex-wrap justify-end gap-1 border-t border-border pt-3">
 						<a
 							class={buttonClass({ variant: 'ghost', size: 'sm' })}
-							href={`/whatsapp/${automation.id}`}><Icon name="pencil" size={14} />Editar</a
+							href={`/whatsapp/${automation.id}`}
+							><Icon name="pencil" size={14} />{t('whatsapp.list.edit')}</a
 						><Button
 							variant="ghost"
 							size="sm"
 							disabled={busyId === automation.id}
-							onclick={() => duplicate(automation)}><Icon name="copy" size={14} />Duplicar</Button
+							onclick={() => duplicate(automation)}
+							><Icon name="copy" size={14} />{t('whatsapp.list.duplicate')}</Button
 						><Button
 							variant="ghost"
 							size="sm"
 							disabled={busyId === automation.id}
 							onclick={() => confirmDelete(automation)}
-							><Icon name="trash" size={14} />Excluir</Button
+							><Icon name="trash" size={14} />{t('whatsapp.list.delete')}</Button
 						>
 					</div>
 				</li>
@@ -295,14 +311,18 @@
 	onclose={() => (removing = null)}
 >
 	<div class="p-5">
-		<h2 id="delete-automation-title" class="text-[17px] font-bold">Excluir automação?</h2>
+		<h2 id="delete-automation-title" class="text-[17px] font-bold">
+			{t('whatsapp.list.deleteDialog.title')}
+		</h2>
 		<p class="mt-2 text-[13.5px] text-fg-muted">
-			“{removing?.name}” será removida permanentemente.
+			{t('whatsapp.list.deleteDialog.description', { name: removing?.name ?? '' })}
 		</p>
 		<div class="mt-5 flex justify-end gap-2">
 			<Button variant="ghost" disabled={Boolean(busyId)} onclick={() => dialog?.close()}
-				>Cancelar</Button
-			><Button variant="danger" loading={Boolean(busyId)} onclick={remove}>Excluir</Button>
+				>{t('common.actions.cancel')}</Button
+			><Button variant="danger" loading={Boolean(busyId)} onclick={remove}
+				>{t('common.actions.delete')}</Button
+			>
 		</div>
 	</div>
 </dialog>

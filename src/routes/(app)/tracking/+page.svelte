@@ -1,16 +1,17 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import PageHeader from '#lib/components/app/PageHeader.svelte';
+	import SelectExpertState from '#lib/components/app/SelectExpertState.svelte';
 	import PageSetupCard from '#lib/components/tracking/PageSetupCard.svelte';
 	import PixelInstallCard from '#lib/components/tracking/PixelInstallCard.svelte';
 	import Alert from '#lib/components/ui/Alert.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
-	import { buttonClass } from '#lib/components/ui/button.js';
 	import Card from '#lib/components/ui/Card.svelte';
 	import EmptyState from '#lib/components/ui/EmptyState.svelte';
 	import Icon, { type IconName } from '#lib/components/ui/Icon.svelte';
 	import Select from '#lib/components/ui/Select.svelte';
 	import { APP_NAME } from '#lib/config.js';
+	import { t, type MessageKey } from '#lib/i18n/index.svelte.js';
 	import {
 		createTrackingPixel,
 		getTrackingPixel,
@@ -57,21 +58,21 @@
 	let activationError = $state<string>();
 	let setupCard = $state<ReturnType<typeof PageSetupCard>>();
 
-	const highlights: { icon: IconName; title: string; text: string }[] = [
+	const highlights: { icon: IconName; title: MessageKey; text: MessageKey }[] = [
 		{
 			icon: 'link',
-			title: 'Instale o pixel',
-			text: 'Um código único, colado uma vez no site.'
+			title: 'tracking.activate.highlights.install.title',
+			text: 'tracking.activate.highlights.install.text'
 		},
 		{
 			icon: 'target',
-			title: 'Aponte os elementos',
-			text: 'Na própria página, clique no botão ou formulário.'
+			title: 'tracking.activate.highlights.point.title',
+			text: 'tracking.activate.highlights.point.text'
 		},
 		{
 			icon: 'bar-chart',
-			title: 'Acompanhe os resultados',
-			text: 'Leads, cadastros e compras por campanha.'
+			title: 'tracking.activate.highlights.track.title',
+			text: 'tracking.activate.highlights.track.text'
 		}
 	];
 
@@ -83,14 +84,14 @@
 			const pixel: TrackingPixel = await createTrackingPixel(data.expert.id);
 			pixelState = { status: 'ready', pixel };
 		} catch {
-			activationError = 'Não foi possível ativar o rastreamento. Tente novamente.';
+			activationError = t('tracking.activate.error');
 		} finally {
 			activating = false;
 		}
 	}
 
 	const launchOptions = $derived([
-		{ value: '', label: 'Lançamento em andamento (automático)' },
+		{ value: '', label: t('tracking.pages.autoLaunch') },
 		...data.launches.map((launch) => ({ value: launch.id, label: launch.name }))
 	]);
 	let pageError = $state<string>();
@@ -112,7 +113,7 @@
 			await setTrackingPageLaunch(data.expert.id, url, launchId);
 		} catch {
 			pixelState = { status: 'ready', pixel: withLaunch(previous) };
-			pageError = 'Não foi possível salvar o lançamento da página. Tente novamente.';
+			pageError = t('tracking.pages.saveError');
 		}
 	}
 
@@ -123,14 +124,14 @@
 </script>
 
 <svelte:head>
-	<title>Rastreamento · {APP_NAME}</title>
+	<title>{t('tracking.title')} · {APP_NAME}</title>
 </svelte:head>
 
 <PageHeader
-	title="Rastreamento"
+	title={t('tracking.title')}
 	description={data.expert
-		? `Meça o que os visitantes fazem nas páginas de ${data.expert.name}: cliques, cadastros e compras.`
-		: 'Meça o que os visitantes fazem nas páginas dos seus experts.'}
+		? t('tracking.description', { expert: data.expert.name })
+		: t('tracking.descriptionAll')}
 />
 
 {#snippet skeleton(lines: number)}
@@ -144,40 +145,34 @@
 {/snippet}
 
 {#if !data.expert}
-	<Card>
-		<EmptyState
-			icon="users"
-			title="Nenhum expert cadastrado"
-			description="O rastreamento é configurado por expert. Cadastre um para começar."
-		>
-			{#snippet action()}
-				<a class={buttonClass()} href="/experts/new">Cadastrar expert</a>
-			{/snippet}
-		</EmptyState>
-	</Card>
+	<SelectExpertState
+		hasExperts={data.experts.length > 0}
+		subjectKey="tracking.selectSubject"
+		emptyDescriptionKey="tracking.selectEmpty"
+	/>
 {:else if pixelState === null}
 	<div class="flex flex-col gap-5">
 		{@render skeleton(2)}
 		{@render skeleton(1)}
 	</div>
-	<span class="sr-only" aria-live="polite">Carregando rastreamento</span>
+	<span class="sr-only" aria-live="polite">{t('tracking.loading')}</span>
 {:else if pixelState.status === 'unavailable'}
 	<Card>
 		<EmptyState
 			icon="target"
-			title="Rastreamento em preparação"
-			description="Este recurso ainda não está disponível no servidor. Assim que for liberado, você configura tudo por aqui."
+			title={t('tracking.unavailable.title')}
+			description={t('tracking.unavailable.description')}
 		/>
 	</Card>
 {:else if pixelState.status === 'error'}
 	<Card>
 		<EmptyState
 			icon="target"
-			title="Não foi possível carregar o rastreamento"
-			description="Tente novamente em alguns instantes."
+			title={t('tracking.loadError.title')}
+			description={t('tracking.loadError.description')}
 		>
 			{#snippet action()}
-				<Button onclick={() => invalidateAll()}>Tentar novamente</Button>
+				<Button onclick={() => invalidateAll()}>{t('common.actions.retry')}</Button>
 			{/snippet}
 		</EmptyState>
 	</Card>
@@ -188,11 +183,10 @@
 	>
 		<div class="max-w-xl">
 			<h2 id="activate-title" class="text-[20px] font-extrabold tracking-[-0.02em]">
-				Saiba quem clicou, se cadastrou e comprou
+				{t('tracking.activate.title')}
 			</h2>
 			<p class="mt-2 text-fg-muted">
-				Ative o pixel do Pulse para {data.expert.name}, instale nas páginas e escolha, clicando na
-				própria página, quais ações viram eventos. Sem precisar mexer em código para cada botão.
+				{t('tracking.activate.description', { expert: data.expert.name })}
 			</p>
 		</div>
 
@@ -207,17 +201,19 @@
 					</span>
 					<span>
 						<span class="block font-semibold">
-							<span class="sr-only">Passo {index + 1}:</span>{item.title}
+							<span class="sr-only">{t('tracking.activate.step', { number: index + 1 })}</span>{t(
+								item.title
+							)}
 						</span>
-						<span class="block text-[13px] text-fg-subtle">{item.text}</span>
+						<span class="block text-[13px] text-fg-subtle">{t(item.text)}</span>
 					</span>
 				</li>
 			{/each}
 		</ol>
 
 		<div class="mt-6 flex flex-wrap items-center gap-3">
-			<Button loading={activating} onclick={activate}>Ativar rastreamento</Button>
-			<span class="text-[12.5px] text-fg-subtle">Você pode desativar quando quiser.</span>
+			<Button loading={activating} onclick={activate}>{t('tracking.activate.button')}</Button>
+			<span class="text-[12.5px] text-fg-subtle">{t('tracking.activate.hint')}</span>
 		</div>
 		{#if activationError}
 			<div class="mt-4"><Alert>{activationError}</Alert></div>
@@ -229,13 +225,13 @@
 		<PageSetupCard bind:this={setupCard} expertId={data.expert.id} {pixel} />
 
 		<Card
-			title="Páginas configuradas"
-			description="Páginas que já têm eventos e a qual lançamento os cadastros de cada uma contam."
+			title={t('tracking.pages.title')}
+			description={t('tracking.pages.description')}
 			flush={pixel.pages.length > 0}
 		>
 			{#if pixel.pages.length === 0}
 				<p class="text-[13.5px] text-fg-muted">
-					Nenhuma página configurada ainda. Cole um link acima para começar.
+					{t('tracking.pages.empty')}
 				</p>
 			{:else}
 				<ul>
@@ -251,21 +247,23 @@
 									>
 								</span>
 								<span class="block text-[12.5px] text-fg-subtle">
-									{item.eventsCount === 1 ? '1 evento' : `${item.eventsCount} eventos`} · atualizado
-									{formatRelativeTime(item.updatedAt)}
+									{t('tracking.pages.events', { count: item.eventsCount })} · {t(
+										'tracking.pages.updated',
+										{ time: formatRelativeTime(item.updatedAt) }
+									)}
 								</span>
 							</span>
 							<div class="w-60 max-[561px]:w-full">
 								<Select
 									id="page-launch-{item.url}"
-									aria-label="Lançamento dos cadastros desta página"
+									aria-label={t('tracking.pages.launchLabel')}
 									value={item.launchId ?? ''}
 									options={launchOptions}
 									onchange={(event) => changeLaunch(item.url, event.currentTarget.value)}
 								/>
 							</div>
 							<Button variant="secondary" size="sm" onclick={() => continueOn(item.url)}>
-								Continuar configurando
+								{t('tracking.pages.continue')}
 							</Button>
 						</li>
 					{/each}

@@ -3,6 +3,7 @@
 	import Alert from '#lib/components/ui/Alert.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Icon, { type IconName } from '#lib/components/ui/Icon.svelte';
+	import { t, type MessageKey } from '#lib/i18n/index.svelte.js';
 	import { openTrackingSetup, PopupBlockedError } from '#lib/services/tracking.js';
 	import type { TrackingPixel } from '#lib/types.js';
 	import { isAllowedDomain, parsePageUrl } from '#lib/utils/trackingUrl.js';
@@ -29,18 +30,22 @@
 	);
 	const pixelInstalled = $derived(pixel.installation.status === 'installed');
 
-	const steps: { icon: IconName; title: string; text: string }[] = [
+	const steps: { icon: IconName; title: MessageKey; text: MessageKey }[] = [
 		{
 			icon: 'external-link',
-			title: 'Abra a página',
-			text: 'Ela abre numa nova aba, com o editor do Pulse.'
+			title: 'tracking.setup.steps.open.title',
+			text: 'tracking.setup.steps.open.text'
 		},
 		{
 			icon: 'target',
-			title: 'Clique no elemento',
-			text: 'Um botão, link ou formulário da página.'
+			title: 'tracking.setup.steps.click.title',
+			text: 'tracking.setup.steps.click.text'
 		},
-		{ icon: 'tag', title: 'Escolha o evento', text: 'Lead, compra, cadastro ou um nome seu.' }
+		{
+			icon: 'tag',
+			title: 'tracking.setup.steps.event.title',
+			text: 'tracking.setup.steps.event.text'
+		}
 	];
 
 	/** Usado pela lista de páginas: preenche e foca o campo. */
@@ -53,12 +58,12 @@
 
 	function errorMessage(error: unknown): string {
 		if (error instanceof PopupBlockedError) {
-			return 'O navegador bloqueou a nova aba. Permita pop-ups para o Pulse e tente de novo.';
+			return t('tracking.setup.popupBlocked');
 		}
 		if (error instanceof ApiError && error.validationMessages.length > 0) {
 			return error.validationMessages.join(' ');
 		}
-		return 'Não foi possível abrir a configuração. Tente novamente.';
+		return t('tracking.setup.openError');
 	}
 
 	async function handleSubmit(event: SubmitEvent) {
@@ -73,7 +78,7 @@
 			await openTrackingSetup(expertId, parsed.url);
 			feedback = {
 				variant: 'success',
-				text: 'Abrimos a página numa nova aba. Configure os eventos por lá: eles aparecem aqui assim que forem salvos.'
+				text: t('tracking.setup.success')
 			};
 		} catch (error) {
 			feedback = { variant: 'error', text: errorMessage(error) };
@@ -87,13 +92,13 @@
 	class="rounded-lg border border-border bg-bg-elevated p-6 max-[561px]:p-4.5"
 	aria-labelledby="setup-title"
 >
-	<h2 id="setup-title" class="text-[17px] font-bold">Configurar eventos</h2>
+	<h2 id="setup-title" class="text-[17px] font-bold">{t('tracking.setup.title')}</h2>
 	<p class="mt-1 text-[13.5px] text-fg-muted">
-		Cole o link da página. Você escolhe na própria página quais cliques e formulários viram eventos.
+		{t('tracking.setup.description')}
 	</p>
 
 	<form class="mt-5" novalidate onsubmit={handleSubmit}>
-		<label class="sr-only" for="setup-url">Link da página</label>
+		<label class="sr-only" for="setup-url">{t('tracking.setup.urlLabel')}</label>
 		<div class="flex gap-2.5 max-[621px]:flex-col">
 			<div
 				class={[
@@ -112,7 +117,7 @@
 					inputmode="url"
 					autocomplete="url"
 					spellcheck="false"
-					placeholder="https://meusite.com.br/pagina-de-vendas"
+					placeholder={t('tracking.setup.urlPlaceholder')}
 					bind:value={() => url, (value) => (typed = value)}
 					bind:this={input}
 					aria-invalid={showError ? 'true' : undefined}
@@ -120,7 +125,7 @@
 				/>
 			</div>
 			<Button type="submit" loading={opening} class="shrink-0">
-				Abrir e configurar
+				{t('tracking.setup.submit')}
 				<Icon name="external-link" size={15} />
 			</Button>
 		</div>
@@ -134,7 +139,7 @@
 					<strong class="font-semibold text-fg">{parsed.hostname}</strong>
 					<span class="truncate text-fg-subtle">{parsed.path === '/' ? '' : parsed.path}</span>
 					{#if newDomain}
-						<span class="text-fg-subtle">· será autorizado a enviar eventos para este pixel</span>
+						<span class="text-fg-subtle">{t('tracking.setup.newDomain')}</span>
 					{/if}
 				</p>
 			{/if}
@@ -144,8 +149,7 @@
 	{#if !pixelInstalled}
 		<div class="mt-4">
 			<Alert variant="warning">
-				O pixel ainda não enviou nenhum evento. Instale o código abaixo nessa página antes: sem ele,
-				o editor não aparece.
+				{t('tracking.setup.notInstalled')}
 			</Alert>
 		</div>
 	{/if}
@@ -167,9 +171,11 @@
 				</span>
 				<span class="min-w-0">
 					<span class="block text-[13.5px] font-semibold">
-						<span class="sr-only">Passo {index + 1}:</span>{step.title}
+						<span class="sr-only">{t('tracking.setup.step', { number: index + 1 })}</span>{t(
+							step.title
+						)}
 					</span>
-					<span class="block text-[12.5px] text-fg-subtle">{step.text}</span>
+					<span class="block text-[12.5px] text-fg-subtle">{t(step.text)}</span>
 				</span>
 			</li>
 		{/each}

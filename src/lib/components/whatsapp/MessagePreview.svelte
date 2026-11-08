@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '#lib/i18n/index.svelte.js';
 	import Icon from '#lib/components/ui/Icon.svelte';
 	import type { WhatsAppButton, WhatsAppMessage } from '#lib/types.js';
 	import { tokenizeWhatsAppText } from '#lib/utils/whatsappMessage.js';
@@ -7,7 +8,9 @@
 	let { message }: Props = $props();
 	let reply = $state('');
 
-	const tokens = $derived(tokenizeWhatsAppText(message.body || 'Sua mensagem aparece aqui.'));
+	const tokens = $derived(
+		tokenizeWhatsAppText(message.body || t('whatsapp.preview.bodyPlaceholder'))
+	);
 
 	function choose(button: WhatsAppButton) {
 		if (button.type === 'quick_reply') reply = button.reply;
@@ -16,15 +19,15 @@
 
 <section
 	class="min-w-0 overflow-hidden rounded-lg border border-border bg-[#efeae2] text-[#111b21] dark:bg-[#0b141a] dark:text-[#e9edef]"
-	aria-label="Prévia da mensagem no WhatsApp"
+	aria-label={t('whatsapp.preview.label')}
 >
 	<header class="flex items-center gap-3 bg-[#008069] px-4 py-3 text-white dark:bg-[#202c33]">
 		<span class="grid size-9 place-items-center rounded-full bg-white/20" aria-hidden="true">
 			<Icon name="whatsapp" size={18} />
 		</span>
 		<div>
-			<h2 class="text-[14px] font-bold">Sua empresa</h2>
-			<p class="text-[11px] text-white/75">online</p>
+			<h2 class="text-[14px] font-bold">{t('whatsapp.preview.business')}</h2>
+			<p class="text-[11px] text-white/75">{t('whatsapp.preview.online')}</p>
 		</div>
 	</header>
 
@@ -65,7 +68,7 @@
 							onclick={() => choose(button)}
 						>
 							<Icon name={button.type === 'url' ? 'external-link' : 'message-circle'} size={13} />
-							{button.label || 'Texto do botão'}
+							{button.label || t('whatsapp.preview.buttonPlaceholder')}
 						</button>
 					{/each}
 				</div>
@@ -76,7 +79,7 @@
 			<div
 				class="mt-3 max-w-[88%] rounded-lg rounded-tl-sm bg-white px-3 py-2 text-[13.5px] break-words whitespace-pre-wrap shadow-sm dark:bg-[#202c33]"
 			>
-				{reply || 'A resposta automática aparece aqui.'}
+				{reply || t('whatsapp.preview.replyPlaceholder')}
 				<time class="mt-1 block text-right text-[10px] text-[#667781] dark:text-[#aebac1]"
 					>10:42</time
 				>

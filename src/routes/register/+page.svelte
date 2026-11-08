@@ -6,6 +6,7 @@
 	import Checkbox from '#lib/components/ui/Checkbox.svelte';
 	import TextField from '#lib/components/ui/TextField.svelte';
 	import { APP_NAME } from '#lib/config.js';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import { AuthError, register } from '#lib/services/auth.js';
 	import {
 		getPasswordStrength,
@@ -28,15 +29,15 @@
 	const strength = $derived(getPasswordStrength(password));
 
 	const errors = $derived({
-		name: validateRequired(name, 'Informe seu nome.'),
+		name: validateRequired(name, t('auth.register.nameRequired')),
 		email: validateEmail(email),
 		password: validatePassword(password),
 		confirmPassword: !confirmPassword
-			? 'Confirme sua senha.'
+			? t('auth.register.confirmRequired')
 			: confirmPassword !== password
-				? 'As senhas não coincidem.'
+				? t('auth.register.mismatch')
 				: undefined,
-		acceptTerms: acceptTerms ? undefined : 'Você precisa aceitar os termos para continuar.'
+		acceptTerms: acceptTerms ? undefined : t('auth.register.termsRequired')
 	});
 
 	const hasErrors = $derived(Object.values(errors).some(Boolean));
@@ -53,10 +54,7 @@
 			await register({ name: name.trim(), email: email.trim(), company: company.trim(), password });
 			await goto('/login?registered=1');
 		} catch (err) {
-			formError =
-				err instanceof AuthError
-					? err.message
-					: 'Não foi possível criar sua conta. Tente novamente.';
+			formError = err instanceof AuthError ? err.message : t('auth.errors.registerFailed');
 		} finally {
 			submitting = false;
 		}
@@ -64,10 +62,10 @@
 </script>
 
 <svelte:head>
-	<title>Criar conta · {APP_NAME}</title>
+	<title>{t('auth.register.pageTitle')} · {APP_NAME}</title>
 </svelte:head>
 
-<AuthShell title="Crie sua conta" subtitle="Comece a escalar seus resultados em poucos minutos.">
+<AuthShell title={t('auth.register.title')} subtitle={t('auth.register.subtitle')}>
 	<form class="flex flex-col gap-4.5" novalidate onsubmit={handleSubmit}>
 		{#if formError}
 			<Alert>{formError}</Alert>
@@ -76,8 +74,8 @@
 		<TextField
 			id="name"
 			name="name"
-			label="Nome completo"
-			placeholder="Como devemos te chamar?"
+			label={t('auth.register.name')}
+			placeholder={t('auth.register.namePlaceholder')}
 			autocomplete="name"
 			bind:value={name}
 			error={submitted ? errors.name : undefined}
@@ -87,8 +85,8 @@
 			id="email"
 			name="email"
 			type="email"
-			label="E-mail profissional"
-			placeholder="voce@empresa.com"
+			label={t('auth.register.email')}
+			placeholder={t('auth.fields.emailPlaceholder')}
 			autocomplete="email"
 			bind:value={email}
 			error={submitted ? errors.email : undefined}
@@ -97,8 +95,8 @@
 		<TextField
 			id="company"
 			name="company"
-			label="Empresa ou agência (opcional)"
-			placeholder="Nome da sua empresa"
+			label={t('auth.register.company')}
+			placeholder={t('auth.register.companyPlaceholder')}
 			autocomplete="organization"
 			bind:value={company}
 		/>
@@ -108,12 +106,12 @@
 				id="password"
 				name="password"
 				type="password"
-				label="Senha"
-				placeholder="Crie uma senha"
+				label={t('auth.fields.password')}
+				placeholder={t('auth.fields.createPasswordPlaceholder')}
 				autocomplete="new-password"
 				bind:value={password}
 				error={submitted ? errors.password : undefined}
-				hint="Mínimo de {MIN_PASSWORD_LENGTH} caracteres."
+				hint={t('auth.fields.passwordHint', { min: MIN_PASSWORD_LENGTH })}
 			/>
 			{#if password}
 				<div
@@ -135,7 +133,9 @@
 							></span>
 						{/each}
 					</div>
-					<span class="text-[12px] whitespace-nowrap text-fg-muted">Força: {strength.label}</span>
+					<span class="text-[12px] whitespace-nowrap text-fg-muted"
+						>{t('auth.fields.strength', { label: strength.label })}</span
+					>
 				</div>
 			{/if}
 		</div>
@@ -144,8 +144,8 @@
 			id="confirm-password"
 			name="confirmPassword"
 			type="password"
-			label="Confirmar senha"
-			placeholder="Repita a senha"
+			label={t('auth.fields.confirmPassword')}
+			placeholder={t('auth.fields.repeatPasswordPlaceholder')}
 			autocomplete="new-password"
 			bind:value={confirmPassword}
 			error={submitted ? errors.confirmPassword : undefined}
@@ -157,20 +157,23 @@
 			bind:checked={acceptTerms}
 			error={submitted ? errors.acceptTerms : undefined}
 		>
-			Li e aceito os
-			<a class="font-semibold" href="/termos" target="_blank" rel="noopener">Termos de uso</a>
-			e a
+			{t('auth.register.termsPrefix')}
+			<a class="font-semibold" href="/termos" target="_blank" rel="noopener"
+				>{t('auth.register.termsLink')}</a
+			>
+			{t('auth.register.termsMiddle')}
 			<a class="font-semibold" href="/privacidade" target="_blank" rel="noopener"
-				>Política de privacidade</a
+				>{t('auth.register.privacyLink')}</a
 			>.
 		</Checkbox>
 
 		<Button type="submit" fullWidth loading={submitting}>
-			{submitting ? 'Criando conta…' : 'Criar conta'}
+			{submitting ? t('auth.register.submitting') : t('auth.register.submit')}
 		</Button>
 	</form>
 
 	{#snippet footer()}
-		Já tem uma conta? <a class="font-semibold" href="/login">Entrar</a>
+		{t('auth.register.haveAccount')}
+		<a class="font-semibold" href="/login">{t('auth.register.signIn')}</a>
 	{/snippet}
 </AuthShell>

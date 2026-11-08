@@ -1,6 +1,9 @@
+import { i18n, t } from '#lib/i18n/index.svelte.js';
 import { PUBLIC_META_APP_ID, PUBLIC_WHATSAPP_CONFIG_ID } from '$app/env/public';
 
-const SDK_URL = 'https://connect.facebook.net/pt_BR/sdk.js';
+const SDK_LOCALES = { 'pt-BR': 'pt_BR', es: 'es_LA', en: 'en_US' } as const;
+
+const sdkUrl = () => `https://connect.facebook.net/${SDK_LOCALES[i18n.locale]}/sdk.js`;
 const SDK_TIMEOUT_MS = 15_000;
 const SIGNUP_TIMEOUT_MS = 120_000;
 const ALLOWED_ORIGINS = new Set(['https://www.facebook.com', 'https://web.facebook.com']);
@@ -94,32 +97,34 @@ function loadFacebookSdk(): Promise<FacebookSdk> {
 			if (error) {
 				reject(error);
 			} else if (window.FB) resolve(window.FB);
-			else reject(new EmbeddedSignupError('O SDK da Meta não ficou disponível.'));
+			else reject(new EmbeddedSignupError(t('integrations.signup.sdkUnavailable')));
 		};
 
 		const timeout = window.setTimeout(
-			() => finish(new EmbeddedSignupError('A Meta demorou para carregar. Tente novamente.')),
+			() => finish(new EmbeddedSignupError(t('integrations.signup.sdkTimeout'))),
 			SDK_TIMEOUT_MS
 		);
 		installAsyncInitHandler();
 		sdkReadyListeners.add(handleSdkReady);
 
-		const existing = document.querySelector<HTMLScriptElement>(`script[src="${SDK_URL}"]`);
+		const existing = document.querySelector<HTMLScriptElement>(
+			`script[src^="https://connect.facebook.net/"][src$="/sdk.js"]`
+		);
 		if (existing) {
 			existing.addEventListener('load', () => finish(), { once: true });
 			existing.addEventListener(
 				'error',
-				() => finish(new EmbeddedSignupError('Não foi possível carregar a Meta.')),
+				() => finish(new EmbeddedSignupError(t('integrations.signup.sdkLoadFailed'))),
 				{ once: true }
 			);
 			return;
 		}
 
 		const script = document.createElement('script');
-		script.src = SDK_URL;
+		script.src = sdkUrl();
 		script.async = true;
 		script.defer = true;
-		script.onerror = () => finish(new EmbeddedSignupError('Não foi possível carregar a Meta.'));
+		script.onerror = () => finish(new EmbeddedSignupError(t('integrations.signup.sdkLoadFailed')));
 		document.head.append(script);
 	})
 		.then(initializeFacebookSdk)
@@ -142,7 +147,7 @@ function parseMessage(data: unknown): unknown {
 
 export async function startWhatsAppEmbeddedSignup(): Promise<EmbeddedSignupResult> {
 	if (!isWhatsAppEmbeddedSignupConfigured) {
-		throw new EmbeddedSignupError('WhatsApp ainda não configurado nesta instalação');
+		throw new EmbeddedSignupError(t('integrations.whatsapp.notConfigured'));
 	}
 
 	const sdk = await loadFacebookSdk();
@@ -186,7 +191,7 @@ export async function startWhatsAppEmbeddedSignup(): Promise<EmbeddedSignupResul
 				return;
 			}
 			if (payload.event === 'ERROR') {
-				fail(new EmbeddedSignupError('A Meta não conseguiu concluir a conexão.'));
+				fail(new EmbeddedSignupError(t('integrations.signup.metaFailed')));
 				return;
 			}
 			if (payload.event !== 'FINISH') return;
@@ -199,7 +204,7 @@ export async function startWhatsAppEmbeddedSignup(): Promise<EmbeddedSignupResul
 				!ID_PATTERN.test(wabaId) ||
 				!ID_PATTERN.test(phoneNumberId)
 			) {
-				fail(new EmbeddedSignupError('A Meta retornou dados inválidos para a conexão.'));
+				fail(new EmbeddedSignupError(t('integrations.signup.invalidData')));
 				return;
 			}
 			ids = { wabaId, phoneNumberId };
@@ -207,7 +212,7 @@ export async function startWhatsAppEmbeddedSignup(): Promise<EmbeddedSignupResul
 		}
 
 		const timeout = window.setTimeout(
-			() => fail(new EmbeddedSignupError('A conexão com a Meta expirou. Tente novamente.')),
+			() => fail(new EmbeddedSignupError(t('integrations.signup.timeout'))),
 			SIGNUP_TIMEOUT_MS
 		);
 		window.addEventListener('message', handleMessage);
@@ -230,7 +235,7 @@ export async function startWhatsAppEmbeddedSignup(): Promise<EmbeddedSignupResul
 				}
 			);
 		} catch {
-			fail(new EmbeddedSignupError('Não foi possível abrir a conexão com a Meta.'));
+			fail(new EmbeddedSignupError(t('integrations.signup.openFailed')));
 		}
 	});
 }

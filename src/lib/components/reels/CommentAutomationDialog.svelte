@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
 	import { ApiError } from '#lib/api/http.js';
+	import { t, type MessageKey } from '#lib/i18n/index.svelte.js';
 	import Alert from '#lib/components/ui/Alert.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Checkbox from '#lib/components/ui/Checkbox.svelte';
@@ -57,10 +58,10 @@
 
 	const keywordError = $derived.by(() => {
 		if (draft.trim().length > MAX_KEYWORD_LENGTH) {
-			return `Cada palavra-chave deve ter no máximo ${MAX_KEYWORD_LENGTH} caracteres.`;
+			return t('reels.dialog.keywordTooLong', { max: MAX_KEYWORD_LENGTH });
 		}
 		if (submitted && keywords.length === 0 && !draft.trim()) {
-			return 'Adicione pelo menos uma palavra-chave.';
+			return t('reels.dialog.keywordRequired');
 		}
 		return undefined;
 	});
@@ -77,21 +78,23 @@
 
 	const messageError = $derived.by(() => {
 		if (message.length > messageLimit) {
-			return `Com botão, a mensagem pode ter até ${MAX_BUTTON_MESSAGE_LENGTH} caracteres.`;
+			return t('reels.dialog.messageTooLongWithButton', { max: MAX_BUTTON_MESSAGE_LENGTH });
 		}
-		return submitted && !message.trim() ? 'Escreva a mensagem que será enviada na DM.' : undefined;
+		return submitted && !message.trim() ? t('reels.dialog.messageRequired') : undefined;
 	});
 	const buttonLabelError = $derived(
-		submitted && withButton && !buttonLabel.trim() ? 'Escreva o texto do botão.' : undefined
+		submitted && withButton && !buttonLabel.trim()
+			? t('reels.dialog.buttonLabelRequired')
+			: undefined
 	);
 	const buttonUrlError = $derived.by(() => {
 		if (!submitted || !withButton) return undefined;
-		if (!buttonUrl.trim()) return 'Informe o link que o botão abre.';
-		return isHttpsUrl(buttonUrl.trim()) ? undefined : 'Use um link que comece com https://.';
+		if (!buttonUrl.trim()) return t('reels.dialog.buttonUrlRequired');
+		return isHttpsUrl(buttonUrl.trim()) ? undefined : t('reels.dialog.buttonUrlInvalid');
 	});
 	const commentReplyError = $derived(
 		submitted && withCommentReply && !commentReply.trim()
-			? 'Escreva a resposta do comentário ou desmarque a opção.'
+			? t('reels.dialog.commentReplyRequired')
 			: undefined
 	);
 	const busy = $derived(saving || deleting);
@@ -133,22 +136,18 @@
 	}
 
 	function errorMessage(error: unknown): string {
-		if (!(error instanceof ApiError)) return 'Não foi possível salvar. Tente novamente.';
+		if (!(error instanceof ApiError)) return t('reels.dialog.saveFailed');
 		if (error.validationMessages.length > 0) return error.validationMessages.join(' ');
 
-		const messages: Record<string, string> = {
-			INSTAGRAM_NOT_CONNECTED: 'Conecte o Instagram deste expert antes de ativar a DM automática.',
-			INSTAGRAM_ACCESS_TOKEN_EXPIRED:
-				'A conexão com o Instagram expirou. Reconecte a conta para ativar a DM automática.',
-			INSTAGRAM_ACCESS_TOKEN_INVALID:
-				'A Meta recusou o acesso desta conta. Reconecte o Instagram do expert.',
-			INSTAGRAM_GRAPH_API_ERROR:
-				'A Meta não confirmou o acompanhamento dos comentários desta conta. Tente novamente em alguns instantes.',
-			INSTAGRAM_GRAPH_API_UNAVAILABLE:
-				'O Instagram não respondeu. Tente novamente em alguns instantes.'
+		const messages: Record<string, MessageKey> = {
+			INSTAGRAM_NOT_CONNECTED: 'reels.dialog.apiErrors.notConnected',
+			INSTAGRAM_ACCESS_TOKEN_EXPIRED: 'reels.dialog.apiErrors.expired',
+			INSTAGRAM_ACCESS_TOKEN_INVALID: 'reels.dialog.apiErrors.invalid',
+			INSTAGRAM_GRAPH_API_ERROR: 'reels.dialog.apiErrors.graphError',
+			INSTAGRAM_GRAPH_API_UNAVAILABLE: 'reels.dialog.apiErrors.unavailable'
 		};
 
-		return messages[error.reason] ?? 'Não foi possível salvar. Tente novamente.';
+		return t(messages[error.reason] ?? 'reels.dialog.saveFailed');
 	}
 
 	async function handleSubmit(event: SubmitEvent) {
@@ -194,7 +193,7 @@
 			ondeleted(post.id);
 			dialog?.close();
 		} catch {
-			formError = 'Não foi possível excluir a automação. Tente novamente.';
+			formError = t('reels.dialog.deleteFailed');
 		} finally {
 			deleting = false;
 		}
@@ -225,15 +224,17 @@
 				{/if}
 			</span>
 			<div class="min-w-0 flex-1">
-				<h2 class="text-[17px] font-bold" id="automation-title">DM automática</h2>
+				<h2 class="text-[17px] font-bold" id="automation-title">
+					{t('reels.dialog.title')}
+				</h2>
 				<p class="mt-0.5 line-clamp-2 text-[13px] text-fg-muted">
-					{post.caption ?? 'Publicação sem legenda'}
+					{post.caption ?? t('reels.dialog.noCaption')}
 				</p>
 			</div>
 			<button
 				class="grid size-8 shrink-0 place-items-center rounded-md text-fg-muted hover:bg-surface hover:text-fg"
 				type="button"
-				aria-label="Fechar"
+				aria-label={t('common.actions.close')}
 				onclick={() => dialog?.close()}
 			>
 				<Icon name="x" size={18} />
@@ -242,13 +243,12 @@
 
 		<div class="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-6 py-5">
 			<p class="text-[13.5px] text-fg-muted">
-				Quando alguém comentar nesta publicação uma das palavras-chave, a pessoa recebe a mensagem
-				abaixo no Direct.
+				{t('reels.dialog.intro')}
 			</p>
 
 			<div class="flex flex-col gap-1.5">
 				<label class="text-[13px] font-semibold text-fg-muted" for="automation-keyword">
-					Palavras-chave
+					{t('reels.dialog.keywords')}
 				</label>
 				<div
 					class={[
@@ -267,7 +267,7 @@
 							<button
 								class="grid size-5 place-items-center rounded-full hover:bg-primary/25"
 								type="button"
-								aria-label="Remover {keyword}"
+								aria-label={t('reels.dialog.removeKeyword', { keyword })}
 								onclick={() => removeKeyword(index)}
 							>
 								<Icon name="x" size={12} />
@@ -279,7 +279,9 @@
 							class="h-8 min-w-32 flex-1 border-0 bg-transparent px-1.5 text-fg outline-none placeholder:text-fg-subtle focus-visible:shadow-none"
 							id="automation-keyword"
 							bind:value={draft}
-							placeholder={keywords.length ? 'Adicionar outra' : 'Ex.: quero, link, eu quero'}
+							placeholder={keywords.length
+								? t('reels.dialog.addAnother')
+								: t('reels.dialog.keywordPlaceholder')}
 							autocomplete="off"
 							aria-describedby="automation-keyword-hint"
 							aria-invalid={keywordError ? 'true' : undefined}
@@ -292,8 +294,7 @@
 					<p class="text-[12.5px] text-danger" role="alert">{keywordError}</p>
 				{:else}
 					<p class="text-[12.5px] text-fg-subtle" id="automation-keyword-hint">
-						Pressione Enter ou vírgula para adicionar (até {MAX_KEYWORDS}). Maiúsculas e acentos não
-						fazem diferença, e a palavra precisa aparecer inteira no comentário.
+						{t('reels.dialog.keywordHint', { max: MAX_KEYWORDS })}
 					</p>
 				{/if}
 			</div>
@@ -301,7 +302,7 @@
 			<div class="flex flex-col gap-1.5">
 				<div class="flex items-baseline justify-between gap-3">
 					<label class="text-[13px] font-semibold text-fg-muted" for="automation-message">
-						Mensagem da DM
+						{t('reels.dialog.message')}
 					</label>
 					<span
 						class={[
@@ -323,24 +324,23 @@
 					id="automation-message"
 					bind:value={message}
 					maxlength={MAX_REPLY_MESSAGE_LENGTH}
-					placeholder="Oi! Que bom que você quer saber mais. Aqui está o link: …"
+					placeholder={t('reels.dialog.messagePlaceholder')}
 					aria-describedby="automation-message-hint"
 					aria-invalid={messageError ? 'true' : undefined}></textarea>
 				{#if messageError}
 					<p class="text-[12.5px] text-danger" role="alert">{messageError}</p>
 				{:else}
 					<p class="text-[12.5px] text-fg-subtle" id="automation-message-hint">
-						Enviada uma única vez por comentário, como resposta privada. Quem não segue a conta
-						recebe em Solicitações de mensagem.
+						{t('reels.dialog.messageHint')}
 					</p>
 				{/if}
 			</div>
 
 			<section class="flex flex-col gap-3.5 rounded-md border border-border p-4">
 				<Checkbox id="automation-with-button" bind:checked={withButton}>
-					<strong class="text-fg">Adicionar botão com link</strong>
+					<strong class="text-fg">{t('reels.dialog.withButton')}</strong>
 					<span class="block text-[12.5px] text-fg-subtle">
-						Aparece logo abaixo da mensagem e abre o link ao tocar.
+						{t('reels.dialog.withButtonHint')}
 					</span>
 				</Checkbox>
 
@@ -350,8 +350,8 @@
 					>
 						<TextField
 							id="automation-button-label"
-							label="Texto do botão"
-							placeholder="Ex.: Ver material"
+							label={t('reels.dialog.buttonLabel')}
+							placeholder={t('reels.dialog.buttonLabelPlaceholder')}
 							maxlength={MAX_BUTTON_LABEL_LENGTH}
 							bind:value={buttonLabel}
 							error={buttonLabelError}
@@ -360,7 +360,7 @@
 						<TextField
 							id="automation-button-url"
 							type="url"
-							label="Link"
+							label={t('reels.dialog.buttonUrl')}
 							placeholder="https://"
 							inputmode="url"
 							autocomplete="off"
@@ -372,7 +372,7 @@
 
 				<div class="rounded-md bg-surface p-3.5">
 					<p class="mb-2.5 text-[11.5px] font-semibold tracking-[0.05em] text-fg-subtle uppercase">
-						Prévia da DM
+						{t('reels.dialog.preview')}
 					</p>
 					<div class="flex max-w-[85%] flex-col gap-1">
 						<p
@@ -381,14 +381,14 @@
 								!message.trim() && 'text-fg-subtle'
 							]}
 						>
-							{message.trim() || 'Sua mensagem aparece aqui.'}
+							{message.trim() || t('reels.dialog.previewEmpty')}
 						</p>
 						{#if withButton}
 							<span
 								class="flex items-center justify-center gap-1.5 rounded-xl border border-border-strong px-3.5 py-2 text-[13.5px] font-semibold text-primary-hover motion-safe:animate-fade-in"
 							>
 								<Icon name="external-link" size={13} />
-								{buttonLabel.trim() || 'Texto do botão'}
+								{buttonLabel.trim() || t('reels.dialog.buttonLabel')}
 							</span>
 						{/if}
 					</div>
@@ -397,9 +397,9 @@
 
 			<section class="flex flex-col gap-3.5 rounded-md border border-border p-4">
 				<Checkbox id="automation-with-comment-reply" bind:checked={withCommentReply}>
-					<strong class="text-fg">Responder o comentário publicamente</strong>
+					<strong class="text-fg">{t('reels.dialog.withCommentReply')}</strong>
 					<span class="block text-[12.5px] text-fg-subtle">
-						Publicada no comentário depois que a DM for enviada.
+						{t('reels.dialog.withCommentReplyHint')}
 					</span>
 				</Checkbox>
 
@@ -407,7 +407,7 @@
 					<div class="flex flex-col gap-1.5 motion-safe:animate-fade-in">
 						<div class="flex items-baseline justify-between gap-3">
 							<label class="text-[13px] font-semibold text-fg-muted" for="automation-comment-reply">
-								Resposta do comentário
+								{t('reels.dialog.commentReply')}
 							</label>
 							<span class="text-[12px] text-fg-subtle tabular-nums">
 								{commentReply.length}/{MAX_COMMENT_REPLY_LENGTH}
@@ -425,14 +425,14 @@
 							id="automation-comment-reply"
 							bind:value={commentReply}
 							maxlength={MAX_COMMENT_REPLY_LENGTH}
-							placeholder="Ex.: Te mandei no direct! 📩"
+							placeholder={t('reels.dialog.commentReplyPlaceholder')}
 							aria-describedby="automation-comment-reply-hint"
 							aria-invalid={commentReplyError ? 'true' : undefined}></textarea>
 						{#if commentReplyError}
 							<p class="text-[12.5px] text-danger" role="alert">{commentReplyError}</p>
 						{:else}
 							<p class="text-[12.5px] text-fg-subtle" id="automation-comment-reply-hint">
-								Fica visível para todos. Se a DM não sair, o comentário não é respondido.
+								{t('reels.dialog.commentReplyHint')}
 							</p>
 						{/if}
 					</div>
@@ -440,17 +440,19 @@
 			</section>
 
 			<Checkbox id="automation-active" bind:checked={isActive}>
-				<strong class="text-fg">Automação ativa</strong>
+				<strong class="text-fg">{t('reels.dialog.active')}</strong>
 				<span class="block text-[12.5px] text-fg-subtle">
-					Desmarque para pausar sem perder a configuração.
+					{t('reels.dialog.activeHint')}
 				</span>
 			</Checkbox>
 
 			{#if initial}
 				<p class="flex items-center gap-2 text-[13px] text-fg-muted">
 					<Icon name="send" size={14} />
-					{initial.sentCount === 1 ? '1 DM enviada' : `${initial.sentCount} DMs enviadas`}
-					{#if initial.lastSentAt}· última em {formatDate(initial.lastSentAt)}{/if}
+					{t('reels.dialog.sent', { count: initial.sentCount })}
+					{#if initial.lastSentAt}{t('reels.dialog.lastSent', {
+							date: formatDate(initial.lastSentAt)
+						})}{/if}
 				</p>
 			{/if}
 
@@ -465,13 +467,15 @@
 			<div>
 				{#if initial}
 					<Button variant="ghost" loading={deleting} disabled={busy} onclick={handleDelete}>
-						<Icon name="trash" size={15} />Excluir
+						<Icon name="trash" size={15} />{t('reels.dialog.delete')}
 					</Button>
 				{/if}
 			</div>
 			<div class="flex gap-2.5">
-				<Button variant="ghost" disabled={busy} onclick={() => dialog?.close()}>Cancelar</Button>
-				<Button type="submit" loading={saving} disabled={busy}>Salvar</Button>
+				<Button variant="ghost" disabled={busy} onclick={() => dialog?.close()}
+					>{t('common.actions.cancel')}</Button
+				>
+				<Button type="submit" loading={saving} disabled={busy}>{t('common.actions.save')}</Button>
 			</div>
 		</footer>
 	</form>

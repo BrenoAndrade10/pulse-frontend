@@ -2,15 +2,15 @@
 	import type { Snippet } from 'svelte';
 	import Badge from '#lib/components/ui/Badge.svelte';
 	import Icon from '#lib/components/ui/Icon.svelte';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import type { BadgeVariant, MetaIntegration } from '#lib/utils/integrations.js';
 
 	type Props = {
 		integration: MetaIntegration;
 		badge: { label: string; variant: BadgeVariant };
-		/** Conta autorizada; sem ela, mostra o ativo que será vinculado. */
 		accountName?: string | null;
 		detail: string;
-		actions: Snippet;
+		actions?: Snippet;
 		children?: Snippet;
 	};
 
@@ -33,17 +33,19 @@
 		<div class="min-w-0 flex-1">
 			<div class="flex flex-wrap items-center gap-x-2 gap-y-1">
 				<h3 id="{integration.channel}-title" class="font-bold">{integration.name}</h3>
-				<span class="text-[12px] text-fg-subtle">{integration.authorization}</span>
+				<span class="text-[12px] text-fg-subtle">{t(integration.authorization)}</span>
 			</div>
-			<p class="mt-0.5 truncate text-[13.5px]">{accountName ?? integration.asset}</p>
+			<p class="mt-0.5 truncate text-[13.5px]">{accountName ?? t(integration.asset)}</p>
 			<p class="mt-0.5 text-[13px] text-fg-muted">{detail}</p>
 		</div>
 		<Badge variant={badge.variant}>{badge.label}</Badge>
 	</div>
 
-	<div class="flex flex-wrap gap-2">
-		{@render actions()}
-	</div>
+	{#if actions}
+		<div class="flex flex-wrap gap-2 empty:hidden">
+			{@render actions()}
+		</div>
+	{/if}
 
 	{@render children?.()}
 </article>

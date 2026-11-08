@@ -1,5 +1,6 @@
 import { ApiError, httpRequest } from '#lib/api/http.js';
 import * as session from '#lib/auth/session.svelte.js';
+import { t } from '#lib/i18n/index.svelte.js';
 
 export type LoginPayload = { email: string; password: string; remember: boolean };
 export type RegisterPayload = { name: string; email: string; company: string; password: string };
@@ -17,11 +18,9 @@ export class AuthError extends Error {
 	}
 }
 
-const NETWORK_MESSAGE = 'Não foi possível conectar ao servidor. Verifique sua conexão.';
-
 function tooManyAttemptsMessage(seconds: number): string {
 	const minutes = Math.max(1, Math.ceil(seconds / 60));
-	return `Muitas tentativas. Tente novamente em ${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}.`;
+	return t('auth.errors.tooManyAttempts', { count: minutes });
 }
 
 export function toAuthError(
@@ -30,7 +29,7 @@ export function toAuthError(
 	fallback: string
 ): Error {
 	if (!(error instanceof ApiError)) return error instanceof Error ? error : new Error(fallback);
-	if (error.status === 0) return new AuthError(NETWORK_MESSAGE, undefined, error.reason);
+	if (error.status === 0) return new AuthError(t('auth.errors.network'), undefined, error.reason);
 	if (error.status === 429) {
 		const retryAfterSeconds = error.retryAfterSeconds ?? 60;
 		return new AuthError(
@@ -62,10 +61,10 @@ export async function login(payload: LoginPayload) {
 			error,
 			{
 				// A API não diferencia e-mail inexistente de senha errada, de propósito.
-				INVALID_CREDENTIALS: 'E-mail ou senha inválidos.',
-				TENANT_ACCESS_DENIED: 'Você não tem acesso a esta empresa.'
+				INVALID_CREDENTIALS: t('auth.errors.invalidCredentials'),
+				TENANT_ACCESS_DENIED: t('auth.errors.tenantAccessDenied')
 			},
-			'Não foi possível entrar. Tente novamente.'
+			t('auth.errors.loginFailed')
 		);
 	}
 }
@@ -91,11 +90,10 @@ export async function register(payload: RegisterPayload): Promise<void> {
 		throw toAuthError(
 			error,
 			{
-				USER_ALREADY_EXISTS: 'Já existe uma conta com este e-mail. Tente entrar.',
-				TENANT_ALREADY_EXISTS:
-					'Já existe uma empresa com este nome. Use outro nome ou peça um convite ao administrador.'
+				USER_ALREADY_EXISTS: t('auth.errors.userAlreadyExists'),
+				TENANT_ALREADY_EXISTS: t('auth.errors.tenantAlreadyExists')
 			},
-			'Não foi possível criar sua conta. Tente novamente.'
+			t('auth.errors.registerFailed')
 		);
 	}
 }
@@ -108,7 +106,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
 		});
 	} catch (error) {
 		if (error instanceof ApiError && error.status !== 0 && error.status !== 429) return;
-		throw toAuthError(error, {}, 'Não foi possível solicitar a redefinição. Tente novamente.');
+		throw toAuthError(error, {}, t('auth.errors.resetRequestFailed'));
 	}
 }
 
@@ -121,8 +119,8 @@ export async function resetPassword(token: string, password: string): Promise<vo
 	} catch (error) {
 		throw toAuthError(
 			error,
-			{ PASSWORD_RESET_TOKEN_INVALID: 'Link inválido ou expirado.' },
-			'Não foi possível alterar sua senha. Tente novamente.'
+			{ PASSWORD_RESET_TOKEN_INVALID: t('auth.errors.resetTokenInvalid') },
+			t('auth.errors.resetFailed')
 		);
 	}
 }

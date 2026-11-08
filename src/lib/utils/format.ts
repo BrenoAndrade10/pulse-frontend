@@ -1,29 +1,56 @@
+import { i18n, t } from '#lib/i18n/index.svelte.js';
+
 export const EMPTY_VALUE = '—';
 
-const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-const integer = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
-const decimal = new Intl.NumberFormat('pt-BR', {
-	minimumFractionDigits: 1,
-	maximumFractionDigits: 2
-});
-const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' });
-const shortDate = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
+const formatters = new Map<
+	string,
+	Intl.NumberFormat | Intl.DateTimeFormat | Intl.RelativeTimeFormat
+>();
+
+function formatter<T extends Intl.NumberFormat | Intl.DateTimeFormat | Intl.RelativeTimeFormat>(
+	id: string,
+	create: (locale: string) => T
+): T {
+	const locale = i18n.intl;
+	const key = `${locale}:${id}`;
+	let cached = formatters.get(key);
+
+	if (!cached) {
+		cached = create(locale);
+		formatters.set(key, cached);
+	}
+
+	return cached as T;
+}
+
+const currency = () =>
+	formatter('currency', (l) => new Intl.NumberFormat(l, { style: 'currency', currency: 'BRL' }));
+const integer = () =>
+	formatter('integer', (l) => new Intl.NumberFormat(l, { maximumFractionDigits: 0 }));
+const decimal = () =>
+	formatter(
+		'decimal',
+		(l) => new Intl.NumberFormat(l, { minimumFractionDigits: 1, maximumFractionDigits: 2 })
+	);
+const date = () => formatter('date', (l) => new Intl.DateTimeFormat(l, { dateStyle: 'short' }));
+const shortDate = () =>
+	formatter('shortDate', (l) => new Intl.DateTimeFormat(l, { day: '2-digit', month: '2-digit' }));
 
 type Value = number | null | undefined;
 
-export const formatCurrency = (v: Value) => (v == null ? EMPTY_VALUE : currency.format(v));
-export const formatNumber = (v: Value) => (v == null ? EMPTY_VALUE : integer.format(v));
-export const formatRoas = (v: Value) => (v == null ? EMPTY_VALUE : `${decimal.format(v)}x`);
+export const formatCurrency = (v: Value) => (v == null ? EMPTY_VALUE : currency().format(v));
+export const formatNumber = (v: Value) => (v == null ? EMPTY_VALUE : integer().format(v));
+export const formatRoas = (v: Value) => (v == null ? EMPTY_VALUE : `${decimal().format(v)}x`);
 
 export function formatDelta(v: number) {
 	const sign = v > 0 ? '+' : '';
-	return `${sign}${decimal.format(v)}%`;
+	return `${sign}${decimal().format(v)}%`;
 }
 
 /** Datas no formato ISO (yyyy-mm-dd ou completo). */
-export const formatDate = (iso: string) => date.format(new Date(iso));
+export const formatDate = (iso: string) => date().format(new Date(iso));
 export const formatShortDate = (iso: string) =>
-	shortDate.format(new Date(`${iso.slice(0, 10)}T12:00:00`));
+	shortDate().format(new Date(`${iso.slice(0, 10)}T12:00:00`));
 
 /** Converte entrada no padrão brasileiro ("1.234,56") em número. Vazio → null, inválido → NaN. */
 export function parseDecimal(input: string): number | null {
@@ -44,30 +71,34 @@ export function initials(name: string) {
 	return (first + last).toUpperCase();
 }
 
-const compactCurrency = new Intl.NumberFormat('pt-BR', {
-	style: 'currency',
-	currency: 'BRL',
-	notation: 'compact',
-	maximumFractionDigits: 1
-});
+const compactCurrency = () =>
+	formatter(
+		'compactCurrency',
+		(l) =>
+			new Intl.NumberFormat(l, {
+				style: 'currency',
+				currency: 'BRL',
+				notation: 'compact',
+				maximumFractionDigits: 1
+			})
+	);
 
-/** Versão curta para eixos de gráfico (ex.: "R$ 6 mil"). */
-export const formatCurrencyCompact = (v: number) => compactCurrency.format(v);
+export const formatCurrencyCompact = (v: number) => compactCurrency().format(v);
 
-const relative = new Intl.RelativeTimeFormat('pt-BR', { numeric: 'auto' });
+const relative = () =>
+	formatter('relative', (l) => new Intl.RelativeTimeFormat(l, { numeric: 'auto' }));
 const RELATIVE_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
 	['day', 86_400],
 	['hour', 3_600],
 	['minute', 60]
 ];
 
-/** "agora mesmo", "há 5 minutos", "ontem"... */
 export function formatRelativeTime(iso: string, now = Date.now()): string {
 	const seconds = Math.round((new Date(iso).getTime() - now) / 1000);
-	if (Math.abs(seconds) < 60) return 'agora mesmo';
+	if (Math.abs(seconds) < 60) return t('common.time.justNow');
 
 	for (const [unit, size] of RELATIVE_UNITS) {
-		if (Math.abs(seconds) >= size) return relative.format(Math.round(seconds / size), unit);
+		if (Math.abs(seconds) >= size) return relative().format(Math.round(seconds / size), unit);
 	}
-	return relative.format(seconds, 'second');
+	return relative().format(seconds, 'second');
 }

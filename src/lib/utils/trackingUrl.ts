@@ -1,3 +1,4 @@
+import { t } from '#lib/i18n/index.svelte.js';
 export type ParsedPageUrl =
 	{ ok: true; url: string; hostname: string; path: string } | { ok: false; error: string };
 
@@ -8,7 +9,7 @@ export function parsePageUrl(
 	{ allowLocal = import.meta.env.DEV }: { allowLocal?: boolean } = {}
 ): ParsedPageUrl {
 	const value = input.trim();
-	if (!value) return { ok: false, error: 'Cole o link da página.' };
+	if (!value) return { ok: false, error: t('tracking.urlErrors.empty') };
 
 	const hasProtocol = /^[a-z][a-z\d+.-]*:\/\//i.test(value);
 	const looksLocal = /^(localhost|127\.0\.0\.1)(:|\/|$)/i.test(value);
@@ -20,7 +21,7 @@ export function parsePageUrl(
 	try {
 		url = new URL(withProtocol);
 	} catch {
-		return { ok: false, error: 'Esse link não parece válido. Ex.: https://meusite.com.br/pagina' };
+		return { ok: false, error: t('tracking.urlErrors.invalid') };
 	}
 
 	if (allowLocal && LOCAL_HOSTS.has(url.hostname) && /^https?:$/.test(url.protocol)) {
@@ -36,11 +37,11 @@ export function parsePageUrl(
 	if (url.protocol !== 'https:') {
 		return {
 			ok: false,
-			error: 'Use uma página com https://. O pixel só funciona em sites seguros.'
+			error: t('tracking.urlErrors.insecure')
 		};
 	}
 	if (!url.hostname.includes('.') || url.hostname === 'localhost') {
-		return { ok: false, error: 'Use o endereço público da página, como meusite.com.br.' };
+		return { ok: false, error: t('tracking.urlErrors.notPublic') };
 	}
 
 	url.hash = '';

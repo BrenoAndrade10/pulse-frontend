@@ -4,25 +4,28 @@
 	import Card from '#lib/components/ui/Card.svelte';
 	import EmptyState from '#lib/components/ui/EmptyState.svelte';
 	import { APP_NAME } from '#lib/config.js';
+	import { t } from '#lib/i18n/index.svelte.js';
 </script>
 
 <svelte:head>
-	<title>Relatórios · {APP_NAME}</title>
+	<title>{t('misc.placeholders.reports.title')} · {APP_NAME}</title>
 </svelte:head>
 
 <PageHeader
-	title="Relatórios"
-	description="Relatórios de performance por expert, campanha e período."
+	title={t('misc.placeholders.reports.title')}
+	description={t('misc.placeholders.reports.description')}
 />
 
 <Card>
 	<EmptyState
 		icon="bar-chart"
-		title="Nenhum relatório disponível"
-		description="Os relatórios ficam disponíveis assim que houver dados de campanhas importados."
+		title={t('misc.placeholders.reports.emptyTitle')}
+		description={t('misc.placeholders.reports.emptyDescription')}
 	>
 		{#snippet action()}
-			<a class={buttonClass({ variant: 'secondary' })} href="/dashboard">Ir para o dashboard</a>
+			<a class={buttonClass({ variant: 'secondary' })} href="/dashboard"
+				>{t('misc.placeholders.reports.goToDashboard')}</a
+			>
 		{/snippet}
 	</EmptyState>
 </Card>

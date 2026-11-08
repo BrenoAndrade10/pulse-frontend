@@ -1,5 +1,6 @@
 import { ApiError } from '#lib/api/http.js';
 import { apiRequest } from '#lib/api/client.js';
+import { t, type MessageKey } from '#lib/i18n/index.svelte.js';
 import type { WhatsAppConnection } from '#lib/types.js';
 
 export type WhatsAppConnectionInput = {
@@ -26,22 +27,23 @@ export function disconnectWhatsApp(expertId: string): Promise<void> {
 	return apiRequest<void>(`/experts/${expertId}/whatsapp/connection`, { method: 'DELETE' });
 }
 
-const ERROR_MESSAGES: Record<string, string> = {
-	WHATSAPP_NOT_CONFIGURED: 'O WhatsApp ainda não foi configurado nesta instalação.',
-	WHATSAPP_ACCOUNT_NOT_AUTHORIZED:
-		'Esta conta do WhatsApp não está autorizada para esta instalação.',
-	WHATSAPP_NUMBER_ALREADY_CONNECTED: 'Este número do WhatsApp já está conectado a outro expert.'
+const ERROR_MESSAGES: Record<string, MessageKey> = {
+	WHATSAPP_NOT_CONFIGURED: 'integrations.whatsapp.errors.notConfigured',
+	WHATSAPP_ACCOUNT_NOT_AUTHORIZED: 'integrations.whatsapp.errors.notAuthorized',
+	WHATSAPP_NUMBER_ALREADY_CONNECTED: 'integrations.whatsapp.errors.numberAlreadyConnected'
 };
 
 export function whatsappConnectionErrorMessage(error: unknown): string {
 	if (error instanceof ApiError) {
-		return (
-			ERROR_MESSAGES[error.reason] ??
-			(error.status === 0
-				? 'Não foi possível acessar o servidor. Verifique sua conexão e tente novamente.'
-				: 'Não foi possível concluir a operação com o WhatsApp. Tente novamente.')
+		const key = ERROR_MESSAGES[error.reason];
+		if (key) return t(key);
+
+		return t(
+			error.status === 0
+				? 'integrations.whatsapp.errors.network'
+				: 'integrations.whatsapp.errors.generic'
 		);
 	}
 
-	return 'Não foi possível concluir a operação com o WhatsApp. Tente novamente.';
+	return t('integrations.whatsapp.errors.generic');
 }

@@ -90,12 +90,15 @@ export type CommentAutomationInput = Pick<
 export type LaunchStatus =
 	'draft' | 'planned' | 'in_progress' | 'completed' | 'canceled' | 'archived';
 
+export type LaunchType = 'internal' | 'seed' | 'perpetual' | 'webinar' | 'other';
+
 export type Launch = {
 	id: string;
 	expertId: string;
 	name: string;
 	description: string | null;
 	status: LaunchStatus;
+	type: LaunchType;
 	startsAt: string | null;
 	endsAt: string | null;
 	timezone: string;
@@ -105,7 +108,7 @@ export type Launch = {
 
 export type LaunchInput = Pick<
 	Launch,
-	'name' | 'description' | 'status' | 'startsAt' | 'endsAt' | 'timezone'
+	'expertId' | 'name' | 'description' | 'status' | 'type' | 'startsAt' | 'endsAt' | 'timezone'
 >;
 
 export type Period = '7d' | '30d' | '90d';

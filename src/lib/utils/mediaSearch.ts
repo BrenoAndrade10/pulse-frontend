@@ -1,3 +1,4 @@
+import type { MessageKey } from '#lib/i18n/index.svelte.js';
 import type { CommentAutomation, InstagramPost } from '#lib/types.js';
 import { mediaKind, type MediaKind } from './instagramMedia.js';
 
@@ -5,25 +6,25 @@ export type DmFilter = 'all' | 'active' | 'paused' | 'none';
 export type KindFilter = 'all' | MediaKind;
 export type MediaSort = 'recent' | 'comments' | 'likes';
 
-export const KIND_FILTER_OPTIONS: { value: KindFilter; label: string }[] = [
-	{ value: 'all', label: 'Todos os tipos' },
-	{ value: 'reel', label: 'Reels' },
-	{ value: 'photo', label: 'Fotos' },
-	{ value: 'carousel', label: 'Carrosséis' },
-	{ value: 'video', label: 'Vídeos' }
+export const KIND_FILTER_OPTIONS: { value: KindFilter; labelKey: MessageKey }[] = [
+	{ value: 'all', labelKey: 'reels.filters.kind.all' },
+	{ value: 'reel', labelKey: 'reels.filters.kind.reel' },
+	{ value: 'photo', labelKey: 'reels.filters.kind.photo' },
+	{ value: 'carousel', labelKey: 'reels.filters.kind.carousel' },
+	{ value: 'video', labelKey: 'reels.filters.kind.video' }
 ];
 
-export const DM_FILTER_OPTIONS: { value: DmFilter; label: string }[] = [
-	{ value: 'all', label: 'Com ou sem DM' },
-	{ value: 'active', label: 'Com DM ativa' },
-	{ value: 'paused', label: 'Com DM pausada' },
-	{ value: 'none', label: 'Sem DM automática' }
+export const DM_FILTER_OPTIONS: { value: DmFilter; labelKey: MessageKey }[] = [
+	{ value: 'all', labelKey: 'reels.filters.dm.all' },
+	{ value: 'active', labelKey: 'reels.filters.dm.active' },
+	{ value: 'paused', labelKey: 'reels.filters.dm.paused' },
+	{ value: 'none', labelKey: 'reels.filters.dm.none' }
 ];
 
-export const MEDIA_SORT_OPTIONS: { value: MediaSort; label: string }[] = [
-	{ value: 'recent', label: 'Mais recentes' },
-	{ value: 'comments', label: 'Mais comentados' },
-	{ value: 'likes', label: 'Mais curtidos' }
+export const MEDIA_SORT_OPTIONS: { value: MediaSort; labelKey: MessageKey }[] = [
+	{ value: 'recent', labelKey: 'reels.filters.sort.recent' },
+	{ value: 'comments', labelKey: 'reels.filters.sort.comments' },
+	{ value: 'likes', labelKey: 'reels.filters.sort.likes' }
 ];
 
 const normalize = (value: string) => value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();

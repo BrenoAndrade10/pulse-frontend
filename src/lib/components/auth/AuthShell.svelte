@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import LanguageSelect from '#lib/components/app/LanguageSelect.svelte';
 	import BrandPanel from './BrandPanel.svelte';
 	import Logo from './Logo.svelte';
 
@@ -20,10 +21,14 @@
 	<main
 		class={[
 			'relative flex items-center justify-center px-6 py-12',
-			'max-[961px]:items-start max-[961px]:px-4 max-[961px]:py-10',
+			'max-[961px]:items-start max-[961px]:px-4 max-[961px]:pt-16 max-[961px]:pb-10',
 			'max-[961px]:bg-[image:radial-gradient(600px_300px_at_100%_0%,rgb(124_92_255/0.18),transparent_70%),radial-gradient(500px_300px_at_0%_100%,rgb(255_77_157/0.1),transparent_70%)]'
 		]}
 	>
+		<div class="absolute top-4 right-4 w-[150px]">
+			<LanguageSelect id="auth-language" showLabel={false} />
+		</div>
+
 		<div class="w-full max-w-[400px]">
 			<div class="mb-8 hidden max-[961px]:block">
 				<Logo />

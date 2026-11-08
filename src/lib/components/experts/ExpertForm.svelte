@@ -6,6 +6,7 @@
 	import { buttonClass } from '#lib/components/ui/button.js';
 	import Card from '#lib/components/ui/Card.svelte';
 	import TextField from '#lib/components/ui/TextField.svelte';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import type { Expert, ExpertInput } from '#lib/types.js';
 	import { META_INTEGRATIONS } from '#lib/utils/integrations.js';
 	import { validateEmail, validateRequired } from '#lib/utils/validation.js';
@@ -35,7 +36,7 @@
 	let formError = $state<string>();
 
 	const errors = $derived({
-		name: validateRequired(form.name, 'Informe o nome do expert.'),
+		name: validateRequired(form.name, t('experts.form.nameRequired')),
 		email: validateEmail(form.email)
 	});
 
@@ -56,7 +57,7 @@
 				email: form.email.trim()
 			});
 		} catch {
-			formError = 'Não foi possível salvar o expert. Tente novamente.';
+			formError = t('experts.form.saveError');
 		} finally {
 			submitting = false;
 		}
@@ -68,26 +69,26 @@
 		<Alert>{formError}</Alert>
 	{/if}
 
-	<Card title="Dados do expert" description="Informações de identificação.">
+	<Card title={t('experts.form.dataTitle')} description={t('experts.form.dataDescription')}>
 		<div class="grid grid-cols-2 gap-x-5 gap-y-4.5 max-[721px]:grid-cols-1">
 			<TextField
 				id="name"
-				label="Nome *"
-				placeholder="Ex.: Ana Souza"
+				label={t('experts.form.nameLabel')}
+				placeholder={t('experts.form.namePlaceholder')}
 				bind:value={form.name}
 				error={show(errors.name)}
 			/>
 			<TextField
 				id="commercial-name"
-				label="Nome comercial"
-				placeholder="Ex.: Método Ana Souza"
+				label={t('experts.form.commercialNameLabel')}
+				placeholder={t('experts.form.commercialNamePlaceholder')}
 				bind:value={form.commercialName}
 			/>
 			<TextField
 				id="email"
 				type="email"
-				label="E-mail *"
-				placeholder="contato@expert.com"
+				label={t('experts.form.emailLabel')}
+				placeholder={t('experts.form.emailPlaceholder')}
 				bind:value={form.email}
 				error={show(errors.email)}
 			/>
@@ -96,8 +97,8 @@
 
 	<Card
 		id="integrations"
-		title="Integrações da Meta"
-		description="Cada canal tem uma autorização própria na Meta: conectar um não conecta os outros."
+		title={t('experts.form.integrationsTitle')}
+		description={t('experts.form.integrationsDescription')}
 	>
 		<div class="flex flex-col gap-3">
 			{#each META_INTEGRATIONS as integration (integration.channel)}
@@ -113,13 +114,13 @@
 				{:else}
 					<IntegrationConnectionCard
 						{integration}
-						badge={{ label: 'Em breve', variant: 'neutral' }}
-						detail={integration.description}
+						badge={{ label: t('integrations.badges.soon'), variant: 'neutral' }}
+						detail={t(integration.description)}
 					>
 						{#snippet actions()}
 							<Button size="sm" variant="secondary" disabled>
 								<Icon name="facebook" size={15} />
-								{integration.connectLabel}
+								{t(integration.connectLabel)}
 							</Button>
 						{/snippet}
 					</IntegrationConnectionCard>
@@ -129,7 +130,7 @@
 	</Card>
 
 	<div class="flex justify-end gap-2.5">
-		<a class={buttonClass({ variant: 'ghost' })} href={cancelHref}>Cancelar</a>
+		<a class={buttonClass({ variant: 'ghost' })} href={cancelHref}>{t('common.actions.cancel')}</a>
 		<Button type="submit" loading={submitting}>{submitLabel}</Button>
 	</div>
 </form>

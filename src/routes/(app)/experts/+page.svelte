@@ -6,6 +6,7 @@
 	import EmptyState from '#lib/components/ui/EmptyState.svelte';
 	import Icon from '#lib/components/ui/Icon.svelte';
 	import { APP_NAME } from '#lib/config.js';
+	import { i18n, t } from '#lib/i18n/index.svelte.js';
 	import { CONNECTION_STATUS } from '#lib/utils/integrations.js';
 	import { EMPTY_VALUE, initials } from '#lib/utils/format.js';
 	import type { PageProps } from './$types';
@@ -20,23 +21,25 @@
 	const muted = 'text-[13px] text-fg-muted';
 
 	const filtered = $derived.by(() => {
-		const term = search.trim().toLocaleLowerCase('pt-BR');
+		const term = search.trim().toLocaleLowerCase(i18n.intl);
 		if (!term) return data.experts;
 		return data.experts.filter((e) =>
 			[e.name, e.email, e.commercialName ?? ''].some((v) =>
-				v.toLocaleLowerCase('pt-BR').includes(term)
+				v.toLocaleLowerCase(i18n.intl).includes(term)
 			)
 		);
 	});
 </script>
 
 <svelte:head>
-	<title>Experts · {APP_NAME}</title>
+	<title>{t('experts.title')} · {APP_NAME}</title>
 </svelte:head>
 
-<PageHeader title="Experts" description="Gerencie os experts da sua operação e suas integrações.">
+<PageHeader title={t('experts.title')} description={t('experts.list.description')}>
 	{#snippet actions()}
-		<a class={buttonClass()} href="/experts/new"><Icon name="plus" size={16} />Novo expert</a>
+		<a class={buttonClass()} href="/experts/new"
+			><Icon name="plus" size={16} />{t('experts.list.newExpert')}</a
+		>
 	{/snippet}
 </PageHeader>
 
@@ -44,12 +47,12 @@
 	<Card>
 		<EmptyState
 			icon="users"
-			title="Nenhum expert cadastrado"
-			description="Cadastre o primeiro expert para conectar suas plataformas."
+			title={t('experts.list.emptyTitle')}
+			description={t('experts.list.emptyDescription')}
 		>
 			{#snippet action()}
 				<a class={buttonClass()} href="/experts/new">
-					<Icon name="plus" size={16} />Cadastrar expert
+					<Icon name="plus" size={16} />{t('experts.list.register')}
 				</a>
 			{/snippet}
 		</EmptyState>
@@ -63,17 +66,16 @@
 				class="flex h-10 w-[min(360px,100%)] items-center gap-2.5 rounded-md border border-border bg-surface px-3 text-fg-subtle focus-within:border-primary focus-within:shadow-focus"
 			>
 				<Icon name="search" size={16} />
-				<span class="sr-only">Buscar experts</span>
+				<span class="sr-only">{t('experts.list.searchLabel')}</span>
 				<input
 					class="min-w-0 flex-1 border-0 bg-transparent px-0.5 py-px text-[14px] text-fg outline-none placeholder:text-[#757575] focus-visible:shadow-none"
 					type="search"
-					placeholder="Buscar por nome, e-mail ou nome comercial"
+					placeholder={t('experts.list.searchPlaceholder')}
 					bind:value={search}
 				/>
 			</label>
 			<span class="text-[13px] whitespace-nowrap text-fg-subtle max-[561px]:hidden">
-				{data.experts.length}
-				{data.experts.length === 1 ? 'expert' : 'experts'}
+				{t('experts.list.count', { count: data.experts.length })}
 			</span>
 		</div>
 
@@ -82,11 +84,11 @@
 				<table class="w-full border-collapse text-[14px]">
 					<thead>
 						<tr>
-							<th class={th}>Expert</th>
-							<th class={th}>Nome comercial</th>
-							<th class={th}>Status</th>
-							<th class={th}>Instagram</th>
-							<th class={th}><span class="sr-only">Ações</span></th>
+							<th class={th}>{t('experts.list.columns.expert')}</th>
+							<th class={th}>{t('experts.list.columns.commercialName')}</th>
+							<th class={th}>{t('experts.list.columns.status')}</th>
+							<th class={th}>{t('experts.list.columns.instagram')}</th>
+							<th class={th}><span class="sr-only">{t('experts.list.columns.actions')}</span></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -104,7 +106,7 @@
 										>
 										<span class="flex flex-col">
 											<span class="font-bold group-hover:text-primary-hover">{expert.name}</span>
-											<span class={muted}>{expert.email || 'Sem e-mail'}</span>
+											<span class={muted}>{expert.email || t('experts.list.noEmail')}</span>
 										</span>
 									</a>
 								</td>
@@ -113,19 +115,22 @@
 								>
 								<td class={[td, 'group-last/row:border-b-0']}>
 									<Badge variant={expert.status === 'active' ? 'success' : 'neutral'}>
-										{expert.status === 'active' ? 'Ativo' : 'Inativo'}
+										{expert.status === 'active'
+											? t('experts.list.active')
+											: t('experts.list.inactive')}
 									</Badge>
 								</td>
 								<td class={[td, 'group-last/row:border-b-0']}
-									><Badge variant={status.variant}>{status.label}</Badge></td
+									><Badge variant={status.variant}>{t(status.label)}</Badge></td
 								>
 								<td class={[td, 'text-right group-last/row:border-b-0']}>
 									<a
 										class={buttonClass({ variant: 'ghost', size: 'sm' })}
 										href="/experts/{expert.id}"
-										aria-label="Configurar {expert.name}"
+										aria-label={t('experts.list.configureAria', { name: expert.name })}
 									>
-										Configurar <Icon name="chevron-right" size={15} />
+										{t('experts.list.configure')}
+										<Icon name="chevron-right" size={15} />
 									</a>
 								</td>
 							</tr>
@@ -134,7 +139,7 @@
 				</table>
 			</div>
 		{:else}
-			<EmptyState compact icon="search" title="Nenhum expert encontrado" />
+			<EmptyState compact icon="search" title={t('experts.list.notFound')} />
 		{/if}
 	</Card>
 {/if}

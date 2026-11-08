@@ -5,6 +5,7 @@
 	import Alert from '#lib/components/ui/Alert.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Icon from '#lib/components/ui/Icon.svelte';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import {
 		connectInstagram,
 		disconnectInstagram,
@@ -16,7 +17,7 @@
 	} from '#lib/services/experts.js';
 	import type { ExpertConnection } from '#lib/types.js';
 	import { formatDate } from '#lib/utils/format.js';
-	import { CONNECTION_STATUS, metaIntegration } from '#lib/utils/integrations.js';
+	import { connectionState, INTEGRATION_STATE, metaIntegration } from '#lib/utils/integrations.js';
 	import IntegrationConnectionCard from './IntegrationConnectionCard.svelte';
 
 	type Props = {
@@ -27,7 +28,11 @@
 	let { expertId, connection }: Props = $props();
 
 	const integration = metaIntegration('instagram');
-	const status = $derived(CONNECTION_STATUS[connection?.status ?? 'disconnected']);
+	const status = $derived.by(() => {
+		const entry = INTEGRATION_STATE[connectionState(connection?.status ?? 'disconnected')];
+
+		return { label: t(entry.label), variant: entry.variant };
+	});
 	const isConnected = $derived(connection?.status === 'connected');
 	const isExpired = $derived(connection?.status === 'expired');
 
@@ -36,21 +41,21 @@
 	let feedback = $state<{ variant: 'success' | 'error'; text: string }>();
 
 	const detail = $derived.by(() => {
-		if (!expertId) return 'Salve o expert para poder conectar a conta.';
-		if (waitingAuthorization) return 'Conclua a autorização na janela do Instagram.';
+		if (!expertId) return t('integrations.instagram.saveFirst');
+		if (waitingAuthorization) return t('integrations.instagram.waitingAuthorization');
 		if (isConnected && connection?.connectedAt) {
-			return `Conectada em ${formatDate(connection.connectedAt)}`;
+			return t('integrations.instagram.connectedAt', { date: formatDate(connection.connectedAt) });
 		}
-		if (isConnected) return 'Conta profissional conectada a este expert.';
-		if (isExpired) return 'A autorização expirou. Reconecte para voltar a sincronizar.';
-		return 'Autorize o acesso à conta profissional do Instagram.';
+		if (isConnected) return t('integrations.instagram.connected');
+		if (isExpired) return t('integrations.instagram.expired');
+		return t('integrations.instagram.authorize');
 	});
 
 	function showResult(result: Pick<InstagramOAuthResult, 'status' | 'reason'>) {
 		waitingAuthorization = false;
 		feedback =
 			result.status === 'connected'
-				? { variant: 'success', text: 'Conta do Instagram conectada.' }
+				? { variant: 'success', text: t('integrations.instagram.connectedSuccess') }
 				: { variant: 'error', text: instagramOAuthErrorMessage(result.reason) };
 	}
 
@@ -89,7 +94,7 @@
 				text:
 					err instanceof IntegrationUnavailableError
 						? err.message
-						: 'Não foi possível conectar a conta. Tente novamente.'
+						: t('integrations.instagram.connectFailed')
 			};
 		} finally {
 			busy = false;
@@ -106,7 +111,7 @@
 		} catch {
 			feedback = {
 				variant: 'error',
-				text: 'Não foi possível desconectar a conta. Tente novamente.'
+				text: t('integrations.instagram.disconnectFailed')
 			};
 		} finally {
 			busy = false;
@@ -123,15 +128,15 @@
 	{#snippet actions()}
 		{#if isConnected}
 			<Button variant="secondary" size="sm" loading={busy} onclick={handleConnect}>
-				Reconectar
+				{t('integrations.actions.reconnect')}
 			</Button>
 			<Button variant="ghost" size="sm" disabled={busy} onclick={handleDisconnect}>
-				Desconectar
+				{t('integrations.actions.disconnect')}
 			</Button>
 		{:else}
 			<Button size="sm" loading={busy} disabled={!expertId} onclick={handleConnect}>
 				<Icon name="instagram" size={15} />
-				{isExpired ? 'Reconectar Instagram' : integration.connectLabel}
+				{isExpired ? t('integrations.instagram.reconnect') : t(integration.connectLabel)}
 			</Button>
 		{/if}
 	{/snippet}

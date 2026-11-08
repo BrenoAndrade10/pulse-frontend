@@ -1,7 +1,13 @@
 import { error, redirect } from '@sveltejs/kit';
 import { ApiError } from '#lib/api/http.js';
-import { ensureSession } from '#lib/auth/session.svelte.js';
-import { getContextSelection, reconcileContextSelection } from '#lib/context/selection.js';
+import { t } from '#lib/i18n/index.svelte.js';
+import { auth, ensureSession } from '#lib/auth/session.svelte.js';
+import {
+	contextScope,
+	getContextSelection,
+	reconcileContextSelection,
+	resolveContextSelection
+} from '#lib/context/selection.js';
 import { listExperts } from '#lib/services/experts.js';
 import { listLaunches } from '#lib/services/launches.js';
 import type { Expert, Launch } from '#lib/types.js';
@@ -22,7 +28,7 @@ export const load: LayoutLoad = async ({ url, untrack }) => {
 		authenticated = await ensureSession();
 	} catch (err) {
 		if (err instanceof ApiError && err.status === 0) {
-			error(503, 'Não foi possível conectar ao servidor.');
+			error(503, t('common.error.serverUnavailable'));
 		}
 
 		throw err;
@@ -42,20 +48,16 @@ export const load: LayoutLoad = async ({ url, untrack }) => {
 			expertsBackendUnavailable = true;
 		} else throw err;
 	}
-	const selection = getContextSelection();
-	const requestedExpertId = selection.expertId;
-	const selectedExpert =
-		experts.find((expert) => expert.id === requestedExpertId) ?? experts[0] ?? null;
+	const scope = contextScope(auth.user?.id ?? '', auth.activeTenant?.tenantId ?? '');
+	const requested = getContextSelection(scope);
+	const requestedExpert = experts.find((expert) => expert.id === requested.expertId) ?? null;
 	let launches: Launch[] = [];
 	let launchesBackendUnavailable = false;
 
-	if (selectedExpert) {
+	if (requestedExpert) {
 		try {
-			launches = await listLaunches(selectedExpert.id);
+			launches = await listLaunches(requestedExpert.id);
 		} catch (err) {
-			// Launches is an optional module for the rest of the app. A backend that
-			// has not received its launches migration yet can answer 5xx here; do not
-			// let that shared request take every authenticated route down with it.
 			if (
 				err instanceof ApiError &&
 				(err.status === 0 || err.status === 404 || err.status >= 500)
@@ -65,18 +67,18 @@ export const load: LayoutLoad = async ({ url, untrack }) => {
 		}
 	}
 
-	const requestedLaunchId = selection.launchId;
-	const selectedLaunch =
-		launches.find((launch) => launch.id === requestedLaunchId) ?? launches[0] ?? null;
+	const selection = resolveContextSelection(requested, experts, launches);
 
-	reconcileContextSelection(selectedExpert?.id ?? null, selectedLaunch?.id ?? null);
+	if (!expertsBackendUnavailable && !launchesBackendUnavailable) {
+		reconcileContextSelection(selection);
+	}
 
 	return {
 		experts,
 		expertsBackendUnavailable,
 		launches,
 		launchesBackendUnavailable,
-		selectedExpertId: selectedExpert?.id ?? null,
-		selectedLaunchId: selectedLaunch?.id ?? null
+		selectedExpertId: selection.expertId,
+		selectedLaunchId: selection.launchId
 	};
 };

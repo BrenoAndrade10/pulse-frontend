@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '#lib/i18n/index.svelte.js';
 	import AutomationEditor from '#lib/components/whatsapp/AutomationEditor.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import EmptyState from '#lib/components/ui/EmptyState.svelte';
@@ -21,9 +22,10 @@
 	<Card
 		><EmptyState
 			icon="users"
-			title="Nenhum expert cadastrado"
-			description="Cadastre um expert antes de criar uma automação."
-			>{#snippet action()}<a class={buttonClass()} href="/experts/new">Cadastrar expert</a
+			title={t('whatsapp.page.noExpert.title')}
+			description={t('whatsapp.page.noExpert.descriptionNew')}
+			>{#snippet action()}<a class={buttonClass()} href="/experts/new"
+					>{t('whatsapp.page.noExpert.action')}</a
 				>{/snippet}</EmptyState
 		></Card
 	>
@@ -39,7 +41,7 @@
 			class="h-96 rounded-lg border border-border bg-bg-elevated motion-safe:animate-pulse"
 		></div>
 	</div>
-	<span class="sr-only" aria-live="polite">Carregando editor</span>
+	<span class="sr-only" aria-live="polite">{t('whatsapp.page.loadingEditor')}</span>
 {:else if editor}
 	<AutomationEditor
 		expert={data.expert}

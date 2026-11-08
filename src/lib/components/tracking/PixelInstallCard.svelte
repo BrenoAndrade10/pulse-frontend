@@ -2,6 +2,7 @@
 	import Badge from '#lib/components/ui/Badge.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Icon from '#lib/components/ui/Icon.svelte';
+	import { t, type MessageKey } from '#lib/i18n/index.svelte.js';
 	import type { TrackingPixel } from '#lib/types.js';
 	import { formatRelativeTime } from '#lib/utils/format.js';
 
@@ -11,32 +12,32 @@
 
 	type Guide = 'html' | 'wordpress' | 'gtm';
 
-	const GUIDES: { id: Guide; label: string; steps: string[] }[] = [
+	const GUIDES: { id: Guide; label: MessageKey; steps: MessageKey[] }[] = [
 		{
 			id: 'html',
-			label: 'HTML',
+			label: 'tracking.install.guides.html.label',
 			steps: [
-				'Abra o HTML da página (ou o modelo usado por todas as páginas).',
-				'Cole o código logo antes de </head>.',
-				'Publique e abra a página uma vez para o pixel enviar o primeiro evento.'
+				'tracking.install.guides.html.steps.one',
+				'tracking.install.guides.html.steps.two',
+				'tracking.install.guides.html.steps.three'
 			]
 		},
 		{
 			id: 'wordpress',
-			label: 'WordPress',
+			label: 'tracking.install.guides.wordpress.label',
 			steps: [
-				'Instale um plugin de códigos, como WPCode, ou use o campo de scripts do seu tema.',
-				'Adicione o código no cabeçalho (Header) de todas as páginas.',
-				'Salve, limpe o cache do site e abra a página uma vez.'
+				'tracking.install.guides.wordpress.steps.one',
+				'tracking.install.guides.wordpress.steps.two',
+				'tracking.install.guides.wordpress.steps.three'
 			]
 		},
 		{
 			id: 'gtm',
-			label: 'Google Tag Manager',
+			label: 'tracking.install.guides.gtm.label',
 			steps: [
-				'Crie uma tag do tipo HTML personalizado e cole o código.',
-				'Use o acionador All Pages (todas as páginas).',
-				'Publique o contêiner e abra a página uma vez.'
+				'tracking.install.guides.gtm.steps.one',
+				'tracking.install.guides.gtm.steps.two',
+				'tracking.install.guides.gtm.steps.three'
 			]
 		}
 	];
@@ -69,18 +70,20 @@
 >
 	<div class="flex flex-wrap items-start justify-between gap-3">
 		<div>
-			<h2 id="install-title" class="text-[17px] font-bold">Instalação do pixel</h2>
+			<h2 id="install-title" class="text-[17px] font-bold">{t('tracking.install.title')}</h2>
 			<p class="mt-1 text-[13.5px] text-fg-muted">
-				Instale uma vez em todas as páginas que você quer medir.
+				{t('tracking.install.description')}
 			</p>
 		</div>
 		<span class="flex flex-col items-end gap-1">
 			<Badge variant={installed ? 'success' : 'warning'}>
-				{installed ? 'Instalado' : 'Aguardando primeiro evento'}
+				{installed ? t('tracking.install.installed') : t('tracking.install.waiting')}
 			</Badge>
 			{#if pixel.installation.lastEventAt}
 				<span class="text-[12px] text-fg-subtle">
-					Último evento {formatRelativeTime(pixel.installation.lastEventAt)}
+					{t('tracking.install.lastEvent', {
+						time: formatRelativeTime(pixel.installation.lastEventAt)
+					})}
 				</span>
 			{/if}
 		</span>
@@ -96,12 +99,14 @@
 			variant="secondary"
 			size="sm"
 			onclick={copySnippet}
-			aria-label="Copiar código do pixel"
+			aria-label={t('tracking.install.copyAria')}
 		>
 			<Icon name={copied ? 'check' : 'copy'} size={14} />
-			{copied ? 'Copiado' : 'Copiar'}
+			{copied ? t('tracking.install.copied') : t('tracking.install.copy')}
 		</Button>
-		<span class="sr-only" aria-live="polite">{copied ? 'Código copiado' : ''}</span>
+		<span class="sr-only" aria-live="polite"
+			>{copied ? t('tracking.install.copiedAnnounce') : ''}</span
+		>
 	</div>
 
 	<div class="mt-5">
@@ -119,7 +124,7 @@
 					aria-controls="guide-panel"
 					onclick={() => (guide = item.id)}
 				>
-					{item.label}
+					{t(item.label)}
 				</button>
 			{/each}
 		</div>
@@ -131,7 +136,7 @@
 							class="grid size-5.5 shrink-0 place-items-center rounded-full bg-surface text-[11.5px] font-bold text-fg"
 							aria-hidden="true">{index + 1}</span
 						>
-						<span>{step}</span>
+						<span>{t(step)}</span>
 					</li>
 				{/each}
 			</ol>

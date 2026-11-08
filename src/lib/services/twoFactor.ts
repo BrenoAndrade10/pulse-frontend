@@ -2,6 +2,7 @@ import { ApiError, httpRequest } from '#lib/api/http.js';
 import { apiRequest } from '#lib/api/client.js';
 import { completeLogin } from '#lib/auth/session.svelte.js';
 import type { AuthResponse } from '#lib/auth/types.js';
+import { t } from '#lib/i18n/index.svelte.js';
 import { AuthError, toAuthError } from '#lib/services/auth.js';
 
 export type TwoFactorSetup = { otpauthUri: string; secret: string; expiresAt: string };
@@ -22,15 +23,15 @@ type ChallengeResult = AuthResponse & {
 	recoveryCodesRemaining?: number;
 };
 
-const messages = {
-	AUTH_CHALLENGE_INVALID: 'Sua verificação expirou. Entre novamente.',
-	TWO_FACTOR_CODE_INVALID: 'Código inválido. Confira e tente novamente.',
-	EMAIL_CODE_INVALID: 'Código inválido. Confira e tente novamente.',
-	EMAIL_LOGIN_CODE_INVALID: 'Código inválido. Confira e tente novamente.'
-};
+const messages = (): Record<string, string> => ({
+	AUTH_CHALLENGE_INVALID: t('auth.errors.challengeExpired'),
+	TWO_FACTOR_CODE_INVALID: t('auth.errors.codeInvalid'),
+	EMAIL_CODE_INVALID: t('auth.errors.codeInvalid'),
+	EMAIL_LOGIN_CODE_INVALID: t('auth.errors.codeInvalid')
+});
 
 function challengeError(error: unknown): Error {
-	return toAuthError(error, messages, 'Não foi possível concluir a verificação. Tente novamente.');
+	return toAuthError(error, messages(), t('auth.errors.verifyFailed'));
 }
 
 export async function verifyEmailChallenge(
@@ -90,7 +91,7 @@ export async function setupTwoFactor(): Promise<TwoFactorSetup> {
 			withCredentials: true
 		});
 	} catch (error) {
-		throw toAuthError(error, messages, 'Não foi possível iniciar a configuração. Tente novamente.');
+		throw toAuthError(error, messages(), t('auth.errors.setupFailed'));
 	}
 }
 
@@ -103,7 +104,7 @@ export async function confirmTwoFactor(code: string): Promise<string[]> {
 		});
 		return response.recoveryCodes;
 	} catch (error) {
-		throw toAuthError(error, messages, 'Não foi possível ativar o aplicativo autenticador.');
+		throw toAuthError(error, messages(), t('auth.errors.activateFailed'));
 	}
 }
 
@@ -117,9 +118,9 @@ export async function regenerateRecoveryCodes(code: string): Promise<string[]> {
 		return response.recoveryCodes;
 	} catch (error) {
 		if (error instanceof ApiError) {
-			throw toAuthError(error, messages, 'Não foi possível gerar novos códigos. Tente novamente.');
+			throw toAuthError(error, messages(), t('auth.errors.regenerateFailed'));
 		}
-		throw new AuthError('Não foi possível gerar novos códigos. Tente novamente.');
+		throw new AuthError(t('auth.errors.regenerateFailed'));
 	}
 }
 

@@ -1,4 +1,5 @@
 import { apiRequest } from '#lib/api/client.js';
+import { i18n, t, type MessageKey } from '#lib/i18n/index.svelte.js';
 import type { Expert, ExpertInput, ExpertStatus } from '#lib/types.js';
 
 export class IntegrationUnavailableError extends Error {}
@@ -13,12 +14,15 @@ export type InstagramOAuthResult = {
 	reason?: string;
 };
 
-const INSTAGRAM_OAUTH_ERRORS: Record<string, string> = {
-	denied: 'A autorização foi cancelada no Instagram.',
-	invalid_state: 'A autorização expirou. Clique em conectar e tente novamente.',
-	expert_not_found: 'Este expert não foi encontrado. Atualize a página e tente novamente.',
-	exchange_failed:
-		'O Instagram recusou a conexão. Confira se a conta é profissional e tente novamente.'
+const INSTAGRAM_OAUTH_ERRORS: Record<string, MessageKey> = {
+	denied: 'integrations.instagram.oauthErrors.denied',
+	invalid_state: 'integrations.instagram.oauthErrors.invalidState',
+	expert_not_found: 'integrations.instagram.oauthErrors.expertNotFound',
+	exchange_failed: 'integrations.instagram.oauthErrors.exchangeFailed',
+	missing_permissions: 'integrations.instagram.oauthErrors.missingPermissions',
+	no_instagram_account: 'integrations.instagram.oauthErrors.noInstagramAccount',
+	multiple_instagram_accounts: 'integrations.instagram.oauthErrors.multipleInstagramAccounts',
+	account_already_connected: 'integrations.instagram.oauthErrors.accountAlreadyConnected'
 };
 
 export function isInstagramOAuthResult(value: unknown): value is InstagramOAuthResult {
@@ -31,10 +35,9 @@ export function isInstagramOAuthResult(value: unknown): value is InstagramOAuthR
 }
 
 export function instagramOAuthErrorMessage(reason?: string | null): string {
-	return (
-		(reason && INSTAGRAM_OAUTH_ERRORS[reason]) ??
-		'Não foi possível conectar a conta do Instagram. Tente novamente.'
-	);
+	const key = reason ? INSTAGRAM_OAUTH_ERRORS[reason] : undefined;
+
+	return t(key ?? 'integrations.instagram.oauthErrors.generic');
 }
 
 type ExpertApiResponse = {
@@ -95,7 +98,7 @@ export async function listExperts(): Promise<Expert[]> {
 	]);
 	const experts = response.map((expert) => toExpert(expert, connections.get(expert.id)));
 
-	return experts.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+	return experts.sort((a, b) => a.name.localeCompare(b.name, i18n.intl));
 }
 
 export async function getExpert(id: string): Promise<Expert | null> {
@@ -136,9 +139,7 @@ export async function connectInstagram(expertId: string): Promise<void> {
 	);
 
 	if (!popup) {
-		throw new IntegrationUnavailableError(
-			'Não foi possível abrir o Instagram. Permita pop-ups para este site e tente novamente.'
-		);
+		throw new IntegrationUnavailableError(t('integrations.instagram.popupBlocked'));
 	}
 
 	popup.sessionStorage.setItem(INSTAGRAM_OAUTH_POPUP_FLAG, '1');
@@ -168,9 +169,7 @@ export async function connectInstagram(expertId: string): Promise<void> {
 
 	if (!redirectUrl) {
 		popup.close();
-		throw new IntegrationUnavailableError(
-			'O backend não retornou a URL de autorização do Instagram.'
-		);
+		throw new IntegrationUnavailableError(t('integrations.instagram.missingAuthorizationUrl'));
 	}
 
 	popup.location.replace(redirectUrl);

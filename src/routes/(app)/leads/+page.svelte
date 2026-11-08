@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import PageHeader from '#lib/components/app/PageHeader.svelte';
+	import SelectExpertState from '#lib/components/app/SelectExpertState.svelte';
 	import Alert from '#lib/components/ui/Alert.svelte';
 	import Badge from '#lib/components/ui/Badge.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
@@ -11,9 +12,10 @@
 	import Icon from '#lib/components/ui/Icon.svelte';
 	import Select from '#lib/components/ui/Select.svelte';
 	import { APP_NAME } from '#lib/config.js';
+	import { t } from '#lib/i18n/index.svelte.js';
 	import { deleteLead, exportLeads, listLeads } from '#lib/services/leads.js';
 	import type { Lead } from '#lib/types.js';
-	import { formatDate } from '#lib/utils/format.js';
+	import { formatDate, formatNumber } from '#lib/utils/format.js';
 	import { withQuery } from '#lib/utils/query.js';
 	import type { LeadsState } from './+page.js';
 	import type { PageProps } from './$types';
@@ -51,7 +53,7 @@
 
 	const launchNames = $derived(new Map(data.launches.map((launch) => [launch.id, launch.name])));
 	const launchOptions = $derived([
-		{ value: '', label: 'Todos os lançamentos' },
+		{ value: '', label: t('leads.filter.allLaunches') },
 		...data.launches.map((launch) => ({ value: launch.id, label: launch.name }))
 	]);
 	const filtering = $derived(Boolean(data.launchId || data.search));
@@ -75,7 +77,7 @@
 			leads.push(...result.data);
 			nextCursor = result.nextCursor;
 		} catch {
-			actionError = 'Não foi possível carregar mais leads. Tente novamente.';
+			actionError = t('leads.errors.loadMore');
 		} finally {
 			loadingMore = false;
 		}
@@ -88,7 +90,7 @@
 		try {
 			await exportLeads(data.expert.id, data.launchId || undefined);
 		} catch {
-			actionError = 'Não foi possível gerar o arquivo. Tente novamente.';
+			actionError = t('leads.errors.export');
 		} finally {
 			exporting = false;
 		}
@@ -113,7 +115,7 @@
 			if (total !== null) total -= 1;
 			dialog?.close();
 		} catch {
-			actionError = 'Não foi possível excluir o lead. Tente novamente.';
+			actionError = t('leads.errors.delete');
 			dialog?.close();
 		} finally {
 			deleting = false;
@@ -137,10 +139,10 @@
 
 	const errorText = $derived(
 		errorReason === 'LEADS_ENCRYPTION_KEY_NOT_CONFIGURED'
-			? 'A captação de leads ainda não foi configurada no servidor.'
+			? t('leads.errors.encryptionNotConfigured')
 			: errorReason === 'VALIDATION_FAILED'
-				? 'Busque por um e-mail completo ou por um telefone com DDD.'
-				: 'Não foi possível carregar os leads.'
+				? t('leads.errors.validation')
+				: t('leads.errors.load')
 	);
 
 	const cell = 'border-b border-border px-5.5 py-3.5 text-left align-top';
@@ -148,14 +150,14 @@
 </script>
 
 <svelte:head>
-	<title>Leads · {APP_NAME}</title>
+	<title>{t('leads.title')} · {APP_NAME}</title>
 </svelte:head>
 
 <PageHeader
-	title="Leads"
+	title={t('leads.title')}
 	description={data.expert
-		? `Pessoas que se cadastraram nos formulários das páginas de ${data.expert.name}.`
-		: 'Pessoas que se cadastraram nos formulários das páginas dos seus experts.'}
+		? t('leads.description', { expert: data.expert.name })
+		: t('leads.descriptionAll')}
 >
 	{#snippet actions()}
 		{#if data.expert}
@@ -165,24 +167,18 @@
 				disabled={status !== 'ready' || total === 0}
 				onclick={handleExport}
 			>
-				<Icon name="download" size={16} />Exportar CSV
+				<Icon name="download" size={16} />{t('leads.exportCsv')}
 			</Button>
 		{/if}
 	{/snippet}
 </PageHeader>
 
 {#if !data.expert}
-	<Card>
-		<EmptyState
-			icon="users"
-			title="Nenhum expert cadastrado"
-			description="Os leads são organizados por expert. Cadastre um para começar."
-		>
-			{#snippet action()}
-				<a class={buttonClass()} href="/experts/new">Cadastrar expert</a>
-			{/snippet}
-		</EmptyState>
-	</Card>
+	<SelectExpertState
+		hasExperts={data.experts.length > 0}
+		subjectKey="leads.selectSubject"
+		emptyDescriptionKey="leads.selectEmpty"
+	/>
 {:else}
 	<div class="mb-4 flex flex-wrap items-center gap-3">
 		<form
@@ -193,7 +189,7 @@
 				applyFilters({ q: search.trim() });
 			}}
 		>
-			<label class="sr-only" for="lead-search">Buscar lead</label>
+			<label class="sr-only" for="lead-search">{t('leads.search.label')}</label>
 			<div
 				class="flex min-w-0 flex-1 items-center rounded-md border border-border bg-surface focus-within:border-primary focus-within:shadow-focus"
 			>
@@ -205,14 +201,14 @@
 					id="lead-search"
 					type="search"
 					bind:value={search}
-					placeholder="E-mail ou telefone completo"
+					placeholder={t('leads.search.placeholder')}
 					autocomplete="off"
 				/>
 				{#if data.search}
 					<button
 						class="mr-1.5 grid size-7.5 place-items-center rounded-md text-fg-muted hover:bg-surface-hover hover:text-fg"
 						type="button"
-						aria-label="Limpar busca"
+						aria-label={t('leads.search.clear')}
 						onclick={() => {
 							search = '';
 							applyFilters({ q: '' });
@@ -222,12 +218,12 @@
 					</button>
 				{/if}
 			</div>
-			<Button type="submit" variant="secondary">Buscar</Button>
+			<Button type="submit" variant="secondary">{t('leads.search.submit')}</Button>
 		</form>
 		<div class="w-60 max-[621px]:w-full">
 			<Select
 				id="lead-launch"
-				aria-label="Filtrar por lançamento"
+				aria-label={t('leads.filter.launchLabel')}
 				value={data.launchId}
 				options={launchOptions}
 				onchange={(event) => applyFilters({ launch: event.currentTarget.value })}
@@ -239,9 +235,11 @@
 		{#if status === 'loading'}
 			<span class="inline-block h-3.5 w-40 rounded bg-surface motion-safe:animate-pulse"></span>
 		{:else if status === 'ready' && total !== null}
-			{total === 1 ? '1 lead' : `${total.toLocaleString('pt-BR')} leads`}
-			{#if data.launchId}no lançamento {launchNames.get(data.launchId) ?? 'selecionado'}{/if}
-			{#if data.search}para "{data.search}"{/if}.
+			{t('leads.summary.count', { count: total, formatted: formatNumber(total) })}
+			{#if data.launchId}{t('leads.summary.inLaunch', {
+					name: launchNames.get(data.launchId) ?? t('leads.summary.selectedLaunch')
+				})}{/if}
+			{#if data.search}{t('leads.summary.forSearch', { query: data.search })}{/if}.
 		{/if}
 	</p>
 
@@ -251,11 +249,11 @@
 
 	{#if status === 'error'}
 		<Card>
-			<EmptyState icon="users" title="Leads indisponíveis" description={errorText}>
+			<EmptyState icon="users" title={t('leads.unavailable')} description={errorText}>
 				{#snippet action()}
 					{#if filtering}
 						<a class={buttonClass({ variant: 'secondary' })} href={page.url.pathname}
-							>Limpar filtros</a
+							>{t('leads.clearFilters')}</a
 						>
 					{/if}
 				{/snippet}
@@ -265,18 +263,18 @@
 		<Card>
 			<EmptyState
 				icon="user-plus"
-				title={filtering ? 'Nenhum lead encontrado' : 'Nenhum lead ainda'}
+				title={filtering ? t('leads.empty.notFoundTitle') : t('leads.empty.noneTitle')}
 				description={filtering
-					? 'Confira o e-mail ou telefone digitado, ou mude o lançamento.'
-					: 'Configure um formulário no Rastreamento: cada envio vira um lead aqui.'}
+					? t('leads.empty.notFoundDescription')
+					: t('leads.empty.noneDescription')}
 			>
 				{#snippet action()}
 					{#if filtering}
 						<a class={buttonClass({ variant: 'secondary' })} href={page.url.pathname}
-							>Limpar filtros</a
+							>{t('leads.clearFilters')}</a
 						>
 					{:else}
-						<a class={buttonClass()} href="/tracking">Configurar rastreamento</a>
+						<a class={buttonClass()} href="/tracking">{t('leads.empty.configureTracking')}</a>
 					{/if}
 				{/snippet}
 			</EmptyState>
@@ -287,12 +285,12 @@
 				<table class="w-full border-collapse text-[14px]" aria-busy={status === 'loading'}>
 					<thead>
 						<tr>
-							<th class={head}>Lead</th>
-							<th class={head}>Contato</th>
-							<th class="{head} max-[901px]:hidden">Lançamentos</th>
-							<th class="{head} max-[761px]:hidden">Primeiro cadastro</th>
-							<th class="{head} max-[1101px]:hidden">Origem</th>
-							<th class={head}><span class="sr-only">Ações</span></th>
+							<th class={head}>{t('leads.table.lead')}</th>
+							<th class={head}>{t('leads.table.contact')}</th>
+							<th class="{head} max-[901px]:hidden">{t('leads.table.launches')}</th>
+							<th class="{head} max-[761px]:hidden">{t('leads.table.firstSignup')}</th>
+							<th class="{head} max-[1101px]:hidden">{t('leads.table.origin')}</th>
+							<th class={head}><span class="sr-only">{t('leads.table.actions')}</span></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -327,7 +325,7 @@
 								{@const customs = Object.entries(lead.custom)}
 								<tr class="motion-safe:animate-fade-in [&:last-child>td]:border-b-0">
 									<td class={cell}>
-										<span class="block font-semibold">{lead.name ?? 'Sem nome'}</span>
+										<span class="block font-semibold">{lead.name ?? t('leads.table.noName')}</span>
 										{#if customs.length}
 											<span
 												class="mt-0.5 block max-w-64 truncate text-[12.5px] text-fg-subtle"
@@ -346,12 +344,12 @@
 											{#each lead.launches as launch (launch.launchId)}
 												<Badge variant={launch.launchId === data.launchId ? 'success' : 'neutral'}>
 													{launchNames.get(launch.launchId) ??
-														'Lançamento'}{launch.submissionsCount > 1
+														t('leads.table.launchFallback')}{launch.submissionsCount > 1
 														? ` · ${launch.submissionsCount}x`
 														: ''}
 												</Badge>
 											{:else}
-												<span class="text-[13px] text-fg-subtle">Sem lançamento</span>
+												<span class="text-[13px] text-fg-subtle">{t('leads.table.noLaunch')}</span>
 											{/each}
 										</div>
 									</td>
@@ -365,7 +363,9 @@
 										<Button
 											variant="ghost"
 											size="sm"
-											aria-label="Excluir {lead.name ?? lead.email ?? 'lead'}"
+											aria-label={t('leads.table.deleteAria', {
+												name: lead.name ?? lead.email ?? t('leads.table.leadFallback')
+											})}
 											onclick={() => confirmDelete(lead)}
 										>
 											<Icon name="trash" size={15} />
@@ -381,7 +381,9 @@
 
 		{#if nextCursor}
 			<div class="mt-5 flex justify-center">
-				<Button variant="secondary" loading={loadingMore} onclick={loadMore}>Carregar mais</Button>
+				<Button variant="secondary" loading={loadingMore} onclick={loadMore}
+					>{t('leads.loadMore')}</Button
+				>
 			</div>
 		{/if}
 	{/if}
@@ -398,14 +400,19 @@
 	aria-labelledby="delete-lead-title"
 >
 	<h2 class="text-[18px] font-bold" id="delete-lead-title">
-		Excluir os dados de {removing?.name ?? removing?.email ?? 'este lead'}?
+		{t('leads.delete.title', {
+			name: removing?.name ?? removing?.email ?? t('leads.delete.thisLead')
+		})}
 	</h2>
 	<p class="mt-2 mb-6 text-fg-muted">
-		O lead, os cadastros e as inscrições nos lançamentos são apagados e não podem ser recuperados.
-		Use para atender pedidos de exclusão de dados (LGPD).
+		{t('leads.delete.description')}
 	</p>
 	<div class="flex justify-end gap-2.5">
-		<Button variant="ghost" disabled={deleting} onclick={() => dialog?.close()}>Cancelar</Button>
-		<Button variant="danger" loading={deleting} onclick={handleDelete}>Excluir</Button>
+		<Button variant="ghost" disabled={deleting} onclick={() => dialog?.close()}
+			>{t('common.actions.cancel')}</Button
+		>
+		<Button variant="danger" loading={deleting} onclick={handleDelete}
+			>{t('common.actions.delete')}</Button
+		>
 	</div>
 </dialog>

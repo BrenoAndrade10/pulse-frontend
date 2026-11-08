@@ -1,14 +1,15 @@
 import { PUBLIC_API_URL } from '$app/env/public';
+import type { MessageKey } from '#lib/i18n/index.svelte.js';
 import type { IconName } from '#lib/components/ui/Icon.svelte';
 import type { InstagramMediaChild, InstagramPost } from '#lib/types.js';
 
 export type MediaKind = 'reel' | 'photo' | 'carousel' | 'video';
 
-export const MEDIA_KIND: Record<MediaKind, { label: string; icon: IconName }> = {
-	reel: { label: 'Reel', icon: 'video' },
-	photo: { label: 'Foto', icon: 'image' },
-	carousel: { label: 'Carrossel', icon: 'layers' },
-	video: { label: 'Vídeo', icon: 'video' }
+export const MEDIA_KIND: Record<MediaKind, { labelKey: MessageKey; icon: IconName }> = {
+	reel: { labelKey: 'reels.media.kind.reel', icon: 'video' },
+	photo: { labelKey: 'reels.media.kind.photo', icon: 'image' },
+	carousel: { labelKey: 'reels.media.kind.carousel', icon: 'layers' },
+	video: { labelKey: 'reels.media.kind.video', icon: 'video' }
 };
 
 /** Tipo como o Instagram mostra: Reel vem de `media_product_type`, o resto de `media_type`. */
