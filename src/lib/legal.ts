@@ -26,7 +26,8 @@ export const LEGAL = {
 	/** Prazo para eliminar os dados após o encerramento da conta. */
 	accountDeletionDays: 30,
 	termsUpdatedAt: '2026-10-18',
-	privacyUpdatedAt: '2026-10-18'
+	privacyUpdatedAt: '2026-10-18',
+	dataDeletionUpdatedAt: '2026-11-07'
 } as const;
 
 export const pendingLegalFields = Object.entries(LEGAL)
