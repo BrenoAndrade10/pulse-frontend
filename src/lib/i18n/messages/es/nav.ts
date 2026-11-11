@@ -13,6 +13,7 @@ export const nav: typeof source = {
 	items: {
 		content: 'Contenidos',
 		campaigns: 'Campañas',
+		links: 'Enlaces',
 		tracking: 'Seguimiento',
 		leads: 'Leads',
 		whatsapp: 'WhatsApp',

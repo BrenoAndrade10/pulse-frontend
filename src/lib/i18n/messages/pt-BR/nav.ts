@@ -11,6 +11,7 @@ export const nav = {
 	items: {
 		content: 'Conteúdos',
 		campaigns: 'Campanhas',
+		links: 'Links',
 		tracking: 'Rastreamento',
 		leads: 'Leads',
 		whatsapp: 'WhatsApp',

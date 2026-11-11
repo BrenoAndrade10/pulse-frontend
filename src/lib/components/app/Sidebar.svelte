@@ -28,6 +28,7 @@
 			items: [
 				{ href: '/reels', label: 'nav.items.content', icon: 'image' },
 				{ href: '/campaigns', label: 'nav.items.campaigns', icon: 'megaphone' },
+				{ href: '/links', label: 'nav.items.links', icon: 'link' },
 				{ href: '/tracking', label: 'nav.items.tracking', icon: 'target' }
 			]
 		},

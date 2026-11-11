@@ -111,6 +111,45 @@ export type LaunchInput = Pick<
 	'expertId' | 'name' | 'description' | 'status' | 'type' | 'startsAt' | 'endsAt' | 'timezone'
 >;
 
+export type LinkChannel = 'instagram' | 'whatsapp' | 'telegram' | 'email' | 'ads' | 'other';
+export type LinkPurpose = 'content' | 'capture' | 'event' | 'offer' | 'checkout' | 'other';
+export type LinkStatus = 'active' | 'inactive';
+export type Link = {
+	id: string;
+	expertId: string | null;
+	launchId: string | null;
+	name: string;
+	destinationUrl: string;
+	code: string;
+	shortUrl: string;
+	channel: LinkChannel | null;
+	placement: string | null;
+	campaign: string | null;
+	utm: {
+		source: string | null;
+		medium: string | null;
+		campaign: string | null;
+		content: string | null;
+		term: string | null;
+	};
+	purpose: LinkPurpose;
+	status: LinkStatus;
+	destinationVersion: number;
+	createdAt: string;
+	updatedAt: string;
+};
+export type CreateLinkInput = {
+	name: string;
+	destinationUrl: string;
+	channel?: LinkChannel;
+	purpose?: LinkPurpose;
+	placement?: string;
+	campaign?: string;
+	utm?: Partial<Link['utm']>;
+	expertId?: string;
+	launchId?: string;
+};
+
 export type Period = '7d' | '30d' | '90d';
 
 export type MetricKey = 'spend' | 'revenue' | 'roas' | 'leads' | 'cpl' | 'sales';

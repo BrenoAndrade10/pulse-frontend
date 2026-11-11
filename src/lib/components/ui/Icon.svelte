@@ -9,6 +9,7 @@
 	import Download from '@lucide/svelte/icons/download';
 	import ExternalLink from '@lucide/svelte/icons/external-link';
 	import Flame from '@lucide/svelte/icons/flame';
+	import Globe from '@lucide/svelte/icons/globe';
 	import Image from '@lucide/svelte/icons/image';
 	import Info from '@lucide/svelte/icons/info';
 	import Layers from '@lucide/svelte/icons/layers';
@@ -51,6 +52,7 @@
 		plug: Plug,
 		'message-circle': MessageCircle,
 		flame: Flame,
+		globe: Globe,
 		send: Send,
 		'shopping-bag': ShoppingBag,
 		settings: Settings,

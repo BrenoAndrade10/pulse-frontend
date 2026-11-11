@@ -9,7 +9,7 @@
 
 	const options = LOCALES.map((locale) => ({
 		value: locale.code,
-		label: `${locale.flag} ${locale.label}`
+		label: locale.label
 	}));
 
 	function change(event: Event & { currentTarget: HTMLSelectElement }) {
@@ -24,5 +24,6 @@
 	aria-label={showLabel ? undefined : t('common.language.label')}
 	value={i18n.locale}
 	{options}
+	leadingIcon="globe"
 	onchange={change}
 />

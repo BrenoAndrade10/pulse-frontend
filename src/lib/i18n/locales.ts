@@ -1,7 +1,7 @@
 export const LOCALES = [
-	{ code: 'pt-BR', label: 'Português', flag: '🇧🇷', intl: 'pt-BR' },
-	{ code: 'es', label: 'Español', flag: '🇪🇸', intl: 'es' },
-	{ code: 'en', label: 'English', flag: '🇺🇸', intl: 'en' }
+	{ code: 'pt-BR', label: 'Português', intl: 'pt-BR' },
+	{ code: 'es', label: 'Español', intl: 'es' },
+	{ code: 'en', label: 'English', intl: 'en' }
 ] as const;
 
 export type Locale = (typeof LOCALES)[number]['code'];
