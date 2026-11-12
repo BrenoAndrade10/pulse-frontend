@@ -280,6 +280,34 @@ export type LeadLaunch = {
 	firstUtm: LeadUtm;
 };
 
+export type LeadHeatBand = 'cold' | 'warm' | 'hot';
+
+export type LeadHeat = {
+	score: number;
+	band: LeadHeatBand;
+	calculatedAt: string | null;
+};
+
+export type LeadHeatDay = {
+	day: string;
+	pageViews: number;
+	engagedSeconds: number;
+	maxScroll: number;
+	interactions: number;
+	leads: number;
+	linkClicks: number;
+};
+
+export type LeadHeatDetail = {
+	score: number;
+	band: LeadHeatBand;
+	hasIdentity: boolean;
+	timezone: string;
+	windowDays: number;
+	lastActivityDay: string | null;
+	days: LeadHeatDay[];
+};
+
 export type Lead = {
 	id: string;
 	name: string | null;
@@ -290,6 +318,7 @@ export type Lead = {
 	firstSeenAt: string;
 	lastSeenAt: string;
 	launches: LeadLaunch[];
+	heat: LeadHeat;
 };
 
 export type LeadsPage = {

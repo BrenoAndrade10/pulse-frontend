@@ -15,13 +15,16 @@ export const leads: typeof source = {
 	},
 	filter: {
 		launchLabel: 'Filtrar por lanzamiento',
-		allLaunches: 'Todos los lanzamientos'
+		allLaunches: 'Todos los lanzamientos',
+		heatLabel: 'Filtrar por Heat',
+		allHeat: 'Todos los Heats'
 	},
 	summary: {
 		count: { one: '{formatted} lead', other: '{formatted} leads' },
 		inLaunch: 'en el lanzamiento {name}',
 		selectedLaunch: 'seleccionado',
-		forSearch: 'para "{query}"'
+		forSearch: 'para "{query}"',
+		forHeat: 'con Heat {band}'
 	},
 	errors: {
 		loadMore: 'No se pudieron cargar más leads. Inténtalo de nuevo.',
@@ -51,7 +54,42 @@ export const leads: typeof source = {
 		launchFallback: 'Lanzamiento',
 		noLaunch: 'Sin lanzamiento',
 		deleteAria: 'Eliminar {name}',
-		leadFallback: 'lead'
+		leadFallback: 'lead',
+		heat: 'Heat',
+		heatAria: 'Ver detalles del Heat de {name}: {status}'
+	},
+	heat: {
+		bands: { hot: 'Caliente', warm: 'Tibio', cold: 'Frío' },
+		notCalculated: 'No calculado',
+		dialog: {
+			title: 'Heat de {name}',
+			description: 'Interacción reciente del lead en tus páginas.',
+			score: 'Heat {band} · {score}',
+			lastActivity: 'Última actividad: {date}',
+			noActivity: 'Sin actividad en los últimos {days} días',
+			explain:
+				'El Heat considera la actividad de los últimos {days} días. La actividad más antigua pesa menos.',
+			noIdentityTitle: 'Aún no hay visitas vinculadas a este lead',
+			noIdentityDescription:
+				'Cuando este lead vuelva a entrar a tus páginas ya identificado, la actividad aparecerá aquí.',
+			notFound: 'Lead no encontrado. Puede haber sido eliminado.',
+			error: 'No se pudo cargar el Heat de este lead.',
+			daysHeading: 'Actividad por día',
+			noSignals: 'No se registraron señales de actividad en este período.',
+			signals: {
+				pageViews: 'Visitas',
+				engagedSeconds: 'Tiempo activo',
+				maxScroll: 'Desplazamiento máximo',
+				interactions: 'Interacciones',
+				leads: 'Registros',
+				linkClicks: 'Clics en enlaces'
+			},
+			duration: {
+				minutesSeconds: '{minutes} min {seconds} s',
+				minutes: '{minutes} min',
+				seconds: '{seconds} s'
+			}
+		}
 	},
 	loadMore: 'Cargar más',
 	delete: {

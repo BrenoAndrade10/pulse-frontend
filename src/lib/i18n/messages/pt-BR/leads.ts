@@ -13,13 +13,16 @@ export const leads = {
 	},
 	filter: {
 		launchLabel: 'Filtrar por lançamento',
-		allLaunches: 'Todos os lançamentos'
+		allLaunches: 'Todos os lançamentos',
+		heatLabel: 'Filtrar por Heat',
+		allHeat: 'Todos os Heats'
 	},
 	summary: {
 		count: { one: '{formatted} lead', other: '{formatted} leads' },
 		inLaunch: 'no lançamento {name}',
 		selectedLaunch: 'selecionado',
-		forSearch: 'para "{query}"'
+		forSearch: 'para "{query}"',
+		forHeat: 'com Heat {band}'
 	},
 	errors: {
 		loadMore: 'Não foi possível carregar mais leads. Tente novamente.',
@@ -49,7 +52,42 @@ export const leads = {
 		launchFallback: 'Lançamento',
 		noLaunch: 'Sem lançamento',
 		deleteAria: 'Excluir {name}',
-		leadFallback: 'lead'
+		leadFallback: 'lead',
+		heat: 'Heat',
+		heatAria: 'Ver detalhes do Heat de {name}: {status}'
+	},
+	heat: {
+		bands: { hot: 'Quente', warm: 'Morno', cold: 'Frio' },
+		notCalculated: 'Não calculado',
+		dialog: {
+			title: 'Heat de {name}',
+			description: 'Engajamento recente do lead nas suas páginas.',
+			score: 'Heat {band} · {score}',
+			lastActivity: 'Última atividade: {date}',
+			noActivity: 'Sem atividade nos últimos {days} dias',
+			explain:
+				'O Heat considera a atividade dos últimos {days} dias. Atividade mais antiga pesa menos.',
+			noIdentityTitle: 'Ainda não há visitas ligadas a este lead',
+			noIdentityDescription:
+				'Quando este lead voltar a acessar suas páginas já identificado, a atividade aparece aqui.',
+			notFound: 'Lead não encontrado. Ele pode ter sido excluído.',
+			error: 'Não foi possível carregar o Heat deste lead.',
+			daysHeading: 'Atividade por dia',
+			noSignals: 'Nenhum sinal de atividade registrado neste período.',
+			signals: {
+				pageViews: 'Visitas',
+				engagedSeconds: 'Tempo ativo',
+				maxScroll: 'Rolagem máxima',
+				interactions: 'Interações',
+				leads: 'Cadastros',
+				linkClicks: 'Cliques em links'
+			},
+			duration: {
+				minutesSeconds: '{minutes} min {seconds} s',
+				minutes: '{minutes} min',
+				seconds: '{seconds} s'
+			}
+		}
 	},
 	loadMore: 'Carregar mais',
 	delete: {

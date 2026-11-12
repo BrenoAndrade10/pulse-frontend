@@ -15,13 +15,16 @@ export const leads: typeof source = {
 	},
 	filter: {
 		launchLabel: 'Filter by launch',
-		allLaunches: 'All launches'
+		allLaunches: 'All launches',
+		heatLabel: 'Filter by Heat',
+		allHeat: 'All Heat levels'
 	},
 	summary: {
 		count: { one: '{formatted} lead', other: '{formatted} leads' },
 		inLaunch: 'in the launch {name}',
 		selectedLaunch: 'selected',
-		forSearch: 'for "{query}"'
+		forSearch: 'for "{query}"',
+		forHeat: 'with {band} Heat'
 	},
 	errors: {
 		loadMore: 'Could not load more leads. Please try again.',
@@ -51,7 +54,41 @@ export const leads: typeof source = {
 		launchFallback: 'Launch',
 		noLaunch: 'No launch',
 		deleteAria: 'Delete {name}',
-		leadFallback: 'lead'
+		leadFallback: 'lead',
+		heat: 'Heat',
+		heatAria: 'View Heat details for {name}: {status}'
+	},
+	heat: {
+		bands: { hot: 'Hot', warm: 'Warm', cold: 'Cold' },
+		notCalculated: 'Not calculated',
+		dialog: {
+			title: 'Heat for {name}',
+			description: 'Recent engagement of this lead on your pages.',
+			score: '{band} Heat · {score}',
+			lastActivity: 'Last activity: {date}',
+			noActivity: 'No activity in the last {days} days',
+			explain: 'Heat considers activity from the last {days} days. Older activity weighs less.',
+			noIdentityTitle: 'There are no visits linked to this lead yet',
+			noIdentityDescription:
+				'When this lead returns to your pages already identified, the activity will show up here.',
+			notFound: 'Lead not found. It may have been deleted.',
+			error: 'Could not load this lead’s Heat.',
+			daysHeading: 'Activity by day',
+			noSignals: 'No activity signals recorded in this period.',
+			signals: {
+				pageViews: 'Visits',
+				engagedSeconds: 'Active time',
+				maxScroll: 'Max scroll',
+				interactions: 'Interactions',
+				leads: 'Sign-ups',
+				linkClicks: 'Link clicks'
+			},
+			duration: {
+				minutesSeconds: '{minutes} min {seconds} s',
+				minutes: '{minutes} min',
+				seconds: '{seconds} s'
+			}
+		}
 	},
 	loadMore: 'Load more',
 	delete: {

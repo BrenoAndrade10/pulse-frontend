@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import PageHeader from '#lib/components/app/PageHeader.svelte';
 	import SelectExpertState from '#lib/components/app/SelectExpertState.svelte';
+	import LeadHeatDialog from '#lib/components/leads/LeadHeatDialog.svelte';
 	import Alert from '#lib/components/ui/Alert.svelte';
 	import Badge from '#lib/components/ui/Badge.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
@@ -16,6 +17,7 @@
 	import { deleteLead, exportLeads, listLeads } from '#lib/services/leads.js';
 	import type { Lead } from '#lib/types.js';
 	import { formatDate, formatNumber } from '#lib/utils/format.js';
+	import { heatVariants } from '#lib/utils/lead-heat.js';
 	import { withQuery } from '#lib/utils/query.js';
 	import type { LeadsState } from './+page.js';
 	import type { PageProps } from './$types';
@@ -56,10 +58,25 @@
 		{ value: '', label: t('leads.filter.allLaunches') },
 		...data.launches.map((launch) => ({ value: launch.id, label: launch.name }))
 	]);
-	const filtering = $derived(Boolean(data.launchId || data.search));
+	const heatOptions = $derived([
+		{ value: '', label: t('leads.filter.allHeat') },
+		...(['hot', 'warm', 'cold'] as const).map((band) => ({
+			value: band,
+			label: t(`leads.heat.bands.${band}`)
+		}))
+	]);
+	const filtering = $derived(Boolean(data.launchId || data.search || data.heat));
+
+	let heatOpen = $state(false);
+	let heatLead = $state<Lead | null>(null);
+
+	function openHeat(lead: Lead) {
+		heatLead = lead;
+		heatOpen = true;
+	}
 
 	/** Filtros vão para a URL: compartilhar o link mantém a lista. */
-	function applyFilters(next: { launch?: string; q?: string }) {
+	function applyFilters(next: { launch?: string; q?: string; heat?: string }) {
 		const query = withQuery(page.url.search, next);
 		void goto(query || page.url.pathname, { reset: false });
 	}
@@ -71,7 +88,11 @@
 		try {
 			const result = await listLeads(
 				data.expert.id,
-				{ launchId: data.launchId || undefined, search: data.search || undefined },
+				{
+					launchId: data.launchId || undefined,
+					search: data.search || undefined,
+					heat: data.heat || undefined
+				},
 				nextCursor
 			);
 			leads.push(...result.data);
@@ -229,6 +250,15 @@
 				onchange={(event) => applyFilters({ launch: event.currentTarget.value })}
 			/>
 		</div>
+		<div class="w-48 max-[621px]:w-full">
+			<Select
+				id="lead-heat"
+				aria-label={t('leads.filter.heatLabel')}
+				value={data.heat}
+				options={heatOptions}
+				onchange={(event) => applyFilters({ heat: event.currentTarget.value })}
+			/>
+		</div>
 	</div>
 
 	<p class="mb-4 min-h-5 text-[13px] text-fg-muted" aria-live="polite">
@@ -238,6 +268,9 @@
 			{t('leads.summary.count', { count: total, formatted: formatNumber(total) })}
 			{#if data.launchId}{t('leads.summary.inLaunch', {
 					name: launchNames.get(data.launchId) ?? t('leads.summary.selectedLaunch')
+				})}{/if}
+			{#if data.heat}{t('leads.summary.forHeat', {
+					band: t(`leads.heat.bands.${data.heat}`).toLowerCase()
 				})}{/if}
 			{#if data.search}{t('leads.summary.forSearch', { query: data.search })}{/if}.
 		{/if}
@@ -287,6 +320,7 @@
 						<tr>
 							<th class={head}>{t('leads.table.lead')}</th>
 							<th class={head}>{t('leads.table.contact')}</th>
+							<th class={head}>{t('leads.table.heat')}</th>
 							<th class="{head} max-[901px]:hidden">{t('leads.table.launches')}</th>
 							<th class="{head} max-[761px]:hidden">{t('leads.table.firstSignup')}</th>
 							<th class="{head} max-[1101px]:hidden">{t('leads.table.origin')}</th>
@@ -303,6 +337,10 @@
 									>
 									<td class={cell}
 										><span class="block h-4 w-44 rounded bg-surface motion-safe:animate-pulse"
+										></span></td
+									>
+									<td class={cell}
+										><span class="block h-6 w-24 rounded-full bg-surface motion-safe:animate-pulse"
 										></span></td
 									>
 									<td class="{cell} max-[901px]:hidden"
@@ -323,6 +361,12 @@
 						{:else}
 							{#each leads as lead (lead.id)}
 								{@const customs = Object.entries(lead.custom)}
+								{@const band = lead.heat.band}
+								{@const calculated = lead.heat.calculatedAt !== null}
+								{@const status = calculated
+									? `${t(`leads.heat.bands.${band}`)} · ${formatNumber(lead.heat.score)}`
+									: t('leads.heat.notCalculated')}
+
 								<tr class="motion-safe:animate-fade-in [&:last-child>td]:border-b-0">
 									<td class={cell}>
 										<span class="block font-semibold">{lead.name ?? t('leads.table.noName')}</span>
@@ -338,6 +382,20 @@
 									<td class={cell}>
 										<span class="block break-all">{lead.email ?? ''}</span>
 										<span class="block text-[13px] text-fg-muted">{formatPhone(lead.phone)}</span>
+									</td>
+									<td class={cell}>
+										<button
+											class="cursor-pointer rounded-[999px] focus-visible:shadow-focus focus-visible:outline-none"
+											type="button"
+											aria-haspopup="dialog"
+											aria-label={t('leads.table.heatAria', {
+												name: lead.name ?? lead.email ?? t('leads.table.leadFallback'),
+												status
+											})}
+											onclick={() => openHeat(lead)}
+										>
+											<Badge variant={calculated ? heatVariants[band] : 'neutral'}>{status}</Badge>
+										</button>
 									</td>
 									<td class="{cell} max-[901px]:hidden">
 										<div class="flex flex-wrap gap-1.5">
@@ -387,6 +445,10 @@
 			</div>
 		{/if}
 	{/if}
+{/if}
+
+{#if data.expert}
+	<LeadHeatDialog bind:open={heatOpen} expertId={data.expert.id} lead={heatLead} />
 {/if}
 
 <dialog

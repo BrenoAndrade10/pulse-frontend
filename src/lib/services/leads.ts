@@ -1,10 +1,10 @@
 import { PUBLIC_API_URL } from '$app/env/public';
 import { apiRequest } from '#lib/api/client.js';
-import type { LeadsPage } from '#lib/types.js';
+import type { LeadHeatBand, LeadHeatDetail, LeadsPage } from '#lib/types.js';
 
 const basePath = (expertId: string) => `/experts/${encodeURIComponent(expertId)}/leads`;
 
-export type LeadsFilter = { launchId?: string; search?: string };
+export type LeadsFilter = { launchId?: string; search?: string; heat?: LeadHeatBand };
 
 export function listLeads(
 	expertId: string,
@@ -14,6 +14,7 @@ export function listLeads(
 	const params = new URLSearchParams({ limit: '50' });
 	if (filter.launchId) params.set('launchId', filter.launchId);
 	if (filter.search) params.set('search', filter.search);
+	if (filter.heat) params.set('heat', filter.heat);
 	if (cursor) params.set('cursor', cursor);
 
 	return apiRequest<LeadsPage>(`${basePath(expertId)}?${params}`);
@@ -41,4 +42,8 @@ export async function deleteLead(expertId: string, leadId: string): Promise<void
 	await apiRequest<void>(`${basePath(expertId)}/${encodeURIComponent(leadId)}`, {
 		method: 'DELETE'
 	});
+}
+
+export function getLeadHeat(expertId: string, leadId: string): Promise<LeadHeatDetail> {
+	return apiRequest<LeadHeatDetail>(`${basePath(expertId)}/${encodeURIComponent(leadId)}/heat`);
 }
