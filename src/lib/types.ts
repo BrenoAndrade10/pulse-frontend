@@ -150,6 +150,32 @@ export type CreateLinkInput = {
 	launchId?: string;
 };
 
+export type LinkListParams = {
+	expertId?: string;
+	launchId?: string;
+	channel?: LinkChannel;
+	status?: LinkStatus;
+	search?: string;
+	limit?: number;
+	cursor?: string;
+};
+
+export type LinkPage = { data: Link[]; nextCursor: string | null };
+
+export type LinkUpdateInput = {
+	name?: string;
+	destinationUrl?: string;
+	status?: LinkStatus;
+	purpose?: LinkPurpose;
+	channel?: LinkChannel;
+	placement?: string | null;
+	campaign?: string | null;
+	utm?: Partial<Link['utm']>;
+	expertId?: string | null;
+	launchId?: string | null;
+	regenerateUtm?: boolean;
+};
+
 export type Period = '7d' | '30d' | '90d';
 
 export type MetricKey = 'spend' | 'revenue' | 'roas' | 'leads' | 'cpl' | 'sales';
