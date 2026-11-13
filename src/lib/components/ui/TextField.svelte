@@ -21,7 +21,7 @@
 	<label class="text-[13px] font-semibold text-fg-muted" for={id}>{label}</label>
 	<div
 		class={[
-			'relative flex items-center rounded-md border bg-surface focus-within:bg-surface-hover',
+			'relative flex items-center overflow-hidden rounded-md border bg-surface focus-within:bg-surface-hover',
 			'[transition:border-color_0.15s,box-shadow_0.15s,background_0.15s]',
 			error
 				? 'border-danger focus-within:shadow-[0_0_0_3px_rgb(255_92_122/0.25)]'
