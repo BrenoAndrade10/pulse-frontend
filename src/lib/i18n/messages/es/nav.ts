@@ -11,7 +11,7 @@ export const nav: typeof source = {
 		management: 'Gestión'
 	},
 	items: {
-		content: 'Contenidos',
+		content: 'Automatización Instagram',
 		campaigns: 'Campañas',
 		links: 'Enlaces',
 		tracking: 'Seguimiento',
@@ -26,6 +26,8 @@ export const nav: typeof source = {
 		mainMenu: 'Menú principal',
 		openMenu: 'Abrir menú',
 		closeMenu: 'Cerrar menú',
+		expandMenu: 'Expandir menú',
+		collapseMenu: 'Contraer menú',
 		containsCurrentPage: '(contiene la página actual)'
 	},
 	account: {

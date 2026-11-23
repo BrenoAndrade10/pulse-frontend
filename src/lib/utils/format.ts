@@ -49,6 +49,31 @@ export function formatDelta(v: number) {
 
 /** Datas no formato ISO (yyyy-mm-dd ou completo). */
 export const formatDate = (iso: string) => date().format(new Date(iso));
+const percent = (digits: number) =>
+	formatter(
+		`percent${digits}`,
+		(l) =>
+			new Intl.NumberFormat(l, {
+				style: 'percent',
+				minimumFractionDigits: digits,
+				maximumFractionDigits: digits
+			})
+	);
+const dateTime = () =>
+	formatter(
+		'dateTime',
+		(l) =>
+			new Intl.DateTimeFormat(l, {
+				day: '2-digit',
+				month: '2-digit',
+				hour: '2-digit',
+				minute: '2-digit'
+			})
+	);
+
+export const formatPercent = (v: Value, digits = 1) =>
+	v == null ? EMPTY_VALUE : percent(digits).format(v);
+export const formatDateTime = (iso: string) => dateTime().format(new Date(iso));
 export const formatShortDate = (iso: string) =>
 	shortDate().format(new Date(`${iso.slice(0, 10)}T12:00:00`));
 

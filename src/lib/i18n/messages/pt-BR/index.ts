@@ -5,6 +5,7 @@ export { experts } from './experts.js';
 export { integrations } from './integrations.js';
 export { settings } from './settings.js';
 export { launches } from './launches.js';
+export { email } from './email.js';
 export { leads } from './leads.js';
 export { tracking } from './tracking.js';
 export { reels } from './reels.js';

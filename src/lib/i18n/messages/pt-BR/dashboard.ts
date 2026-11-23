@@ -53,6 +53,33 @@ export const dashboard = {
 		emptyDescription:
 			'Os resultados aparecem aqui assim que houver uma conta de anúncios do Meta Ads conectada com campanhas ativas.'
 	},
+	overview: {
+		selectExpert: 'Selecione um expert no seletor de contexto para ver a captação.',
+		error: 'Não foi possível carregar a captação agora.',
+		capture: {
+			title: 'Captação no período',
+			leads: 'Leads captados',
+			clicks: 'Cliques nos links',
+			chartAria: 'Leads captados por dia'
+		},
+		origins: {
+			title: 'Leads por origem',
+			total: 'Total',
+			empty: 'Nenhum lead captado no período.',
+			unknown: 'Origem não identificada'
+		},
+		connections: {
+			title: 'Conexões',
+			connected: 'Conectado',
+			expired: 'Expirado',
+			notConnected: 'Não conectado',
+			manage: 'Gerenciar integrações'
+		},
+		financial: {
+			title: 'Desempenho financeiro',
+			unavailable: 'Dados ainda indisponíveis'
+		}
+	},
 	instagram: {
 		title: 'Instagram',
 		description: 'Status das conexões dos experts.',

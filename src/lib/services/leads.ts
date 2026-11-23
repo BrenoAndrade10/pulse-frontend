@@ -1,17 +1,22 @@
 import { PUBLIC_API_URL } from '$app/env/public';
 import { apiRequest } from '#lib/api/client.js';
-import type { LeadHeatBand, LeadHeatDetail, LeadsPage } from '#lib/types.js';
+import type { HeatSummary, LeadHeatDetail, LeadHeatFilter, LeadsPage } from '#lib/types.js';
 
 const basePath = (expertId: string) => `/experts/${encodeURIComponent(expertId)}/leads`;
 
-export type LeadsFilter = { launchId?: string; search?: string; heat?: LeadHeatBand };
+export type LeadsFilter = {
+	launchId?: string;
+	search?: string;
+	heat?: LeadHeatFilter;
+	limit?: number;
+};
 
 export function listLeads(
 	expertId: string,
 	filter: LeadsFilter = {},
 	cursor?: string
 ): Promise<LeadsPage> {
-	const params = new URLSearchParams({ limit: '50' });
+	const params = new URLSearchParams({ limit: String(filter.limit ?? 50) });
 	if (filter.launchId) params.set('launchId', filter.launchId);
 	if (filter.search) params.set('search', filter.search);
 	if (filter.heat) params.set('heat', filter.heat);
@@ -46,4 +51,10 @@ export async function deleteLead(expertId: string, leadId: string): Promise<void
 
 export function getLeadHeat(expertId: string, leadId: string): Promise<LeadHeatDetail> {
 	return apiRequest<LeadHeatDetail>(`${basePath(expertId)}/${encodeURIComponent(leadId)}/heat`);
+}
+
+export function getHeatSummary(expertId: string, launchId?: string): Promise<HeatSummary> {
+	const params = new URLSearchParams({ limit: '5' });
+	if (launchId) params.set('launchId', launchId);
+	return apiRequest<HeatSummary>(`/experts/${encodeURIComponent(expertId)}/heat/summary?${params}`);
 }

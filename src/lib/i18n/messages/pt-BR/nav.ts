@@ -9,7 +9,7 @@ export const nav = {
 		management: 'Gerenciamento'
 	},
 	items: {
-		content: 'Conteúdos',
+		content: 'Automação Instagram',
 		campaigns: 'Campanhas',
 		links: 'Links',
 		tracking: 'Rastreamento',
@@ -24,6 +24,8 @@ export const nav = {
 		mainMenu: 'Menu principal',
 		openMenu: 'Abrir menu',
 		closeMenu: 'Fechar menu',
+		expandMenu: 'Expandir menu',
+		collapseMenu: 'Recolher menu',
 		containsCurrentPage: '(contém a página atual)'
 	},
 	account: {

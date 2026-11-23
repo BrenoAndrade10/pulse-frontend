@@ -1,6 +1,68 @@
 import type { reels as source } from '../pt-BR/reels.js';
 
 export const reels: typeof source = {
+	auto: {
+		title: 'Instagram automation',
+		description: 'Manage automatic replies for your posts and Reels.',
+		postsDescription: 'Send a Direct message when someone comments the keyword.',
+		accountConnected: 'Account connected',
+		manageConnection: 'Manage connection',
+		tablist: 'Automation sections',
+		tabs: { posts: 'Posts', automations: 'Automations' },
+		newAutomation: 'New automation',
+		searchPosts: 'Search caption or paste link',
+		searchAutomations: 'Search by name or keyword',
+		statusFilter: 'Status',
+		status: {
+			none: 'No automation',
+			active: 'Active',
+			paused: 'Paused',
+			draft: 'Draft'
+		},
+		allStatuses: 'All statuses',
+		table: {
+			automation: 'Automation / Post',
+			keyword: 'Keyword',
+			status: 'Status',
+			actions: 'Actions',
+			count: { one: '{formatted} automation', other: '{formatted} automations' }
+		},
+		actions: {
+			pause: 'Pause',
+			resume: 'Resume',
+			continue: 'Continue editing',
+			edit: 'Edit',
+			delete: 'Delete',
+			more: 'More actions',
+			openPost: 'Open on Instagram',
+			selectPost: 'Select post',
+			closePanel: 'Close panel'
+		},
+		panel: {
+			title: 'Set up Direct reply',
+			stepPost: '01 · Post',
+			stepKeyword: '02 · Keyword',
+			stepMessage: '03 · Direct message',
+			example: 'Example comment: {keyword}',
+			preview: 'Direct preview',
+			saveDraft: 'Save draft',
+			activate: 'Activate automation',
+			saveChanges: 'Save changes',
+			pause: 'Pause',
+			extras: 'Extra options'
+		},
+		deleteConfirm: {
+			title: 'Delete this automation?',
+			description: 'The automatic reply for this post stops being sent. This cannot be undone.'
+		},
+		empty: {
+			title: 'No automations yet',
+			description: 'Choose a post and set up a Direct reply.',
+			cta: 'Choose a post',
+			noResultsTitle: 'No automations found',
+			noResultsDescription: 'Adjust the search or the status filter.'
+		}
+	},
 	page: {
 		title: 'Posts',
 		descriptionExpert: 'Photos, carousels, videos and Reels from {name}’s Instagram.',

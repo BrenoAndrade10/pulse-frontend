@@ -55,6 +55,33 @@ export const dashboard: typeof source = {
 		emptyDescription:
 			'Results will appear here once a Meta Ads account with active campaigns is connected.'
 	},
+	overview: {
+		selectExpert: 'Select an expert in the context selector to see lead capture.',
+		error: 'Could not load lead capture right now.',
+		capture: {
+			title: 'Capture in the period',
+			leads: 'Leads captured',
+			clicks: 'Link clicks',
+			chartAria: 'Leads captured per day'
+		},
+		origins: {
+			title: 'Leads by origin',
+			total: 'Total',
+			empty: 'No leads captured in the period.',
+			unknown: 'Unidentified origin'
+		},
+		connections: {
+			title: 'Connections',
+			connected: 'Connected',
+			expired: 'Expired',
+			notConnected: 'Not connected',
+			manage: 'Manage integrations'
+		},
+		financial: {
+			title: 'Financial performance',
+			unavailable: 'Data not available yet'
+		}
+	},
 	instagram: {
 		title: 'Instagram',
 		description: 'Connection status for your experts.',

@@ -1,11 +1,11 @@
 import { ApiError } from '#lib/api/http.js';
 import { listLeads } from '#lib/services/leads.js';
-import type { LeadHeatBand, LeadsPage } from '#lib/types.js';
+import type { LeadHeatFilter, LeadsPage } from '#lib/types.js';
 import type { PageLoad } from './$types';
 
 export type LeadsState = { status: 'ready'; page: LeadsPage } | { status: 'error'; reason: string };
 
-const heatBands: LeadHeatBand[] = ['cold', 'warm', 'hot'];
+const heatBands: LeadHeatFilter[] = ['cold', 'warm', 'hot', 'none'];
 
 /** Filtros na URL (?launch=&q=&heat=); a primeira página chega como promise, com skeleton. */
 export const load: PageLoad = async ({ parent, url }) => {
@@ -14,7 +14,7 @@ export const load: PageLoad = async ({ parent, url }) => {
 	const launchId = url.searchParams.get('launch') ?? '';
 	const search = url.searchParams.get('q') ?? '';
 	const heatParam = url.searchParams.get('heat');
-	const heat: LeadHeatBand | '' = heatBands.find((band) => band === heatParam) ?? '';
+	const heat: LeadHeatFilter | '' = heatBands.find((band) => band === heatParam) ?? '';
 
 	const leads: Promise<LeadsState> = expert
 		? listLeads(expert.id, {

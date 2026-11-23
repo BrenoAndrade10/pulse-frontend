@@ -17,7 +17,19 @@ export const leads: typeof source = {
 		launchLabel: 'Filtrar por lanzamiento',
 		allLaunches: 'Todos los lanzamientos',
 		heatLabel: 'Filtrar por Heat',
-		allHeat: 'Todos los Heats'
+		allHeat: 'Todos los Heats',
+		all: 'Todos',
+		heatChips: 'Filtrar leads por Heat'
+	},
+	view: {
+		label: 'Vista',
+		cards: 'Tarjetas',
+		list: 'Lista'
+	},
+	card: {
+		noData: 'Aún sin datos de navegación',
+		activity: 'Actividad {when}',
+		viewHeat: 'Ver Heat'
 	},
 	summary: {
 		count: { one: '{formatted} lead', other: '{formatted} leads' },
@@ -59,8 +71,31 @@ export const leads: typeof source = {
 		heatAria: 'Ver detalles del Heat de {name}: {status}'
 	},
 	heat: {
-		bands: { hot: 'Caliente', warm: 'Tibio', cold: 'Frío' },
-		notCalculated: 'No calculado',
+		overview: {
+			title: 'Pulse Heat',
+			description: 'Quién está más comprometido con tus páginas.',
+			leads: '{formatted} leads',
+			distribution: 'Distribución por Heat',
+			priority: 'A quién priorizar ahora',
+			empty: 'Aún no hay leads calientes.',
+			none: 'Aún no hay leads.',
+			viewAll: 'Ver leads calientes',
+			error: 'No se pudo cargar el Heat ahora.',
+			selectExpert: 'Selecciona un expert en el selector de contexto para ver Pulse Heat.',
+			activity: 'Actividad {when}',
+			reason: {
+				window: 'Últimos {days} días',
+				form: 'Envió el formulario',
+				clicks: { one: '{formatted} clic en enlace', other: '{formatted} clics en enlaces' },
+				visits: { one: '{formatted} visita', other: '{formatted} visitas' },
+				interactions: { one: '{formatted} interacción', other: '{formatted} interacciones' },
+				fallback: 'Actividad reciente'
+			},
+			viewPriority: 'Ver leads prioritarios',
+			openAria: 'Ver Heat de {name}'
+		},
+		bands: { hot: 'Caliente', warm: 'Tibio', cold: 'Frío', none: 'Sin datos' },
+		notCalculated: 'Sin datos',
 		dialog: {
 			title: 'Heat de {name}',
 			description: 'Interacción reciente del lead en tus páginas.',

@@ -1,6 +1,10 @@
-import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = () => {
-	redirect(307, '/login');
+	return {
+		seo: {
+			title: 'Pulse Lead — Gestão de lançamentos digitais',
+			description: 'Acompanhe o funil do seu lançamento e descubra quais leads precisam de atenção.'
+		}
+	};
 };

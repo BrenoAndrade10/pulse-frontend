@@ -1,6 +1,69 @@
 import type { reels as source } from '../pt-BR/reels.js';
 
 export const reels: typeof source = {
+	auto: {
+		title: 'Automatización de Instagram',
+		description: 'Gestiona las respuestas automáticas de tus posts y Reels.',
+		postsDescription: 'Envía un mensaje por Direct cuando alguien comente la palabra clave.',
+		accountConnected: 'Cuenta conectada',
+		manageConnection: 'Gestionar conexión',
+		tablist: 'Secciones de la automatización',
+		tabs: { posts: 'Publicaciones', automations: 'Automatizaciones' },
+		newAutomation: 'Nueva automatización',
+		searchPosts: 'Buscar leyenda o pegar enlace',
+		searchAutomations: 'Buscar por nombre o palabra clave',
+		statusFilter: 'Estado',
+		status: {
+			none: 'Sin automatización',
+			active: 'Activa',
+			paused: 'Pausada',
+			draft: 'Borrador'
+		},
+		allStatuses: 'Todos los estados',
+		table: {
+			automation: 'Automatización / Publicación',
+			keyword: 'Palabra clave',
+			status: 'Estado',
+			actions: 'Acciones',
+			count: { one: '{formatted} automatización', other: '{formatted} automatizaciones' }
+		},
+		actions: {
+			pause: 'Pausar',
+			resume: 'Reactivar',
+			continue: 'Continuar edición',
+			edit: 'Editar',
+			delete: 'Eliminar',
+			more: 'Más acciones',
+			openPost: 'Abrir en Instagram',
+			selectPost: 'Seleccionar publicación',
+			closePanel: 'Cerrar panel'
+		},
+		panel: {
+			title: 'Configurar respuesta por Direct',
+			stepPost: '01 · Publicación',
+			stepKeyword: '02 · Palabra clave',
+			stepMessage: '03 · Mensaje por Direct',
+			example: 'Ejemplo de comentario: {keyword}',
+			preview: 'Vista previa del Direct',
+			saveDraft: 'Guardar borrador',
+			activate: 'Activar automatización',
+			saveChanges: 'Guardar cambios',
+			pause: 'Pausar',
+			extras: 'Opciones extra'
+		},
+		deleteConfirm: {
+			title: '¿Eliminar esta automatización?',
+			description:
+				'La respuesta automática de este post deja de enviarse. Esta acción no se puede deshacer.'
+		},
+		empty: {
+			title: 'Aún no hay automatizaciones',
+			description: 'Elige una publicación y configura una respuesta por Direct.',
+			cta: 'Elegir publicación',
+			noResultsTitle: 'No se encontraron automatizaciones',
+			noResultsDescription: 'Ajusta la búsqueda o el filtro de estado.'
+		}
+	},
 	page: {
 		title: 'Publicaciones',
 		descriptionExpert: 'Fotos, carruseles, videos y Reels de Instagram de {name}.',

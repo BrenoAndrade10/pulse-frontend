@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import ContextBar from '#lib/components/app/ContextBar.svelte';
@@ -15,6 +15,29 @@
 	let { data, children }: LayoutProps = $props();
 
 	let menuOpen = $state(false);
+	let collapsed = $state(false);
+	let animate = $state(false);
+
+	const COLLAPSE_KEY = 'pulse.sidebar.collapsed';
+
+	onMount(() => {
+		try {
+			collapsed = localStorage.getItem(COLLAPSE_KEY) === '1';
+		} catch {
+			collapsed = false;
+		}
+		const frame = requestAnimationFrame(() => (animate = true));
+		return () => cancelAnimationFrame(frame);
+	});
+
+	function toggleCollapsed() {
+		collapsed = !collapsed;
+		try {
+			localStorage.setItem(COLLAPSE_KEY, collapsed ? '1' : '0');
+		} catch {
+			return;
+		}
+	}
 
 	// Sessão encerrada durante o uso (logout, expiração, logout em outra aba).
 	$effect(() => {
@@ -35,8 +58,19 @@
 
 <svelte:window onkeydown={(e) => e.key === 'Escape' && (menuOpen = false)} />
 
-<div class="grid min-h-dvh grid-cols-[260px_minmax(0,1fr)] max-lg:grid-cols-[minmax(0,1fr)]">
-	<Sidebar open={menuOpen} onclose={() => (menuOpen = false)} />
+<div
+	class={[
+		'grid min-h-dvh grid-cols-[minmax(0,1fr)] lg:grid-cols-[var(--sidebar-w)_minmax(0,1fr)]',
+		animate && 'lg:[transition:grid-template-columns_0.25s_ease] motion-reduce:transition-none'
+	]}
+	style:--sidebar-w={collapsed ? '100px' : '288px'}
+>
+	<Sidebar
+		open={menuOpen}
+		onclose={() => (menuOpen = false)}
+		{collapsed}
+		ontoggle={toggleCollapsed}
+	/>
 
 	<div
 		class="min-w-0 [background:radial-gradient(900px_400px_at_100%_-10%,rgb(124_92_255/0.08),transparent_70%),var(--color-bg)]"

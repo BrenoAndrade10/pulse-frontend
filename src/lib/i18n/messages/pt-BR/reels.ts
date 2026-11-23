@@ -1,4 +1,67 @@
 export const reels = {
+	auto: {
+		title: 'Automação do Instagram',
+		description: 'Gerencie as respostas automáticas dos seus posts e Reels.',
+		postsDescription: 'Envie uma mensagem no Direct quando alguém comentar a palavra-chave.',
+		accountConnected: 'Conta conectada',
+		manageConnection: 'Gerenciar conexão',
+		tablist: 'Seções da automação',
+		tabs: { posts: 'Publicações', automations: 'Automações' },
+		newAutomation: 'Nova automação',
+		searchPosts: 'Buscar legenda ou colar link',
+		searchAutomations: 'Buscar por nome ou palavra-chave',
+		statusFilter: 'Status',
+		status: {
+			none: 'Sem automação',
+			active: 'Ativa',
+			paused: 'Pausada',
+			draft: 'Rascunho'
+		},
+		allStatuses: 'Todos os status',
+		table: {
+			automation: 'Automação / Publicação',
+			keyword: 'Palavra-chave',
+			status: 'Status',
+			actions: 'Ações',
+			count: { one: '{formatted} automação', other: '{formatted} automações' }
+		},
+		actions: {
+			pause: 'Pausar',
+			resume: 'Reativar',
+			continue: 'Continuar edição',
+			edit: 'Editar',
+			delete: 'Excluir',
+			more: 'Mais ações',
+			openPost: 'Abrir no Instagram',
+			selectPost: 'Selecionar publicação',
+			closePanel: 'Fechar painel'
+		},
+		panel: {
+			title: 'Configurar resposta no Direct',
+			stepPost: '01 · Publicação',
+			stepKeyword: '02 · Palavra-chave',
+			stepMessage: '03 · Mensagem no Direct',
+			example: 'Exemplo de comentário: {keyword}',
+			preview: 'Prévia do Direct',
+			saveDraft: 'Salvar rascunho',
+			activate: 'Ativar automação',
+			saveChanges: 'Salvar alterações',
+			pause: 'Pausar',
+			extras: 'Opções extras'
+		},
+		deleteConfirm: {
+			title: 'Excluir esta automação?',
+			description:
+				'A resposta automática deste post deixa de ser enviada. Essa ação não pode ser desfeita.'
+		},
+		empty: {
+			title: 'Nenhuma automação ainda',
+			description: 'Escolha uma publicação e configure uma resposta no Direct.',
+			cta: 'Escolher publicação',
+			noResultsTitle: 'Nenhuma automação encontrada',
+			noResultsDescription: 'Ajuste a busca ou o filtro de status.'
+		}
+	},
 	page: {
 		title: 'Publicações',
 		descriptionExpert: 'Fotos, carrosséis, vídeos e Reels do Instagram de {name}.',

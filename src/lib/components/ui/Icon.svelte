@@ -1,4 +1,21 @@
 <script lang="ts" module>
+	import Bold from '@lucide/svelte/icons/bold';
+	import Italic from '@lucide/svelte/icons/italic';
+	import Underline from '@lucide/svelte/icons/underline';
+	import Strikethrough from '@lucide/svelte/icons/strikethrough';
+	import List from '@lucide/svelte/icons/list';
+	import ListOrdered from '@lucide/svelte/icons/list-ordered';
+	import AlignLeft from '@lucide/svelte/icons/align-left';
+	import AlignCenter from '@lucide/svelte/icons/align-center';
+	import AlignRight from '@lucide/svelte/icons/align-right';
+	import Undo2 from '@lucide/svelte/icons/undo-2';
+	import Redo2 from '@lucide/svelte/icons/redo-2';
+	import Minus from '@lucide/svelte/icons/minus';
+	import Braces from '@lucide/svelte/icons/braces';
+	import Code from '@lucide/svelte/icons/code';
+	import Quote from '@lucide/svelte/icons/quote';
+	import MousePointerClick from '@lucide/svelte/icons/mouse-pointer-click';
+	import Unlink from '@lucide/svelte/icons/unlink';
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import ChartNoAxesColumn from '@lucide/svelte/icons/chart-no-axes-column';
 	import Check from '@lucide/svelte/icons/check';
@@ -6,6 +23,7 @@
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import Copy from '@lucide/svelte/icons/copy';
+	import Ellipsis from '@lucide/svelte/icons/ellipsis';
 	import Download from '@lucide/svelte/icons/download';
 	import ExternalLink from '@lucide/svelte/icons/external-link';
 	import Flame from '@lucide/svelte/icons/flame';
@@ -20,6 +38,8 @@
 	import Megaphone from '@lucide/svelte/icons/megaphone';
 	import Menu from '@lucide/svelte/icons/menu';
 	import MessageCircle from '@lucide/svelte/icons/message-circle';
+	import PanelLeftClose from '@lucide/svelte/icons/panel-left-close';
+	import PanelLeftOpen from '@lucide/svelte/icons/panel-left-open';
 	import Pause from '@lucide/svelte/icons/pause';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Play from '@lucide/svelte/icons/play';
@@ -73,7 +93,27 @@
 		'external-link': ExternalLink,
 		download: Download,
 		copy: Copy,
+		bold: Bold,
+		italic: Italic,
+		underline: Underline,
+		strikethrough: Strikethrough,
+		list: List,
+		'list-ordered': ListOrdered,
+		'align-left': AlignLeft,
+		'align-center': AlignCenter,
+		'align-right': AlignRight,
+		undo: Undo2,
+		redo: Redo2,
+		minus: Minus,
+		braces: Braces,
+		code: Code,
+		quote: Quote,
+		pointer: MousePointerClick,
+		unlink: Unlink,
 		'chevron-left': ChevronLeft,
+		ellipsis: Ellipsis,
+		'panel-left-close': PanelLeftClose,
+		'panel-left-open': PanelLeftOpen,
 		layers: Layers,
 		rocket: Rocket,
 		trash: Trash2,

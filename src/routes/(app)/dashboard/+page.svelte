@@ -2,9 +2,13 @@
 	import { untrack } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import CaptureCard from '#lib/components/dashboard/CaptureCard.svelte';
+	import OriginsCard from '#lib/components/dashboard/OriginsCard.svelte';
 	import AreaChart from '#lib/components/dashboard/AreaChart.svelte';
+	import HeatOverview from '#lib/components/leads/HeatOverview.svelte';
 	import KpiCard from '#lib/components/dashboard/KpiCard.svelte';
 	import OnboardingChecklist from '#lib/components/dashboard/OnboardingChecklist.svelte';
+	import Icon from '#lib/components/ui/Icon.svelte';
 	import Badge from '#lib/components/ui/Badge.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import EmptyState from '#lib/components/ui/EmptyState.svelte';
@@ -22,7 +26,8 @@
 		type OnboardingSignals
 	} from '#lib/onboarding/steps.js';
 	import { PERIODS } from '#lib/services/dashboard.js';
-	import type { LaunchStatus, LaunchType, MetricKey } from '#lib/types.js';
+	import { getCaptureOverview } from '#lib/services/overview.js';
+	import type { CaptureOverview, LaunchStatus, LaunchType, MetricKey } from '#lib/types.js';
 	import {
 		formatCurrency,
 		formatCurrencyCompact,
@@ -75,13 +80,59 @@
 	};
 	const periodKey = (value: string) => `dashboard.periods.${value}` as MessageKey;
 
+	const heatExpertId = $derived(
+		data.expertId ?? (data.experts.length === 1 ? data.experts[0].id : null)
+	);
+	let overview = $state<CaptureOverview | null>(null);
+	let overviewPhase = $state<'select' | 'loading' | 'ready' | 'error'>('select');
+
+	$effect(() => {
+		const id = heatExpertId;
+		const launchId = data.launchId ?? undefined;
+		const period = data.period;
+		overview = null;
+		if (!id) {
+			overviewPhase = 'select';
+			return;
+		}
+		let current = true;
+		overviewPhase = 'loading';
+		getCaptureOverview(id, period, launchId).then(
+			(result) => {
+				if (!current) return;
+				overview = result;
+				overviewPhase = 'ready';
+			},
+			() => {
+				if (current) overviewPhase = 'error';
+			}
+		);
+		return () => {
+			current = false;
+		};
+	});
+
+	const connectionExperts = $derived(
+		heatExpertId ? data.experts.filter((e) => e.id === heatExpertId) : data.experts
+	);
+	const connectionState = $derived(
+		connectionExperts.some((e) => e.instagram.status === 'expired')
+			? 'expired'
+			: connectionExperts.some((e) => e.instagram.status === 'connected')
+				? 'connected'
+				: 'notConnected'
+	);
+	const connectionVariant = {
+		connected: 'success',
+		expired: 'warning',
+		notConnected: 'neutral'
+	} as const;
+	const hasFinancial = $derived(
+		data.dashboard.series.length > 0 ||
+			data.dashboard.byExpert.length > 0 ||
+			Object.values(data.dashboard.totals).some((value) => value !== null)
+	);
 	const hasExperts = $derived(data.experts.length > 0);
-	const connectedCount = $derived(
-		data.experts.filter((e) => e.instagram.status === 'connected').length
-	);
-	const expiredCount = $derived(
-		data.experts.filter((e) => e.instagram.status === 'expired').length
-	);
 
 	const launch = $derived(data.launches.find((item) => item.id === data.launchId) ?? null);
 	const contextExpert = $derived(
@@ -245,80 +296,33 @@
 	/>
 {/if}
 
-<div class="mb-6 grid grid-cols-3 gap-4 max-xl:grid-cols-2 max-[561px]:grid-cols-1">
-	{#each kpis as kpi (kpi.key)}
-		<KpiCard
-			label={t(kpi.label)}
-			icon={kpi.icon}
-			value={kpi.format(data.dashboard.totals[kpi.key])}
-			delta={data.dashboard.deltas[kpi.key]}
-			invertDelta={kpi.invertDelta}
-		/>
-	{/each}
+<div
+	class="mb-6 grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] items-stretch gap-4 max-xl:grid-cols-1"
+>
+	<CaptureCard phase={overviewPhase} {overview} />
+	<HeatOverview expertId={heatExpertId} launchId={data.launchId} />
 </div>
 
-<div class="mb-6 grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-4 max-xl:grid-cols-1">
-	<Card title={t('dashboard.chart.title')} description={t('dashboard.chart.description')}>
-		{#if data.dashboard.series.length}
-			<AreaChart
-				ariaLabel={t('dashboard.chart.ariaLabel')}
-				labels={data.dashboard.series.map((p) => formatShortDate(p.date))}
-				series={[
-					{
-						name: t('dashboard.chart.revenue'),
-						color: '#ff4d9d',
-						values: data.dashboard.series.map((p) => p.revenue)
-					},
-					{
-						name: t('dashboard.chart.spend'),
-						color: '#7c5cff',
-						values: data.dashboard.series.map((p) => p.spend)
-					}
-				]}
-				formatValue={formatCurrency}
-				formatAxis={formatCurrencyCompact}
-			/>
-		{:else}
-			<EmptyState
-				icon="bar-chart"
-				title={t('dashboard.chart.emptyTitle')}
-				description={t('dashboard.chart.emptyDescription')}
-			/>
-		{/if}
-	</Card>
-
-	<Card title={t('dashboard.instagram.title')} description={t('dashboard.instagram.description')}>
+<div
+	class="mb-6 grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] items-stretch gap-4 max-xl:grid-cols-1"
+>
+	<OriginsCard phase={overviewPhase} {overview} />
+	<Card title={t('dashboard.overview.connections.title')}>
 		{#if hasExperts}
-			<ul class="flex flex-col gap-1">
-				<li class="flex items-center justify-between border-b border-border py-3 text-[14px]">
-					<span class="inline-flex items-center gap-2.5 text-fg-muted"
-						><i class="size-2 rounded-full bg-success"></i>{t(
-							'dashboard.instagram.connected'
-						)}</span
-					>
-					<strong class="text-[18px] tabular-nums">{connectedCount}</strong>
-				</li>
-				<li class="flex items-center justify-between border-b border-border py-3 text-[14px]">
-					<span class="inline-flex items-center gap-2.5 text-fg-muted"
-						><i class="size-2 rounded-full bg-warning"></i>{t('dashboard.instagram.expired')}</span
-					>
-					<strong class="text-[18px] tabular-nums">{expiredCount}</strong>
-				</li>
-				<li class="flex items-center justify-between border-b border-border py-3 text-[14px]">
-					<span class="inline-flex items-center gap-2.5 text-fg-muted"
-						><i class="size-2 rounded-full bg-fg-subtle"></i>{t(
-							'dashboard.instagram.notConnected'
-						)}</span
-					>
-					<strong class="text-[18px] tabular-nums"
-						>{data.experts.length - connectedCount - expiredCount}</strong
-					>
-				</li>
-			</ul>
+			<div class="flex items-center gap-3.5 rounded-md border border-border bg-surface px-4 py-3.5">
+				<Icon name="instagram" size={26} />
+				<span class="text-[15px] font-semibold">Instagram</span>
+				<Badge variant={connectionVariant[connectionState]}>
+					{t(`dashboard.overview.connections.${connectionState}`)}
+				</Badge>
+			</div>
 			<a
-				class={[buttonClass({ variant: 'secondary', size: 'sm' }), 'mt-4.5 w-full']}
-				href="/integrations#instagram">{t('dashboard.instagram.manage')}</a
+				class="mt-4 flex h-11 items-center justify-between rounded-md border border-border bg-surface px-4 text-[14px] font-semibold text-fg hover:bg-surface-hover hover:no-underline"
+				href="/integrations#instagram"
 			>
+				{t('dashboard.overview.connections.manage')}
+				<Icon name="chevron-right" size={16} />
+			</a>
 		{:else}
 			<EmptyState
 				compact
@@ -330,45 +334,99 @@
 	</Card>
 </div>
 
-<Card title={t('dashboard.table.title')} description={t('dashboard.table.description')} flush>
-	{#if data.dashboard.byExpert.length}
-		<div class="overflow-x-auto">
-			<table class="w-full border-collapse text-[14px]">
-				<thead>
-					<tr>
-						<th class="{headCell} text-left">{t('dashboard.table.expert')}</th>
-						<th class="{headCell} {num}">{t('dashboard.table.spend')}</th>
-						<th class="{headCell} {num}">{t('dashboard.table.revenue')}</th>
-						<th class="{headCell} {num}">{t('dashboard.table.roas')}</th>
-						<th class="{headCell} {num}">{t('dashboard.table.leads')}</th>
-						<th class="{headCell} {num}">{t('dashboard.table.cpl')}</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each data.dashboard.byExpert as row (row.expertId)}
-						<tr class="[&:last-child>td]:border-b-0">
-							<td class="{cell} text-left"><a href="/experts/{row.expertId}">{row.name}</a></td>
-							<td class="{cell} {num}">{formatCurrency(row.spend)}</td>
-							<td class="{cell} {num}">{formatCurrency(row.revenue)}</td>
-							<td class="{cell} {num}">{formatRoas(row.roas)}</td>
-							<td class="{cell} {num}">{formatNumber(row.leads)}</td>
-							<td class="{cell} {num}">{formatCurrency(row.cpl)}</td>
+{#if hasFinancial}
+	<div class="mb-6 grid grid-cols-3 gap-4 max-xl:grid-cols-2 max-[561px]:grid-cols-1">
+		{#each kpis as kpi (kpi.key)}
+			<KpiCard
+				label={t(kpi.label)}
+				icon={kpi.icon}
+				value={kpi.format(data.dashboard.totals[kpi.key])}
+				delta={data.dashboard.deltas[kpi.key]}
+				invertDelta={kpi.invertDelta}
+			/>
+		{/each}
+	</div>
+
+	<div class="mb-6">
+		<Card title={t('dashboard.chart.title')} description={t('dashboard.chart.description')}>
+			{#if data.dashboard.series.length}
+				<AreaChart
+					ariaLabel={t('dashboard.chart.ariaLabel')}
+					labels={data.dashboard.series.map((p) => formatShortDate(p.date))}
+					series={[
+						{
+							name: t('dashboard.chart.revenue'),
+							color: '#ff4d9d',
+							values: data.dashboard.series.map((p) => p.revenue)
+						},
+						{
+							name: t('dashboard.chart.spend'),
+							color: '#7c5cff',
+							values: data.dashboard.series.map((p) => p.spend)
+						}
+					]}
+					formatValue={formatCurrency}
+					formatAxis={formatCurrencyCompact}
+				/>
+			{:else}
+				<EmptyState
+					icon="bar-chart"
+					title={t('dashboard.chart.emptyTitle')}
+					description={t('dashboard.chart.emptyDescription')}
+				/>
+			{/if}
+		</Card>
+	</div>
+
+	<Card title={t('dashboard.table.title')} description={t('dashboard.table.description')} flush>
+		{#if data.dashboard.byExpert.length}
+			<div class="overflow-x-auto">
+				<table class="w-full border-collapse text-[14px]">
+					<thead>
+						<tr>
+							<th class="{headCell} text-left">{t('dashboard.table.expert')}</th>
+							<th class="{headCell} {num}">{t('dashboard.table.spend')}</th>
+							<th class="{headCell} {num}">{t('dashboard.table.revenue')}</th>
+							<th class="{headCell} {num}">{t('dashboard.table.roas')}</th>
+							<th class="{headCell} {num}">{t('dashboard.table.leads')}</th>
+							<th class="{headCell} {num}">{t('dashboard.table.cpl')}</th>
 						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
-	{:else}
-		<EmptyState
-			icon="users"
-			title={t('dashboard.table.emptyTitle')}
-			description={t('dashboard.table.emptyDescription')}
-		>
-			{#snippet action()}
-				{#if !hasExperts}
-					<a class={buttonClass()} href="/experts/new">{t('dashboard.actions.registerExpert')}</a>
-				{/if}
-			{/snippet}
-		</EmptyState>
-	{/if}
-</Card>
+					</thead>
+					<tbody>
+						{#each data.dashboard.byExpert as row (row.expertId)}
+							<tr class="[&:last-child>td]:border-b-0">
+								<td class="{cell} text-left"><a href="/experts/{row.expertId}">{row.name}</a></td>
+								<td class="{cell} {num}">{formatCurrency(row.spend)}</td>
+								<td class="{cell} {num}">{formatCurrency(row.revenue)}</td>
+								<td class="{cell} {num}">{formatRoas(row.roas)}</td>
+								<td class="{cell} {num}">{formatNumber(row.leads)}</td>
+								<td class="{cell} {num}">{formatCurrency(row.cpl)}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		{:else}
+			<EmptyState
+				icon="users"
+				title={t('dashboard.table.emptyTitle')}
+				description={t('dashboard.table.emptyDescription')}
+			>
+				{#snippet action()}
+					{#if !hasExperts}
+						<a class={buttonClass()} href="/experts/new">{t('dashboard.actions.registerExpert')}</a>
+					{/if}
+				{/snippet}
+			</EmptyState>
+		{/if}
+	</Card>
+{:else}
+	<div
+		class="flex flex-wrap items-center gap-x-5 gap-y-1 rounded-lg border border-border bg-bg-elevated px-5.5 py-4"
+	>
+		<Icon name="wallet" size={18} class="text-fg-subtle" />
+		<strong class="text-[15px]">{t('dashboard.overview.financial.title')}</strong>
+		<span class="hidden h-5 w-px bg-border sm:block" aria-hidden="true"></span>
+		<span class="text-[14px] text-fg-muted">{t('dashboard.overview.financial.unavailable')}</span>
+	</div>
+{/if}

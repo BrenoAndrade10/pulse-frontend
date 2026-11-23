@@ -282,6 +282,8 @@ export type LeadLaunch = {
 
 export type LeadHeatBand = 'cold' | 'warm' | 'hot';
 
+export type LeadHeatFilter = LeadHeatBand | 'none';
+
 export type LeadHeat = {
 	score: number;
 	band: LeadHeatBand;
@@ -319,6 +321,29 @@ export type Lead = {
 	lastSeenAt: string;
 	launches: LeadLaunch[];
 	heat: LeadHeat;
+};
+
+export type LeadRecentSignals = {
+	windowDays: number;
+	pageViews: number;
+	linkClicks: number;
+	interactions: number;
+	leads: number;
+	engagedSeconds: number;
+};
+
+export type HeatPriorityLead = Lead & { recent: LeadRecentSignals | null };
+
+export type HeatSummary = {
+	counts: Record<LeadHeatFilter, number> & { total: number };
+	priority: HeatPriorityLead[];
+};
+
+export type CaptureOverview = {
+	period: { key: Period; days: number; fromDay: string; toDay: string; timezone: string };
+	leads: { total: number; series: { date: string; count: number }[] };
+	linkClicks: number | null;
+	origins: { source: string; campaign: string; count: number }[];
 };
 
 export type LeadsPage = {
