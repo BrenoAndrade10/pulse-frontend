@@ -2,7 +2,26 @@
 [build]
   command = "npm run build"
   publish = "build"
+  functions = "netlify/functions"
+
+[dev]
+  command = "npm run dev"
+  targetPort = 5173
+  port = 8888
 
 [build.environment]
   # Mesma versão usada no desenvolvimento.
   NODE_VERSION = "24"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/_app/*"
+  [headers.values]
+    Cache-Control = "public,max-age=31536000,immutable"
