@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import './prelaunch.css';
+	import { createTracker, type Tracker } from './tracker';
 	type FormData = {
 		name: string;
 		email: string;
@@ -85,6 +87,7 @@
 	let launchDate = $state('');
 	let remaining = $state({ days: 0, hours: 0, minutes: 0, valid: false, expired: false });
 	let timer: ReturnType<typeof setInterval> | undefined;
+	let tracker: Tracker | undefined;
 	const track = (event: string, params: Record<string, unknown> = {}) => {
 		const w = window as typeof window & { fbq?: (...args: unknown[]) => void };
 		if (w.fbq) w.fbq('trackCustom', event, params);
@@ -92,6 +95,7 @@
 	const start = () => {
 		if (!started) {
 			started = true;
+			tracker?.formStart();
 			track('FormStart');
 		}
 	};
@@ -138,6 +142,7 @@
 		start();
 		if (validateOne()) {
 			step = 2;
+			tracker?.step(2);
 			track('FormStepCompleted', { step: 1 });
 		}
 	};
@@ -162,7 +167,12 @@
 			const r = await fetch('/.netlify/functions/submit-lead', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json', 'x-idempotency-key': key },
-				body: JSON.stringify({ ...form, attribution, idempotencyKey: key })
+				body: JSON.stringify({
+					...form,
+					attribution,
+					idempotencyKey: key,
+					sessionId: tracker?.sessionId ?? ''
+				})
 			});
 			const rawResponse = await r.text();
 			let j: { success?: boolean; message?: string; leadId?: string };
@@ -178,6 +188,7 @@
 			if (!r.ok || !j.success)
 				throw new Error(j.message || 'Não foi possível salvar seu cadastro.');
 			submitted = true;
+			tracker?.submitted(j.leadId ?? '');
 			track('Lead', { eventID: j.leadId });
 		} catch (e) {
 			submitError =
@@ -200,6 +211,8 @@
 		};
 	};
 	onMount(() => {
+		tracker = createTracker();
+		tracker.start();
 		const p = new URLSearchParams(location.search);
 		const keys = [
 			'utm_source',
@@ -222,6 +235,7 @@
 		document.addEventListener('visibilitychange', onVisibility);
 		return () => {
 			if (timer) clearInterval(timer);
+			tracker?.stop();
 			document.removeEventListener('visibilitychange', onVisibility);
 		};
 	});

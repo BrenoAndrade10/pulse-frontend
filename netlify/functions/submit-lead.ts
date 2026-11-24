@@ -17,6 +17,7 @@ type LeadPayload = {
 	honeypot?: string;
 	attribution?: Record<string, string>;
 	idempotencyKey?: string;
+	sessionId?: string;
 };
 
 const headers = {
@@ -143,6 +144,7 @@ export default async (request: Request) => {
 					role,
 					difficulties: selectedDifficulties,
 					tools: selectedTools,
+					sessionId: clean(payload.sessionId, 64),
 					leadId,
 					submittedAt: now
 				}),
@@ -192,13 +194,14 @@ export default async (request: Request) => {
 			clean(a.ad_id, 120),
 			'Novo',
 			'',
-			''
+			'',
+			clean(payload.sessionId, 64)
 		];
 		const spreadsheet = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
 		const tab = process.env.GOOGLE_SHEETS_TAB_NAME || 'Leads';
 		if (!spreadsheet) throw new Error('Planilha não configurada.');
 		const token = await accessToken();
-		const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheet)}/values/${encodeURIComponent(`${tab}!A:AD`)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+		const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheet)}/values/${encodeURIComponent(`${tab}!A:AE`)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
 		const response = await fetch(url, {
 			method: 'POST',
 			headers: { Authorization: `Bearer ${token}`, 'content-type': 'application/json' },
