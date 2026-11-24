@@ -148,7 +148,17 @@ export default async (request: Request) => {
 				}),
 				signal: AbortSignal.timeout(10000)
 			});
-			if (!scriptResponse.ok) throw new Error('O Google Sheets não confirmou o cadastro.');
+			const scriptRaw = await scriptResponse.text();
+			let scriptResult: { success?: boolean; message?: string } = {};
+			try {
+				scriptResult = JSON.parse(scriptRaw) as typeof scriptResult;
+			} catch {
+				throw new Error(
+					`O Apps Script retornou uma resposta inválida (HTTP ${scriptResponse.status}). Verifique se a implantação está como Aplicativo da Web e acessível a qualquer pessoa.`
+				);
+			}
+			if (!scriptResponse.ok || scriptResult.success === false)
+				throw new Error(scriptResult.message || 'O Google Sheets não confirmou o cadastro.');
 			return json({ success: true, leadId });
 		}
 		const a = payload.attribution ?? {};
