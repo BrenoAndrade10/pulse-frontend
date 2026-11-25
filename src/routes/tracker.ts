@@ -21,12 +21,16 @@ type Snapshot = {
 	fbclid: string;
 	fbp: string;
 	fbc: string;
+	interacted: boolean;
+	firstInteractionSeconds: number;
+	automated: boolean;
 	reason: string;
 };
 
 const ENDPOINT = '/.netlify/functions/track';
 const HEARTBEAT_MS = 15000;
 const FORM_SELECTOR = '#pesquisa';
+const INTERACTION_EVENTS = ['pointerdown', 'touchstart', 'keydown', 'wheel', 'scroll'] as const;
 
 const readStorage = (key: string) => {
 	try {
@@ -86,6 +90,11 @@ export function createTracker() {
 	let lastField = '';
 	let submitted = false;
 	let leadId = '';
+	let interacted = false;
+	let firstInteractionSeconds = 0;
+	const automated =
+		navigator.webdriver === true ||
+		/HeadlessChrome|PhantomJS|Lighthouse/i.test(navigator.userAgent);
 	let dirty = true;
 	let timer: ReturnType<typeof setInterval> | undefined;
 	let observer: IntersectionObserver | undefined;
@@ -115,6 +124,9 @@ export function createTracker() {
 		fbclid,
 		fbp: fbpCookie,
 		fbc: fbcCookie,
+		interacted,
+		firstInteractionSeconds,
+		automated,
 		reason
 	});
 
@@ -148,7 +160,7 @@ export function createTracker() {
 			visibleSince = 0;
 			dirty = true;
 			flush('hidden', true);
-		} else {
+		} else if (!visibleSince) {
 			visibleSince = Date.now();
 		}
 	};
@@ -159,6 +171,15 @@ export function createTracker() {
 			visibleSince = 0;
 		}
 		flush('pagehide', true);
+	};
+
+	const onInteraction = () => {
+		if (interacted) return;
+		interacted = true;
+		firstInteractionSeconds = Math.round((Date.now() - startedAt) / 1000);
+		for (const name of INTERACTION_EVENTS) window.removeEventListener(name, onInteraction);
+		dirty = true;
+		flush('interaction', true);
 	};
 
 	const markStarted = () => {
@@ -189,6 +210,8 @@ export function createTracker() {
 		document.addEventListener('visibilitychange', onVisibility);
 		window.addEventListener('pagehide', onPageHide);
 		document.addEventListener('focusin', onFocusIn);
+		for (const name of INTERACTION_EVENTS)
+			window.addEventListener(name, onInteraction, { passive: true });
 		const form = document.querySelector(FORM_SELECTOR);
 		if (form && 'IntersectionObserver' in window) {
 			observer = new IntersectionObserver(
@@ -218,6 +241,7 @@ export function createTracker() {
 		document.removeEventListener('visibilitychange', onVisibility);
 		window.removeEventListener('pagehide', onPageHide);
 		document.removeEventListener('focusin', onFocusIn);
+		for (const name of INTERACTION_EVENTS) window.removeEventListener(name, onInteraction);
 		onPageHide();
 	};
 

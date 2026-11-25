@@ -95,7 +95,6 @@
 	const start = () => {
 		if (!started) {
 			started = true;
-			tracker?.formStart();
 			track('FormStart');
 		}
 	};

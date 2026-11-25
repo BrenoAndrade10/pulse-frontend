@@ -229,6 +229,13 @@ export const email: typeof source = {
 			content: 'Content',
 			review: 'Review and send'
 		},
+		stepLabel: 'Step {{n}}',
+		stepsAria: 'Campaign steps',
+		stepHints: {
+			segment: 'Choose who receives it',
+			content: 'Write and preview',
+			review: 'Check and send'
+		},
 		segment: {
 			title: 'Who to send to',
 			description: 'Choose a segment. The list is built at sending time.',

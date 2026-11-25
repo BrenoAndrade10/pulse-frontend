@@ -7,7 +7,9 @@ const text = (value: unknown, max: number) =>
 	String(value ?? '')
 		.trim()
 		.slice(0, max)
-		.replace(/[\u0000-\u001f]/g, '');
+		.split('')
+		.filter((char) => char.charCodeAt(0) >= 32)
+		.join('');
 const num = (value: unknown, max: number) => {
 	const n = Number(value);
 	return Number.isFinite(n) ? Math.min(max, Math.max(0, Math.round(n))) : 0;
@@ -51,6 +53,9 @@ export default async (request: Request) => {
 			fbclid: text(p.fbclid, 240),
 			fbp: text(p.fbp, 80),
 			fbc: text(p.fbc, 240),
+			interacted: bool(p.interacted),
+			firstInteractionSeconds: num(p.firstInteractionSeconds, 86400),
+			automated: bool(p.automated),
 			reason: text(p.reason, 24)
 		};
 		const response = await fetch(appsScriptUrl, {

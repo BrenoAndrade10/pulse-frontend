@@ -229,6 +229,13 @@ export const email: typeof source = {
 			content: 'Contenido',
 			review: 'Revisión y envío'
 		},
+		stepLabel: 'Paso {{n}}',
+		stepsAria: 'Pasos de la campaña',
+		stepHints: {
+			segment: 'Elige quién lo recibe',
+			content: 'Escribe y previsualiza',
+			review: 'Revisa y envía'
+		},
 		segment: {
 			title: 'A quién enviar',
 			description: 'Elige un segmento. La lista se arma al momento del envío.',

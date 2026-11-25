@@ -227,6 +227,13 @@ export const email = {
 			content: 'Conteúdo',
 			review: 'Revisão e envio'
 		},
+		stepLabel: 'Passo {{n}}',
+		stepsAria: 'Etapas da campanha',
+		stepHints: {
+			segment: 'Escolha quem recebe',
+			content: 'Escreva e visualize',
+			review: 'Confira e envie'
+		},
 		segment: {
 			title: 'Para quem enviar',
 			description: 'Escolha um segmento. A lista é montada no momento do envio.',

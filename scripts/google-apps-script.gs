@@ -1,6 +1,6 @@
 const HEADERS = ['Lead ID', 'Data e hora do cadastro', 'Nome', 'E-mail', 'WhatsApp', 'Atuação profissional', 'Outra atuação profissional', 'Principais dificuldades', 'Outra dificuldade', 'Ferramentas utilizadas', 'Outras ferramentas', 'Investimento mensal em ferramentas', 'Resposta aberta', 'Consentimento WhatsApp', 'Consentimento e-mail', 'Data e hora do consentimento', 'Versão do consentimento', 'Interesse em entrevista', 'UTM Source', 'UTM Medium', 'UTM Campaign', 'UTM Content', 'UTM Term', 'Facebook Click ID', 'Campaign ID', 'Ad Set ID', 'Ad ID', 'Status do contato', 'Data do último contato', 'Observações', 'Session ID'];
 
-const TRACKING_HEADERS = ['Session ID', 'Visitor ID', 'Primeira atividade', 'Última atividade', 'Tempo ativo (s)', 'Tempo total (s)', 'Scroll máximo (%)', 'Viu o formulário', 'Iniciou o formulário', 'Etapa máxima', 'Último campo', 'Enviou', 'Lead ID', 'Visitante recorrente', 'Dispositivo', 'Largura da tela', 'Idioma', 'Origem (referrer)', 'Facebook Click ID', 'FBP', 'FBC', 'Último evento'];
+const TRACKING_HEADERS = ['Session ID', 'Visitor ID', 'Primeira atividade', 'Última atividade', 'Tempo ativo (s)', 'Tempo total (s)', 'Scroll máximo (%)', 'Viu o formulário', 'Iniciou o formulário', 'Etapa máxima', 'Último campo', 'Enviou', 'Lead ID', 'Visitante recorrente', 'Dispositivo', 'Largura da tela', 'Idioma', 'Origem (referrer)', 'Facebook Click ID', 'FBP', 'FBC', 'Último evento', 'Interagiu', 'Segundos até 1ª interação', 'Automatizado'];
 
 function doPost(e) {
   try {
@@ -35,6 +35,8 @@ function saveTracking(data) {
     if (sheet.getLastRow() === 0) {
       sheet.appendRow(TRACKING_HEADERS);
       sheet.setFrozenRows(1);
+    } else if (sheet.getLastColumn() < TRACKING_HEADERS.length) {
+      sheet.getRange(1, 1, 1, TRACKING_HEADERS.length).setValues([TRACKING_HEADERS]);
     }
     const found = sheet.getRange(1, 1, sheet.getLastRow(), 1).createTextFinder(sessionId).matchEntireCell(true).findNext();
     const previous = found ? sheet.getRange(found.getRow(), 1, 1, TRACKING_HEADERS.length).getValues()[0] : null;
@@ -62,7 +64,10 @@ function saveTracking(data) {
       safe(data.fbclid),
       safe(data.fbp),
       safe(data.fbc),
-      safe(data.reason)
+      safe(data.reason),
+      flag(22, data.interacted),
+      previous && previous[23] !== '' ? previous[23] : Number(data.firstInteractionSeconds) || 0,
+      flag(24, data.automated)
     ];
     if (found) sheet.getRange(found.getRow(), 1, 1, row.length).setValues([row]);
     else sheet.appendRow(row);
