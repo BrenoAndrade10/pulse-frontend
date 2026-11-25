@@ -28,11 +28,17 @@ export default defineConfig(({ mode }) => {
 						'style-src': ['self', 'unsafe-inline', 'https://fonts.googleapis.com'],
 						'font-src': ['self', 'https://fonts.gstatic.com'],
 						// Fotos e vídeos do Instagram vêm pelo proxy da API, nunca direto da Meta.
-						'img-src': ['self', 'data:', ...(apiOrigin ? [apiOrigin] : [])],
+						'img-src': [
+							'self',
+							'data:',
+							'https://www.facebook.com',
+							...(apiOrigin ? [apiOrigin] : [])
+						],
 						'media-src': ['self', ...(apiOrigin ? [apiOrigin] : [])],
 						'connect-src': [
 							'self',
 							'https://graph.facebook.com',
+							'https://www.facebook.com',
 							'https://connect.facebook.net',
 							...(apiOrigin ? [apiOrigin] : [])
 						],

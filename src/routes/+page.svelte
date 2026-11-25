@@ -2,6 +2,15 @@
 	import { onMount } from 'svelte';
 	import './prelaunch.css';
 	import { createTracker, type Tracker } from './tracker';
+	import {
+		initPixel,
+		observeFormStart,
+		observeFormView,
+		setConsent,
+		trackCustom,
+		trackLead,
+		type Consent
+	} from './pixel';
 	type FormData = {
 		name: string;
 		email: string;
@@ -88,15 +97,16 @@
 	let remaining = $state({ days: 0, hours: 0, minutes: 0, valid: false, expired: false });
 	let timer: ReturnType<typeof setInterval> | undefined;
 	let tracker: Tracker | undefined;
-	const track = (event: string, params: Record<string, unknown> = {}) => {
-		const w = window as typeof window & { fbq?: (...args: unknown[]) => void };
-		if (w.fbq) w.fbq('trackCustom', event, params);
-	};
+	let consent = $state<Consent | null>(null);
+	let consentChecked = $state(false);
+	let leadTracked = false;
+	const track = trackCustom;
 	const start = () => {
-		if (!started) {
-			started = true;
-			track('FormStart');
-		}
+		if (!started) started = true;
+	};
+	const answerConsent = (value: Consent) => {
+		consent = value;
+		setConsent(value);
 	};
 	const maskPhone = (value: string) => {
 		const trimmed = value.trim();
@@ -188,7 +198,10 @@
 				throw new Error(j.message || 'Não foi possível salvar seu cadastro.');
 			submitted = true;
 			tracker?.submitted(j.leadId ?? '');
-			track('Lead', { eventID: j.leadId });
+			if (!leadTracked && j.leadId && j.leadId !== 'accepted') {
+				leadTracked = true;
+				trackLead(j.leadId);
+			}
 		} catch (e) {
 			submitError =
 				e instanceof Error ? e.message : 'Não foi possível concluir agora. Tente novamente.';
@@ -210,6 +223,10 @@
 		};
 	};
 	onMount(() => {
+		consent = initPixel();
+		consentChecked = true;
+		const stopFormView = observeFormView();
+		const stopFormStart = observeFormStart();
 		tracker = createTracker();
 		tracker.start();
 		const p = new URLSearchParams(location.search);
@@ -235,6 +252,8 @@
 		return () => {
 			if (timer) clearInterval(timer);
 			tracker?.stop();
+			stopFormView();
+			stopFormStart();
 			document.removeEventListener('visibilitychange', onVisibility);
 		};
 	});
@@ -581,4 +600,24 @@
 			>Gestão e inteligência para lançamentos digitais.</span
 		><a href="/privacidade">Privacidade</a>
 	</footer>
+	{#if consentChecked && consent === null}
+		<div
+			class="cookie-banner"
+			role="dialog"
+			aria-live="polite"
+			aria-label="Preferências de cookies"
+		>
+			<p>
+				Usamos cookies para melhorar sua experiência. <a href="/privacidade">Privacidade</a>
+			</p>
+			<div class="cookie-actions">
+				<button type="button" class="cookie-deny" onclick={() => answerConsent('denied')}
+					>Recusar</button
+				>
+				<button type="button" class="cookie-accept" onclick={() => answerConsent('granted')}
+					>Aceitar</button
+				>
+			</div>
+		</div>
+	{/if}
 </div>

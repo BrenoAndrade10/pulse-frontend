@@ -999,4 +999,68 @@ html:has(.prelaunch-shell) {
 			animation-duration: 0.01ms !important;
 		}
 	}
+	.cookie-banner {
+		position: fixed;
+		right: 12px;
+		bottom: 12px;
+		left: 12px;
+		z-index: 50;
+		display: flex;
+		max-width: 720px;
+		margin: 0 auto;
+		padding: 10px 12px;
+		align-items: center;
+		gap: 12px;
+		border: 1px solid #2a2338;
+		border-radius: 14px;
+		background: #12101c;
+		box-shadow: 0 12px 40px rgb(0 0 0 / 0.5);
+		color: #cfc9dc;
+		font-size: 12px;
+		line-height: 1.4;
+	}
+	.cookie-banner p {
+		margin: 0;
+	}
+	.cookie-banner a {
+		color: #b692ff;
+		text-decoration: underline;
+	}
+	.cookie-actions {
+		display: flex;
+		flex-shrink: 0;
+		gap: 8px;
+	}
+	.cookie-actions button {
+		min-height: 34px;
+		padding: 0 14px;
+		border-radius: 9px;
+		font-size: 12.5px;
+		font-weight: 700;
+	}
+	.cookie-deny {
+		border: 1px solid #34304a;
+		background: transparent;
+		color: #cfc9dc;
+	}
+	.cookie-accept {
+		border: 0;
+		background: linear-gradient(90deg, #7045ff, #b05cf0);
+		color: #fff;
+	}
+	@media (max-width: 560px) {
+		.cookie-banner {
+			gap: 10px;
+			font-size: 11.5px;
+		}
+		.cookie-actions {
+			flex-direction: column;
+			gap: 6px;
+		}
+		.cookie-actions button {
+			min-height: 30px;
+			padding: 0 12px;
+			font-size: 12px;
+		}
+	}
 }
