@@ -1,0 +1,143 @@
+#integracoes-ia.cl-sec {
+	padding-block: clamp(32px, 6vw, 56px);
+}
+
+#integracoes-ia .cl-head {
+	max-width: 920px;
+	margin-bottom: clamp(20px, 3.5vw, 28px);
+}
+
+#integracoes-ia .cl-head h2 {
+	font-size: clamp(26px, 5.6vw, 38px);
+}
+
+#integracoes-ia .cl-sub {
+	margin-top: 12px;
+	font-size: clamp(15px, 3.6vw, 17px);
+}
+
+#integracoes-ia .cl-future-grid {
+	gap: 12px;
+}
+
+#integracoes-ia .cl-card {
+	padding: 16px;
+}
+
+#integracoes-ia .cl-choice-item {
+	min-height: 36px;
+	padding: 0 12px;
+	font-size: 12.5px;
+}
+
+#integracoes-ia .cl-card-head {
+	margin-bottom: 10px;
+}
+
+#integracoes-ia .cl-future-panel {
+	display: grid;
+	min-height: 0;
+	margin-top: 10px;
+	padding: 12px 14px;
+}
+
+#integracoes-ia .cl-future-item {
+	grid-area: 1 / 1;
+	visibility: hidden;
+	opacity: 0;
+	transition:
+		opacity 0.25s ease,
+		visibility 0s linear 0.25s;
+}
+
+#integracoes-ia .cl-future-item.is-on {
+	visibility: visible;
+	opacity: 1;
+	transition-delay: 0s;
+}
+
+#integracoes-ia .cl-future-item b {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	font-size: 15px;
+}
+
+#integracoes-ia .cl-future-item .cl-tag {
+	padding: 2px 8px;
+	font-size: 10.5px;
+}
+
+#integracoes-ia .cl-future-item p {
+	margin-top: 4px;
+	font-size: 13.5px;
+}
+
+.cl-future-note {
+	margin-top: var(--cl-gap-2);
+	max-width: 80ch;
+	color: var(--cl-dim);
+	font-size: 12.5px;
+	line-height: 1.5;
+}
+
+#planos.cl-sec {
+	padding-block: clamp(44px, 7vw, 72px);
+}
+
+#planos .cl-head {
+	margin-bottom: clamp(20px, 3.5vw, 28px);
+}
+
+#planos .cl-head h2 {
+	font-size: clamp(26px, 5.6vw, 38px);
+}
+
+#planos .cl-plan {
+	max-width: 640px;
+	padding: 22px;
+}
+
+#planos .cl-price {
+	margin-top: 12px;
+}
+
+#planos .cl-price b {
+	font-size: clamp(38px, 10vw, 48px);
+}
+
+#planos .cl-price-note {
+	margin-top: 6px;
+}
+
+#planos .cl-plan-sub {
+	margin-top: 16px;
+}
+
+#planos .cl-plan .cl-checks {
+	gap: 10px;
+	margin-top: 10px;
+	margin-bottom: var(--cl-gap-3);
+}
+
+#planos .cl-plan .cl-checks li {
+	font-size: 14.5px;
+}
+
+#planos .cl-plan .cl-note {
+	padding-top: 14px;
+}
+
+@media (min-width: 560px) {
+	#planos .cl-plan .cl-checks {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px 20px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#integracoes-ia .cl-future-item {
+		transition: none;
+	}
+}

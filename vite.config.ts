@@ -10,6 +10,8 @@ export default defineConfig(({ mode }) => {
 		: undefined;
 
 	return {
+		server: { allowedHosts: ['.ngrok-free.app', '.ngrok.app', '.ngrok.io'] },
+		preview: { allowedHosts: ['.ngrok-free.app', '.ngrok.app', '.ngrok.io'] },
 		plugins: [
 			tailwindcss(),
 			sveltekit({
